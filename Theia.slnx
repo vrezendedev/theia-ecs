@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Theia.Benchmarks/Theia.Benchmarks.csproj" />
+  <Project Path="Theia.ECS/Theia.ECS.csproj" />
+  <Project Path="Theia.Tests/Theia.Tests.csproj" />
+</Solution>
