@@ -225,6 +225,7 @@ public partial class BlittableMetaTests
 }
 #endregion
 
+#pragma warning disable CS0649
 #region Struct with Attributes
 public partial class BlittableMetaTests
 {
@@ -344,3 +345,4 @@ public partial class BlittableMetaTests
         );
 }
 #endregion
+#pragma warning restore CS0649

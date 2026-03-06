@@ -36,6 +36,6 @@ internal static class ComponentMeta<T>
     [DoesNotReturn]
     private static void ThrowInvalidOperationException() =>
         throw new InvalidOperationException(
-            $"Theia.ECS [Error]: Component '{typeof(T).Name}' must be a blittable struct. Ensure it contains only blittable value types and no bools, chars, strings, or reference types."
+            $"Component '{typeof(T).Name}' must be a blittable struct. Ensure it contains only blittable value types and no bools, chars, strings, or reference types."
         );
 }
