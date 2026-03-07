@@ -4,7 +4,7 @@ namespace Theia.ECS.Components;
 
 internal abstract class ComponentStorage
 {
-    internal readonly int Capacity;
+    internal int Count { get; set; }
     internal abstract void Add(ref Entity e, ref EntityMeta entityMeta);
     internal abstract void Remove(ref Entity e, ref EntityMeta entityMeta);
     internal abstract void Transfer(

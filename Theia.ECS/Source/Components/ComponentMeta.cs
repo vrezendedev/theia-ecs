@@ -7,11 +7,12 @@ namespace Theia.ECS.Components;
 
 internal static class ComponentsMeta
 {
-    private const int DefaultComponentTypeCapacity = 16;
+    private const int DefaultComponentTypeMapCapacity = 16;
+    private const int DefaultComponentTypeGrowthFactor = 2;
 
     internal static int s_count { get; set; }
-    private static ComponentType[] s_componentsTypes = s_componentsTypes = new ComponentType[
-        DefaultComponentTypeCapacity
+    private static ComponentType[] s_componentTypeMap = s_componentTypeMap = new ComponentType[
+        DefaultComponentTypeMapCapacity
     ];
     internal static readonly object s_lock = s_lock = new object();
 
@@ -19,12 +20,15 @@ internal static class ComponentsMeta
     {
         lock (s_lock)
         {
-            if (s_count == s_componentsTypes.Length)
-                Array.Resize(ref s_componentsTypes, s_componentsTypes.Length * 2);
+            if (s_count == s_componentTypeMap.Length)
+                Array.Resize(
+                    ref s_componentTypeMap,
+                    s_componentTypeMap.Length * DefaultComponentTypeGrowthFactor
+                );
 
             int index = s_count;
 
-            s_componentsTypes[index] = new ComponentType<T>(Unsafe.SizeOf<T>());
+            s_componentTypeMap[index] = new ComponentType<T>(Unsafe.SizeOf<T>());
 
             s_count++;
 
@@ -37,8 +41,14 @@ internal static class ComponentsMeta
         if ((uint)index >= (uint)s_count)
             ThrowIndexOutOfRangeException(index);
 
-        return s_componentsTypes[index];
+        return s_componentTypeMap[index];
     }
+
+    /// <summary>
+    /// Used exclusively for array resizing tests.
+    /// </summary>
+    /// <returns>The current length of <see cref="s_componentTypeMap"/>.</returns>
+    internal static int GetComponentTypeMapCapacity() => s_componentTypeMap.Length;
 
     [DoesNotReturn]
     private static void ThrowIndexOutOfRangeException(int index) =>
