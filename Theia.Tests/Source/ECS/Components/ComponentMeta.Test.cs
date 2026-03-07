@@ -56,7 +56,7 @@ public class ComponentMetaTests
     [Fact]
     public void Constructor_WithDifferentComponent_AssignNewId()
     {
-        int first = ComponentMeta.s_count;
+        int first = ComponentsMeta.s_count;
         int second = first + 1;
 
         int id1 = ComponentMeta<Position>.s_id;
@@ -68,7 +68,7 @@ public class ComponentMetaTests
 
     [Fact]
     public void Constructor_WithComponent_SetCorrectSize() =>
-        Assert.Equal(24, ComponentMeta<Transform>.s_size);
+        Assert.Equal(24, ComponentsMeta.GetComponentType(ComponentMeta<Transform>.s_id)._sizeOf);
 
     [Fact]
     public void Constructor_WithNonBlittableComponent_ThrowsTypeInitializationException()

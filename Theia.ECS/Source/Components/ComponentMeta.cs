@@ -5,32 +5,59 @@ using Theia.ECS.Reflection.Types;
 
 namespace Theia.ECS.Components;
 
-internal static class ComponentMeta
+internal static class ComponentsMeta
 {
-    internal static int s_count { get; set; }
-    internal static readonly object s_lock;
+    private const int DefaultComponentTypeCapacity = 16;
 
-    static ComponentMeta() => s_lock = new object();
+    internal static int s_count { get; set; }
+    private static ComponentType[] s_componentsTypes = s_componentsTypes = new ComponentType[
+        DefaultComponentTypeCapacity
+    ];
+    internal static readonly object s_lock = s_lock = new object();
+
+    internal static int RegisterComponent<T>()
+    {
+        lock (s_lock)
+        {
+            if (s_count == s_componentsTypes.Length)
+                Array.Resize(ref s_componentsTypes, s_componentsTypes.Length * 2);
+
+            int index = s_count;
+
+            s_componentsTypes[index] = new ComponentType<T>(Unsafe.SizeOf<T>());
+
+            s_count++;
+
+            return index;
+        }
+    }
+
+    internal static ComponentType GetComponentType(int index)
+    {
+        if ((uint)index >= (uint)s_count)
+            ThrowIndexOutOfRangeException(index);
+
+        return s_componentsTypes[index];
+    }
+
+    [DoesNotReturn]
+    private static void ThrowIndexOutOfRangeException(int index) =>
+        throw new IndexOutOfRangeException(
+            $"Component index '{index}' is out of range. Valid range is 0 to {s_count - 1}. Ensure the index refers to a registered component type."
+        );
 }
 
 internal static class ComponentMeta<T>
     where T : struct
 {
     internal static readonly int s_id;
-    internal static readonly int s_size;
 
     static ComponentMeta()
     {
         if (!BlittableMeta.IsStrictlyBlittable(typeof(T)))
             ThrowInvalidOperationException();
 
-        s_size = Unsafe.SizeOf<T>();
-
-        lock (ComponentMeta.s_lock)
-        {
-            s_id = ComponentMeta.s_count;
-            ComponentMeta.s_count++;
-        }
+        s_id = ComponentsMeta.RegisterComponent<T>();
     }
 
     [DoesNotReturn]
