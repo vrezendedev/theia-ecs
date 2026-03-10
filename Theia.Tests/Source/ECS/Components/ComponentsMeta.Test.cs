@@ -17,25 +17,57 @@ public class ComponentsMetaTests
         public T Value;
     }
 
-    private struct ComponentA { }
+    private struct ComponentA
+    {
+        public int A;
+    }
 
-    private struct ComponentB { }
+    private struct ComponentB
+    {
+        public int B;
+    }
 
-    private struct ComponentC { }
+    private struct ComponentC
+    {
+        public int C;
+    }
 
-    private struct ComponentD { }
+    private struct ComponentD
+    {
+        public int D;
+    }
 
-    private struct ComponentE { }
+    private struct ComponentE
+    {
+        public int E;
+    }
 
-    private struct ComponentF { }
+    private struct ComponentF
+    {
+        public int F;
+    }
 
-    private struct ComponentG { }
+    private struct ComponentG
+    {
+        public int G;
+    }
 
-    private struct ComponentH { }
+    private struct ComponentH
+    {
+        public int H;
+    }
 
-    private struct ComponentI { }
+    private struct ComponentI
+    {
+        public int I;
+    }
 
-    private struct ComponentJ { }
+    private struct ComponentJ
+    {
+        public int J;
+    }
+
+    private struct InvalidComponent { }
 
     [Fact]
     public void Constructor_WithNonBlittableComponent_ThrowsTypeInitializationException()
@@ -43,6 +75,17 @@ public class ComponentsMetaTests
         TypeInitializationException exception = Assert.Throws<TypeInitializationException>(() =>
         {
             _ = ComponentMeta<NonBlittableComponent>.s_id;
+        });
+
+        Assert.IsType<InvalidOperationException>(exception.InnerException);
+    }
+
+    [Fact]
+    public void Constructor_WithEmptyStructComponent_ThrowsTypeInitializationException()
+    {
+        TypeInitializationException exception = Assert.Throws<TypeInitializationException>(() =>
+        {
+            _ = ComponentMeta<InvalidComponent>.s_id;
         });
 
         Assert.IsType<InvalidOperationException>(exception.InnerException);
@@ -130,7 +173,7 @@ public class ComponentsMetaTests
     }
 
     [Fact]
-    public void GetComponentType_InvalidIndex_ThrowsTypeInitializationException() =>
+    public void GetComponentType_InvalidIndex_ThrowsIndexOutOfRangeException() =>
         Assert.Throws<IndexOutOfRangeException>(() =>
             ComponentsMeta.GetComponentType(ComponentsMeta.s_count + 1)
         );

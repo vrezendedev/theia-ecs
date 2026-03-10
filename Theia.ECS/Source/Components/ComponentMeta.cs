@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Reflection.Types;
 
@@ -16,7 +17,8 @@ internal static class ComponentsMeta
     ];
     internal static readonly object s_lock = s_lock = new object();
 
-    internal static int RegisterComponent<T>()
+    internal static int RegisterComponent<T>(int sizeOfT)
+        where T : struct
     {
         lock (s_lock)
         {
@@ -28,7 +30,7 @@ internal static class ComponentsMeta
 
             int index = s_count;
 
-            s_componentTypeMap[index] = new ComponentType<T>(Unsafe.SizeOf<T>());
+            s_componentTypeMap[index] = new ComponentType<T>(sizeOfT);
 
             s_count++;
 
@@ -65,14 +67,29 @@ internal static class ComponentMeta<T>
     static ComponentMeta()
     {
         if (!BlittableMeta.IsStrictlyBlittable(typeof(T)))
-            ThrowInvalidOperationException();
+            ThrowInvalidOperationBlittableException();
 
-        s_id = ComponentsMeta.RegisterComponent<T>();
+        int fieldsCounted = typeof(T)
+            .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Length;
+
+        if (fieldsCounted == 0)
+            ThrowInvalidOperationEmptyStructException();
+
+        int sizeOfT = Unsafe.SizeOf<T>();
+
+        s_id = ComponentsMeta.RegisterComponent<T>(sizeOfT);
     }
 
     [DoesNotReturn]
-    private static void ThrowInvalidOperationException() =>
+    private static void ThrowInvalidOperationBlittableException() =>
         throw new InvalidOperationException(
             $"Component '{typeof(T).Name}' must be a blittable struct. Ensure it contains only blittable value types and no bools, chars, strings, or reference types."
+        );
+
+    [DoesNotReturn]
+    private static void ThrowInvalidOperationEmptyStructException() =>
+        throw new InvalidOperationException(
+            $"Component '{typeof(T).Name}' cannot be an empty struct. Components must contain at least one field."
         );
 }

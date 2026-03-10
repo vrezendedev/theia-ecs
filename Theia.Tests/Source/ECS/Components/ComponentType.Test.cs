@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
 
 namespace Theia.ECS.Tests.Components;
@@ -30,19 +32,34 @@ public class ComponentTypeTests
         public Scale Scale;
     }
 
+    [InlineArray(10)]
+    private struct ComponentWithFixedSizeBuffer()
+    {
+        public int Element0;
+    }
+
     [Fact]
     public void ComponentType_SizeOf_ReturnsCorrectSize() =>
         Assert.Equal(24, ComponentsMeta.GetComponentType(ComponentMeta<Transform>.s_id)._sizeOf);
 
     [Fact]
+    public void ComponentType_SizeOfComponentWithFixedSizeBuffer_ReturnsCorrectSize() =>
+        Assert.Equal(
+            40,
+            ComponentsMeta
+                .GetComponentType(ComponentMeta<ComponentWithFixedSizeBuffer>.s_id)
+                ._sizeOf
+        );
+
+    [Fact]
     public void CreateStorage_WithT_ReturnsComponentStorageOfT()
     {
-        ComponentStorage componentStorage = ComponentsMeta
+        Storage componentStorage = ComponentsMeta
             .GetComponentType(ComponentMeta<Position>.s_id)
             .CreateStorage(10);
 
-        Assert.IsType<ComponentStorage<Position>>(componentStorage);
-        Assert.IsAssignableFrom<ComponentStorage>(componentStorage);
+        Assert.IsType<Storage<Position>>(componentStorage);
+        Assert.IsAssignableFrom<Storage>(componentStorage);
     }
 }
 #pragma warning restore CS0649

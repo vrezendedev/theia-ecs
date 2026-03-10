@@ -1,3 +1,5 @@
+using Theia.ECS.Archetypes;
+
 namespace Theia.ECS.Components;
 
 internal abstract class ComponentType
@@ -6,5 +8,5 @@ internal abstract class ComponentType
 
     internal ComponentType(int sizeOf) => _sizeOf = sizeOf;
 
-    internal abstract ComponentStorage CreateStorage(int capacity);
+    internal abstract Storage CreateStorage(int capacity);
 }
