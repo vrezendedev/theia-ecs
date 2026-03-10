@@ -19,15 +19,15 @@ public class EntityMetaTests
         EntityMeta entityMetaA = new()
         {
             _version = 0,
-            _archetypeIndex = 1,
-            _componentStorageIndex = 2,
+            _archetype = null!,
+            _storageIndex = 2,
             _componentIndex = 0,
         };
         EntityMeta entityMetaB = new()
         {
             _version = 0,
-            _archetypeIndex = 1,
-            _componentStorageIndex = 3,
+            _archetype = null!,
+            _storageIndex = 3,
             _componentIndex = 0,
         };
 
@@ -40,15 +40,15 @@ public class EntityMetaTests
         EntityMeta entityMetaA = new()
         {
             _version = 1,
-            _archetypeIndex = 2,
-            _componentStorageIndex = 3,
+            _archetype = null!,
+            _storageIndex = 3,
             _componentIndex = 1,
         };
         EntityMeta entityMetaB = new()
         {
             _version = 1,
-            _archetypeIndex = 2,
-            _componentStorageIndex = 3,
+            _archetype = null!,
+            _storageIndex = 3,
             _componentIndex = 1,
         };
 
@@ -61,15 +61,15 @@ public class EntityMetaTests
         EntityMeta entityMetaA = new()
         {
             _version = 0,
-            _archetypeIndex = 2,
-            _componentStorageIndex = 3,
+            _archetype = null!,
+            _storageIndex = 3,
             _componentIndex = 1,
         };
         EntityMeta entityMetaB = new()
         {
             _version = 1,
-            _archetypeIndex = 2,
-            _componentStorageIndex = 3,
+            _archetype = null!,
+            _storageIndex = 3,
             _componentIndex = 1,
         };
 

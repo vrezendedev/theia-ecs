@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Components;
+using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
 
 namespace Theia.ECS.Archetypes;
@@ -21,10 +22,11 @@ internal sealed class Archetype
     private readonly int _capacity;
     private readonly int[] _componentStorageMapping;
 
+    private int _initializedCount;
     private Indexer[] _indexers;
     private Storage[][] _storages;
 
-    private Stack<int> _free = new();
+    private Stack<int> _free;
     private Queue<int> _lazy;
 
     internal Archetype(int archetypeId, Signature signature)
@@ -34,16 +36,19 @@ internal sealed class Archetype
         _capacity = GetCapacity(signature.SizeOf());
         _componentStorageMapping = GetStorageMapping(signature.Values());
 
-        int components = signature.Length;
-        _indexers = [new Indexer(0, _capacity)];
-        _storages = new Storage[components][];
+        int componentsLength = signature.Length;
 
-        for (int i = 0; i < components; i++)
+        _indexers = new Indexer[1];
+        _storages = new Storage[componentsLength][];
+
+        for (int i = 0; i < _storages.Length; i++)
             _storages[i] = new Storage[1];
 
         _free = new(1);
-        _free.Push(0);
-        _lazy = new();
+        _lazy = new(1);
+        _lazy.Enqueue(0);
+
+        _initializedCount = 0;
     }
 
     private int GetCapacity(int signatureSize) =>
@@ -73,21 +78,81 @@ internal sealed class Archetype
         return ids.ToArray();
     }
 
-    private void InitializeStorages(int index)
+    internal EntityAccounted Add(Entity entity)
     {
-        int capacity = _capacity;
-        ReadOnlySpan<int> componentIndexes = _signature.Values();
+        int storageIndex = GetValidIndexerIndex();
 
-        for (int i = 0; i < componentIndexes.Length; i++)
-        {
-            int componentId = componentIndexes[i];
-            int storageIndex = _componentStorageMapping[componentId];
-            ComponentType componentType = ComponentsMeta.GetComponentType(componentId);
-            _storages[storageIndex][index] = componentType.CreateStorage(capacity);
-        }
+        Indexer indexer = _indexers[storageIndex];
+
+        int componentIndex = indexer.Add();
+        indexer.Set(componentIndex, entity);
+
+        if (!indexer.IsFull())
+            _free.Push(storageIndex);
+
+        return new EntityAccounted(this, storageIndex, componentIndex);
     }
 
-    internal void Resize()
+    internal EntitySwapped Remove(EntityMeta entityMeta)
+    {
+        int storageIndex = entityMeta._storageIndex;
+        int componentIndex = entityMeta._componentIndex;
+
+        Indexer indexer = _indexers[storageIndex];
+        int swapped = indexer.Remove(componentIndex);
+
+        _free.Push(storageIndex);
+
+        if (swapped != -1)
+        {
+            for (int i = 0; i < _storages.Length; i++)
+                _storages[i][entityMeta._storageIndex].Move(swapped, componentIndex);
+
+            return new EntitySwapped(indexer.Get(componentIndex)._id, componentIndex);
+        }
+
+        return EntitySwapped.None;
+    }
+
+    internal EntityTransferred Transfer(Entity entity, EntityMeta entityMeta, Archetype to)
+    {
+        EntityAccounted accounted = to.Add(entity);
+
+        ReadOnlySpan<int> fromComponentStorageMappedIndexes = _componentStorageMapping;
+        ReadOnlySpan<int> toComponentStorageMappedIndexes = to._componentStorageMapping;
+
+        ReadOnlySpan<int> ids = to._signature.Values();
+
+        for (int i = 0; i < ids.Length; i++)
+        {
+            if (ids[i] < fromComponentStorageMappedIndexes.Length)
+            {
+                int fromComponentStoragesIndex = fromComponentStorageMappedIndexes[ids[i]];
+
+                if (fromComponentStoragesIndex != -1)
+                {
+                    int toComponentStoragesIndex = toComponentStorageMappedIndexes[ids[i]];
+
+                    Storage fromStorage = _storages[fromComponentStoragesIndex][
+                        entityMeta._storageIndex
+                    ];
+                    Storage toStorage = to._storages[toComponentStoragesIndex][
+                        accounted._storageIndex
+                    ];
+
+                    fromStorage.Transfer(
+                        entityMeta._componentIndex,
+                        accounted._componentIndex,
+                        toStorage
+                    );
+                }
+            }
+        }
+
+        return new EntityTransferred(accounted, Remove(entityMeta));
+    }
+
+    private void Resize()
     {
         int currentLength = _indexers.Length;
         int length = currentLength * 2;
@@ -101,32 +166,53 @@ internal sealed class Archetype
             _lazy.Enqueue(i);
     }
 
-    internal void Add(in Entity entity, ref EntityMeta entityMeta)
+    private void InitializeNextLazyIndexerAndStorages()
     {
-        throw new NotImplementedException();
+        int nextId = _lazy.Dequeue();
+        int capacity = _capacity;
+
+        _indexers[nextId] = new Indexer(nextId, capacity);
+
+        ReadOnlySpan<int> componentIndexes = _signature.Values();
+
+        for (int i = 0; i < componentIndexes.Length; i++)
+        {
+            int componentId = componentIndexes[i];
+            int storageIndex = _componentStorageMapping[componentId];
+            ComponentType componentType = ComponentsMeta.GetComponentType(componentId);
+            _storages[storageIndex][nextId] = componentType.CreateStorage(capacity);
+        }
+
+        _initializedCount++;
+
+        _free.Push(nextId);
     }
 
-    internal void Remove(in Entity entity, ref EntityMeta entityMeta)
+    private int GetValidIndexerIndex()
     {
-        throw new NotImplementedException();
+        if (_free.Count == 0)
+        {
+            if (_lazy.Count == 0)
+                Resize();
+
+            InitializeNextLazyIndexerAndStorages();
+        }
+
+        return _free.Pop();
     }
 
-    internal void Transfer(ref EntityMeta entityMeta, Archetype to)
-    {
-        throw new NotImplementedException();
-    }
-
-    internal Span<Indexer> GetIndexers() => _indexers;
+    internal Span<Indexer> GetIndexers() => _indexers.AsSpan(0, _initializedCount);
 
     internal Span<Storage> GetStorages<T>()
-        where T : struct => _storages[_componentStorageMapping[ComponentMeta<T>.s_id]];
+        where T : struct =>
+        _storages[_componentStorageMapping[ComponentMeta<T>.s_id]].AsSpan(0, _initializedCount);
 
     internal ref T Get<T>(in EntityMeta entityMeta)
         where T : struct
     {
         int storageIndex = _componentStorageMapping[ComponentMeta<T>.s_id];
 
-        return ref ((Storage<T>)_storages[storageIndex][entityMeta._componentStorageIndex]).Get(
+        return ref ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Get(
             entityMeta._componentIndex
         );
     }
@@ -136,7 +222,7 @@ internal sealed class Archetype
     {
         int storageIndex = _componentStorageMapping[ComponentMeta<T>.s_id];
 
-        ((Storage<T>)_storages[storageIndex][entityMeta._componentStorageIndex]).Set(
+        ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Set(
             entityMeta._componentIndex,
             component
         );

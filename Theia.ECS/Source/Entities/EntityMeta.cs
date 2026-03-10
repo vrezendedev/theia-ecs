@@ -1,27 +1,28 @@
 using System;
+using Theia.ECS.Archetypes;
 
 namespace Theia.ECS.Entities;
 
 internal struct EntityMeta : IEquatable<EntityMeta>
 {
     internal int _version { get; set; }
-    internal int _archetypeIndex { get; set; }
-    internal int _componentStorageIndex { get; set; }
+    internal Archetype _archetype { get; set; }
+    internal int _storageIndex { get; set; }
     internal int _componentIndex { get; set; }
 
     public bool Equals(EntityMeta other) =>
         _version == other._version
-        && _archetypeIndex == other._archetypeIndex
-        && _componentStorageIndex == other._componentStorageIndex
+        && _archetype == other._archetype
+        && _storageIndex == other._storageIndex
         && _componentIndex == other._componentIndex;
 
     public override bool Equals(object? obj) => obj is EntityMeta other && Equals(other);
 
     public override int GetHashCode() =>
-        HashCode.Combine(_version, _archetypeIndex, _componentStorageIndex, _componentIndex);
+        HashCode.Combine(_version, _archetype?._archetypeId ?? -1, _storageIndex, _componentIndex);
 
     public override string ToString() =>
-        $"{nameof(EntityMeta)}(Version: {_version} | ArchetypeIndex: {_archetypeIndex} | ComponentStorageIndex: {_componentStorageIndex} | ComponentIndex: {_componentIndex})";
+        $"{nameof(EntityMeta)}(Version: {_version} | Archetype: {_archetype} | StorageIndex: {_storageIndex} | ComponentIndex: {_componentIndex})";
 
     public static bool operator ==(EntityMeta left, EntityMeta right) => left.Equals(right);
 
