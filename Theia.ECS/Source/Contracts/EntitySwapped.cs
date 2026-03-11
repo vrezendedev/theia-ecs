@@ -15,10 +15,10 @@ internal readonly ref struct EntitySwapped : IEquatable<EntitySwapped>
         _componentIndex = componentIndex;
     }
 
-    internal static EntitySwapped None => new();
-
     public bool Equals(EntitySwapped other) =>
         _entityID == other._entityID
         && _storageIndex == other._storageIndex
         && _componentIndex == other._componentIndex;
+
+    internal static EntitySwapped None => new();
 }

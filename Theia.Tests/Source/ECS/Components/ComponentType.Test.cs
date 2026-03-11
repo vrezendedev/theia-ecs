@@ -3,7 +3,7 @@ using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
 using Theia.Tests.Resources;
 
-namespace Theia.ECS.Tests.Components;
+namespace Theia.Tests.ECS.Components;
 
 public sealed class ComponentTypeTests
 {

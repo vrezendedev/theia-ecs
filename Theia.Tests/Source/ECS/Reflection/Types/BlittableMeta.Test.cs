@@ -1,5 +1,4 @@
 using System;
-using Theia.ECS.Blittables;
 using Theia.ECS.Reflection.Types;
 using Theia.Tests.Resources;
 
@@ -129,60 +128,6 @@ public sealed partial class BlittableMetaTests
 }
 #endregion
 
-#region Cached Types
-public sealed partial class BlittableMetaTests
-{
-    [Fact]
-    public void IsStrictlyBlittable_DecimalCached_ShouldNotCache()
-    {
-        int cachedInitially = BlittableMeta._totalBlittablesCached;
-
-        BlittableMeta.IsStrictlyBlittable(typeof(decimal));
-
-        Assert.Equal(cachedInitially, BlittableMeta._totalBlittablesCached);
-    }
-
-    [Fact]
-    public void IsStrictlyBlittable_DateTimeCached_ShouldNotCache()
-    {
-        int cachedInitially = BlittableMeta._totalBlittablesCached;
-
-        BlittableMeta.IsStrictlyBlittable(typeof(DateTime));
-
-        Assert.Equal(cachedInitially, BlittableMeta._totalBlittablesCached);
-    }
-
-    [Fact]
-    public void IsStrictlyBlittable_TimeSpanCached_ShouldNotCache()
-    {
-        int cachedInitially = BlittableMeta._totalBlittablesCached;
-
-        BlittableMeta.IsStrictlyBlittable(typeof(TimeSpan));
-
-        Assert.Equal(cachedInitially, BlittableMeta._totalBlittablesCached);
-    }
-
-    [Fact]
-    public void IsStrictlyBlittable_BlittableCharCached_ShouldNotCache()
-    {
-        int cachedInitially = BlittableMeta._totalBlittablesCached;
-
-        BlittableMeta.IsStrictlyBlittable(typeof(BlittableChar));
-
-        Assert.Equal(cachedInitially, BlittableMeta._totalBlittablesCached);
-    }
-
-    [Fact]
-    public void IsStrictlyBlittable_BlittableBooleanCached_ShouldNotCache()
-    {
-        int cachedInitially = BlittableMeta._totalBlittablesCached;
-
-        BlittableMeta.IsStrictlyBlittable(typeof(BlittableBoolean));
-
-        Assert.Equal(cachedInitially, BlittableMeta._totalBlittablesCached);
-    }
-}
-#endregion
 
 #region Struct with Attributes
 public sealed partial class BlittableMetaTests

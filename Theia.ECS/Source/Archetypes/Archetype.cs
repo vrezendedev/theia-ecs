@@ -33,10 +33,10 @@ internal sealed class Archetype
     {
         _archetypeId = archetypeId;
         _signature = signature;
-        _capacity = GetCapacity(signature.SizeOf);
-        _componentStorageMapping = GetStorageMapping(signature.Values());
+        _capacity = GetCapacity(signature._sizeOf);
+        _componentStorageMapping = GetStorageMapping(signature._maxId, signature.Components());
 
-        int componentsLength = signature.Length;
+        int componentsLength = signature._length;
 
         _indexers = new Indexer[1];
         _storages = new Storage[componentsLength][];
@@ -57,13 +57,8 @@ internal sealed class Archetype
             MinimumEntitiesPerChunk
         );
 
-    private int[] GetStorageMapping(ReadOnlySpan<int> signatureIds)
+    private int[] GetStorageMapping(int maxId, ReadOnlySpan<int> signatureIds)
     {
-        int maxId = -1;
-
-        for (int i = 0; i < signatureIds.Length; i++)
-            maxId = Math.Max(maxId, signatureIds[i]);
-
         Span<int> ids = stackalloc int[maxId + 1];
         ids.Fill(-1);
 
@@ -121,7 +116,7 @@ internal sealed class Archetype
         ReadOnlySpan<int> fromComponentStorageMappedIndexes = _componentStorageMapping;
         ReadOnlySpan<int> toComponentStorageMappedIndexes = to._componentStorageMapping;
 
-        ReadOnlySpan<int> ids = to._signature.Values();
+        ReadOnlySpan<int> ids = to._signature.Components();
 
         for (int i = 0; i < ids.Length; i++)
         {
@@ -173,7 +168,7 @@ internal sealed class Archetype
 
         _indexers[nextId] = new Indexer(nextId, capacity);
 
-        ReadOnlySpan<int> componentIndexes = _signature.Values();
+        ReadOnlySpan<int> componentIndexes = _signature.Components();
 
         for (int i = 0; i < componentIndexes.Length; i++)
         {

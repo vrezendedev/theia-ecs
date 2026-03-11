@@ -30,7 +30,7 @@ internal static class ComponentsMeta
 
             int index = s_count;
 
-            s_componentTypeMap[index] = new ComponentType<T>(sizeOfT);
+            s_componentTypeMap[index] = new ComponentType<T>(typeof(T), sizeOfT);
 
             s_count++;
 

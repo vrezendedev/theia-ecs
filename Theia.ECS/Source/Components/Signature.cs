@@ -1,26 +1,121 @@
 using System;
+using System.Runtime.CompilerServices;
+using Theia.ECS.Contracts;
+using Theia.ECS.Extensions;
 
 namespace Theia.ECS.Components;
 
-internal readonly struct Signature
+internal readonly struct Signature : IEquatable<Signature>
 {
-    internal readonly int Length;
-    internal readonly int SizeOf;
-    internal readonly int[] Components;
+    private readonly int[] _components;
+    internal readonly int _length;
 
-    internal Signature(ReadOnlySpan<int> componentsIds)
+    internal readonly int _sizeOf;
+    internal readonly int _maxId;
+
+    private readonly ulong[] _buckets;
+    internal readonly int _bucketCount;
+
+    internal Signature(ReadOnlySpan<int> componentIds)
     {
-        Length = componentsIds.Length;
+        Signature.ValidateComponents(componentIds);
 
-        int size = 0;
+        _components = componentIds.ToArray();
+        _length = componentIds.Length;
 
-        for (int i = 0; i < componentsIds.Length; i++)
-            size += ComponentsMeta.GetComponentType(componentsIds[i])._sizeOf;
+        SignatureMeta signatureMeta = Signature.GetSignatureMeta(componentIds);
 
-        SizeOf = size;
+        _sizeOf = signatureMeta._size;
+        _maxId = signatureMeta._maxId;
+        _bucketCount = signatureMeta._bucketCount;
 
-        Components = componentsIds.ToArray();
+        Span<ulong> buckets = stackalloc ulong[_bucketCount];
+
+        Signature.GetSignatureBuckets(componentIds, buckets);
+
+        _buckets = buckets.ToArray();
     }
 
-    internal ReadOnlySpan<int> Values() => Components;
+    internal Signature(
+        ReadOnlySpan<int> componentIds,
+        SignatureMeta signatureMeta,
+        ReadOnlySpan<ulong> buckets
+    )
+    {
+        Signature.ValidateComponents(componentIds);
+
+        _components = componentIds.ToArray();
+        _length = componentIds.Length;
+
+        _sizeOf = signatureMeta._size;
+        _maxId = signatureMeta._maxId;
+        _bucketCount = signatureMeta._bucketCount;
+
+        _buckets = buckets.ToArray();
+    }
+
+    /// <summary>
+    /// Bypass constructor intended exclusively for Unit Testing.
+    /// Skips <see cref="ComponentsMeta"/> lookups, allowing arbitrary component IDs
+    /// to be used without requiring registered component types.
+    /// <para><b>Do not use outside of test projects.</b></para>
+    /// </summary>
+    /// <param name="componentIds">Arbitrary component IDs to build the signature from.</param>
+    /// <param name="bypass">Acts as a compile-time discriminator to distinguish this overload.</param>
+    [Obsolete("Test-only Constructor")]
+    internal Signature(ReadOnlySpan<int> componentIds, bool bypass)
+    {
+        Signature.ValidateComponents(componentIds);
+
+        _components = componentIds.ToArray();
+        _length = componentIds.Length;
+
+        int maxId = -1;
+
+        for (int i = 0; i < componentIds.Length; i++)
+            maxId = Math.Max(maxId, componentIds[i]);
+
+        _sizeOf = 0;
+        _maxId = maxId;
+        _bucketCount = Signature.GetBucketCount(maxId);
+
+        Span<ulong> buckets = stackalloc ulong[_bucketCount];
+
+        Signature.GetSignatureBuckets(componentIds, buckets);
+
+        _buckets = buckets.ToArray();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ReadOnlySpan<int> Components() => _components;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ReadOnlySpan<ulong> Buckets() => _buckets;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsSatisfiedBy(Signature other) =>
+        Signature.IsSatisfiedBy(_buckets, other._buckets);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Equals(Signature other) =>
+        Signature.Equals(_length, other._length, _buckets, other._buckets);
+
+    public override bool Equals(object? obj) => obj is Signature other && Equals(other);
+
+    public override int GetHashCode()
+    {
+        HashCode hash = new HashCode();
+
+        for (int i = 0; i < _buckets.Length; i++)
+            hash.Add(_buckets[i]);
+
+        return hash.ToHashCode();
+    }
+
+    public override string ToString() =>
+        $"{nameof(Signature)}(Components: {string.Join(", ", _components)} | Length: {_length} | Sizeof: {_sizeOf} | MaxId: {_maxId} | Buckets: {string.Join(", ", _buckets)} | BucketCount: {_bucketCount})";
+
+    public static bool operator ==(Signature left, Signature right) => left.Equals(right);
+
+    public static bool operator !=(Signature left, Signature right) => !left.Equals(right);
 }

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Theia.ECS.Components;
 using Theia.Tests.Resources;
 
-namespace Theia.ECS.Tests.Components;
+namespace Theia.Tests.ECS.Components;
 
 public sealed class ComponentsMetaTests
 {
