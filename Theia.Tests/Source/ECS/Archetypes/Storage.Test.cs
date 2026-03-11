@@ -1,15 +1,11 @@
 using System;
 using Theia.ECS.Archetypes;
+using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Archetypes;
 
-public class StorageTests
+public sealed class StorageTests
 {
-    private struct ComponentA
-    {
-        public int X;
-    }
-
     [Fact]
     public void Values_WithAllComponentsSet_ReturnsMatchingSpan()
     {
@@ -18,12 +14,12 @@ public class StorageTests
         Storage<ComponentA> storage = new Storage<ComponentA>(length);
 
         for (int i = 0; i < length; i++)
-            storage.Set(i, new ComponentA() { X = i });
+            storage.Set(i, new ComponentA() { AField = i });
 
         Span<ComponentA> components = storage.Values(length);
 
         for (int i = 0; i < length; i++)
-            Assert.Equal(i, components[i].X);
+            Assert.Equal(i, components[i].AField);
     }
 
     [Fact]
@@ -34,11 +30,11 @@ public class StorageTests
 
         int targetIndex = 0;
         int x = 10;
-        ComponentA component = new ComponentA() { X = x };
+        ComponentA component = new ComponentA() { AField = x };
 
         storage.Set(targetIndex, component);
 
-        Assert.Equal(x, storage.Get(targetIndex).X);
+        Assert.Equal(x, storage.Get(targetIndex).AField);
     }
 
     [Fact]
@@ -51,13 +47,13 @@ public class StorageTests
         int from = 0;
         int value = 5;
 
-        storage.Set(from, new ComponentA() { X = value });
+        storage.Set(from, new ComponentA() { AField = value });
 
         int to = 5;
 
         storage.Move(from, to);
 
-        Assert.Equal(storage.Get(from).X, storage.Get(to).X);
+        Assert.Equal(storage.Get(from).AField, storage.Get(to).AField);
     }
 
     [Fact]
@@ -73,10 +69,13 @@ public class StorageTests
         int oldIndex = 9;
         int newIndex = 15;
 
-        storageA.Set(oldIndex, new ComponentA() { X = value });
+        storageA.Set(oldIndex, new ComponentA() { AField = value });
 
         storageA.Transfer(oldIndex, newIndex, storageB);
 
-        Assert.Equal(storageA.Get(oldIndex).X, ((Storage<ComponentA>)storageB).Get(newIndex).X);
+        Assert.Equal(
+            storageA.Get(oldIndex).AField,
+            ((Storage<ComponentA>)storageB).Get(newIndex).AField
+        );
     }
 }

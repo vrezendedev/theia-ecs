@@ -2,7 +2,7 @@ using Theia.ECS.Entities;
 
 namespace Theia.Tests.ECS.Entities;
 
-public class EntityMetaTests
+public sealed class EntityMetaTests
 {
     [Fact]
     public void Equals_WithSameFields_ReturnsTrue()

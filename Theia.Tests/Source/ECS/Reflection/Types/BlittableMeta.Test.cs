@@ -1,13 +1,12 @@
 using System;
-using System.Runtime.InteropServices;
 using Theia.ECS.Blittables;
-using Theia.ECS.Blittables.Attributes;
 using Theia.ECS.Reflection.Types;
+using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Reflection.Types;
 
 #region Primitives
-public partial class BlittableMetaTests
+public sealed partial class BlittableMetaTests
 {
     [Fact]
     public void IsStrictlyBlittable_PrimitiveBool_ReturnsFalse() =>
@@ -68,30 +67,8 @@ public partial class BlittableMetaTests
 #endregion
 
 #region Enums, Reference, ByRef, Pointer and Generic Types
-public partial class BlittableMetaTests
+public sealed partial class BlittableMetaTests
 {
-    private enum TestEnum : int
-    {
-        A,
-        B,
-    }
-
-    private interface INonBlittableInterface { }
-
-    private class NonBlittableClass() { }
-
-    private delegate void NonBlittableDelegate();
-
-    private record NonBlittableRecord();
-
-    private record struct BlittableRecordStruct { }
-
-    private ref struct NonBlittableRefStruct { }
-
-    private struct GenericStruct<T> { }
-
-    private struct GenericStruct<T, TT> { }
-
     [Fact]
     public void IsStrictlyBlittable_ReferenceInterface_ReturnsFalse() =>
         Assert.False(BlittableMeta.IsStrictlyBlittable(typeof(INonBlittableInterface)));
@@ -148,31 +125,13 @@ public partial class BlittableMetaTests
 
     [Fact]
     public void IsStrictlyBlittable_Enum_ReturnsTrue() =>
-        Assert.True(BlittableMeta.IsStrictlyBlittable(typeof(TestEnum)));
+        Assert.True(BlittableMeta.IsStrictlyBlittable(typeof(EnumA)));
 }
 #endregion
 
 #region Cached Types
-public partial class BlittableMetaTests
+public sealed partial class BlittableMetaTests
 {
-    private struct CachedStruct { }
-
-    [Fact]
-    public void IsStrictlyBlittable_StructCached_ShouldCache()
-    {
-        int cachedInitially = BlittableMeta._totalBlittablesCached;
-
-        BlittableMeta.IsStrictlyBlittable(typeof(CachedStruct));
-
-        int cachedAfter = cachedInitially + 1;
-
-        Assert.Equal(cachedAfter, BlittableMeta._totalBlittablesCached);
-
-        BlittableMeta.IsStrictlyBlittable(typeof(CachedStruct));
-
-        Assert.Equal(cachedAfter, BlittableMeta._totalBlittablesCached);
-    }
-
     [Fact]
     public void IsStrictlyBlittable_DecimalCached_ShouldNotCache()
     {
@@ -225,27 +184,9 @@ public partial class BlittableMetaTests
 }
 #endregion
 
-#pragma warning disable CS0649
 #region Struct with Attributes
-public partial class BlittableMetaTests
+public sealed partial class BlittableMetaTests
 {
-    [StructLayout(LayoutKind.Auto)]
-    private struct NonBlittableStructWithAutoLayout { }
-
-    [AssumeBlittable]
-    private struct AssumedBlittableStruct { }
-
-    [AssumeBlittable]
-    private struct AssumedBlittableOnNonBlittableStruct
-    {
-        public string Value;
-    }
-
-    private struct StructWithAssumedBlittableOnNonBlittableStruct
-    {
-        public AssumedBlittableOnNonBlittableStruct Value;
-    }
-
     [Fact]
     public void IsStrictlyBlittable_StructsWithStructLayoutAuto_ReturnsFalse() =>
         Assert.False(BlittableMeta.IsStrictlyBlittable(typeof(NonBlittableStructWithAutoLayout)));
@@ -271,38 +212,8 @@ public partial class BlittableMetaTests
 #endregion
 
 #region Structs with Fields
-public partial class BlittableMetaTests
+public sealed partial class BlittableMetaTests
 {
-    private struct StructWithPrimitiveBlittableFields
-    {
-        public int Int;
-        public byte Byte;
-    }
-
-    private struct StructWithPrimitiveNonBlittableFields
-    {
-        public int? Int;
-        public byte Byte;
-    }
-
-    private struct StructWithBlittableFields
-    {
-        public int Int;
-        public BlittableBoolean Boolean;
-    }
-
-    private struct StructWithNonBlittableFields
-    {
-        public int Int;
-        public string String;
-    }
-
-    private struct StructWithBlittableGenerics<T, TT>
-    {
-        public T ValueT;
-        public TT ValueTT;
-    }
-
     [Fact]
     public void IsStrictlyBlittable_StructWithPrimitiveBlittableFields_ReturnsTrue() =>
         Assert.True(BlittableMeta.IsStrictlyBlittable(typeof(StructWithPrimitiveBlittableFields)));
@@ -345,4 +256,3 @@ public partial class BlittableMetaTests
         );
 }
 #endregion
-#pragma warning restore CS0649

@@ -1,8 +1,9 @@
+using System;
 using Theia.ECS.Archetypes;
 
 namespace Theia.ECS.Contracts;
 
-internal readonly ref struct EntityAccounted
+internal readonly ref struct EntityAccounted : IEquatable<EntityAccounted>
 {
     internal readonly Archetype _archetype;
     internal readonly int _storageIndex;
@@ -14,4 +15,9 @@ internal readonly ref struct EntityAccounted
         _storageIndex = storageIndex;
         _componentIndex = componentIndex;
     }
+
+    public bool Equals(EntityAccounted other) =>
+        _archetype == other._archetype
+        && _storageIndex == other._storageIndex
+        && _componentIndex == other._componentIndex;
 }

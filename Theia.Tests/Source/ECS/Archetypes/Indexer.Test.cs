@@ -4,7 +4,7 @@ using Theia.ECS.Entities;
 
 namespace Theia.Tests.ECS.Archetypes;
 
-public class IndexerTests
+public sealed class IndexerTests
 {
     [Fact]
     public void Count_WithEmptyIndexer_ReturnsZero()

@@ -19,7 +19,7 @@ internal sealed class Archetype
 
     internal readonly int _archetypeId;
     internal readonly Signature _signature;
-    private readonly int _capacity;
+    internal readonly int _capacity;
     private readonly int[] _componentStorageMapping;
 
     private int _initializedCount;
@@ -33,7 +33,7 @@ internal sealed class Archetype
     {
         _archetypeId = archetypeId;
         _signature = signature;
-        _capacity = GetCapacity(signature.SizeOf());
+        _capacity = GetCapacity(signature.SizeOf);
         _componentStorageMapping = GetStorageMapping(signature.Values());
 
         int componentsLength = signature.Length;
@@ -108,7 +108,7 @@ internal sealed class Archetype
             for (int i = 0; i < _storages.Length; i++)
                 _storages[i][entityMeta._storageIndex].Move(swapped, componentIndex);
 
-            return new EntitySwapped(indexer.Get(componentIndex)._id, componentIndex);
+            return new EntitySwapped(indexer.Get(componentIndex)._id, storageIndex, componentIndex);
         }
 
         return EntitySwapped.None;

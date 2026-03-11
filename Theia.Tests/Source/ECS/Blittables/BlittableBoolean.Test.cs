@@ -2,7 +2,7 @@ using Theia.ECS.Blittables;
 
 namespace Theia.Tests.ECS.Blittables;
 
-public class BlittableBooleanTests
+public sealed class BlittableBooleanTests
 {
     [Fact]
     public void Equals_WithSameByte_ReturnsTrue()

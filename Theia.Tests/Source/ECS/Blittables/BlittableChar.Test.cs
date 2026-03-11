@@ -2,7 +2,7 @@ using Theia.ECS.Blittables;
 
 namespace Theia.Tests.ECS.Blittables;
 
-public class BlittableCharTests
+public sealed class BlittableCharTests
 {
     [Fact]
     public void Equals_WithSameChar_ReturnsTrue()

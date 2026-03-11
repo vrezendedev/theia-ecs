@@ -10,6 +10,14 @@ internal struct EntityMeta : IEquatable<EntityMeta>
     internal int _storageIndex { get; set; }
     internal int _componentIndex { get; set; }
 
+    internal EntityMeta(int version, Archetype archetype, int storageIndex, int componentIndex)
+    {
+        _version = version;
+        _archetype = archetype;
+        _storageIndex = storageIndex;
+        _componentIndex = componentIndex;
+    }
+
     public bool Equals(EntityMeta other) =>
         _version == other._version
         && _archetype == other._archetype

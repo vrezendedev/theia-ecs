@@ -1,37 +1,12 @@
 using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
+using Theia.Tests.Resources;
 
 namespace Theia.ECS.Tests.Components;
 
-#pragma warning disable CS0649
-public class ComponentTypeTests
+public sealed class ComponentTypeTests
 {
-    private struct Position
-    {
-        public int X;
-        public int Y;
-    }
-
-    private struct Rotation
-    {
-        public int X;
-        public int Y;
-    }
-
-    private struct Scale
-    {
-        public int X;
-        public int Y;
-    }
-
-    private struct Transform
-    {
-        public Position Position;
-        public Rotation Rotation;
-        public Scale Scale;
-    }
-
     [InlineArray(10)]
     private struct ComponentWithFixedSizeBuffer()
     {
@@ -40,7 +15,7 @@ public class ComponentTypeTests
 
     [Fact]
     public void ComponentType_SizeOf_ReturnsCorrectSize() =>
-        Assert.Equal(24, ComponentsMeta.GetComponentType(ComponentMeta<Transform>.s_id)._sizeOf);
+        Assert.Equal(20, ComponentsMeta.GetComponentType(ComponentMeta<Transform>.s_id)._sizeOf);
 
     [Fact]
     public void ComponentType_SizeOfComponentWithFixedSizeBuffer_ReturnsCorrectSize() =>
@@ -62,4 +37,3 @@ public class ComponentTypeTests
         Assert.IsAssignableFrom<Storage>(componentStorage);
     }
 }
-#pragma warning restore CS0649

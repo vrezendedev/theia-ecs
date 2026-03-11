@@ -1,74 +1,12 @@
 using System;
 using System.Threading.Tasks;
 using Theia.ECS.Components;
+using Theia.Tests.Resources;
 
 namespace Theia.ECS.Tests.Components;
 
-#pragma warning disable CS0649
-public class ComponentsMetaTests
+public sealed class ComponentsMetaTests
 {
-    private struct NonBlittableComponent
-    {
-        public string Name;
-    }
-
-    private struct GenericComponent<T>
-    {
-        public T Value;
-    }
-
-    private struct ComponentA
-    {
-        public int A;
-    }
-
-    private struct ComponentB
-    {
-        public int B;
-    }
-
-    private struct ComponentC
-    {
-        public int C;
-    }
-
-    private struct ComponentD
-    {
-        public int D;
-    }
-
-    private struct ComponentE
-    {
-        public int E;
-    }
-
-    private struct ComponentF
-    {
-        public int F;
-    }
-
-    private struct ComponentG
-    {
-        public int G;
-    }
-
-    private struct ComponentH
-    {
-        public int H;
-    }
-
-    private struct ComponentI
-    {
-        public int I;
-    }
-
-    private struct ComponentJ
-    {
-        public int J;
-    }
-
-    private struct InvalidComponent { }
-
     [Fact]
     public void Constructor_WithNonBlittableComponent_ThrowsTypeInitializationException()
     {
@@ -85,7 +23,7 @@ public class ComponentsMetaTests
     {
         TypeInitializationException exception = Assert.Throws<TypeInitializationException>(() =>
         {
-            _ = ComponentMeta<InvalidComponent>.s_id;
+            _ = ComponentMeta<EmptyComponent>.s_id;
         });
 
         Assert.IsType<InvalidOperationException>(exception.InnerException);
@@ -185,4 +123,3 @@ public class ComponentsMetaTests
         Assert.NotNull(ComponentsMeta.GetComponentType(id));
     }
 }
-#pragma warning restore CS0649
