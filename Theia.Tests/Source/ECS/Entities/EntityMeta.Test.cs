@@ -19,14 +19,14 @@ public sealed class EntityMetaTests
         EntityMeta entityMetaA = new()
         {
             _version = 0,
-            _archetype = null!,
+            _archetypeIndex = 0,
             _storageIndex = 2,
             _componentIndex = 0,
         };
         EntityMeta entityMetaB = new()
         {
             _version = 0,
-            _archetype = null!,
+            _archetypeIndex = 0,
             _storageIndex = 3,
             _componentIndex = 0,
         };
@@ -40,14 +40,14 @@ public sealed class EntityMetaTests
         EntityMeta entityMetaA = new()
         {
             _version = 1,
-            _archetype = null!,
+            _archetypeIndex = 0,
             _storageIndex = 3,
             _componentIndex = 1,
         };
         EntityMeta entityMetaB = new()
         {
             _version = 1,
-            _archetype = null!,
+            _archetypeIndex = 0,
             _storageIndex = 3,
             _componentIndex = 1,
         };
@@ -61,14 +61,14 @@ public sealed class EntityMetaTests
         EntityMeta entityMetaA = new()
         {
             _version = 0,
-            _archetype = null!,
+            _archetypeIndex = 0,
             _storageIndex = 3,
             _componentIndex = 1,
         };
         EntityMeta entityMetaB = new()
         {
             _version = 1,
-            _archetype = null!,
+            _archetypeIndex = 0,
             _storageIndex = 3,
             _componentIndex = 1,
         };

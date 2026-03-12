@@ -16,6 +16,7 @@ internal sealed class Archetype
     /// </summary>
     private const int AvailableMemoryPerChunk = 16_384 - 128;
     private const int MinimumEntitiesPerChunk = 64;
+    private const int DefaultIndexersAndStoragesGrowthFactor = 2;
 
     internal readonly int _archetypeId;
     internal readonly Signature _signature;
@@ -85,7 +86,7 @@ internal sealed class Archetype
         if (!indexer.IsFull())
             _free.Push(storageIndex);
 
-        return new EntityAccounted(this, storageIndex, componentIndex);
+        return new EntityAccounted(_archetypeId, storageIndex, componentIndex);
     }
 
     internal EntitySwapped Remove(EntityMeta entityMeta)
@@ -150,14 +151,14 @@ internal sealed class Archetype
     private void Resize()
     {
         int currentLength = _indexers.Length;
-        int length = currentLength * 2;
+        int targetLength = currentLength * DefaultIndexersAndStoragesGrowthFactor;
 
-        Array.Resize(ref _indexers, length);
+        Array.Resize(ref _indexers, targetLength);
 
         for (int i = 0; i < _storages.Length; i++)
-            Array.Resize(ref _storages[i], length);
+            Array.Resize(ref _storages[i], targetLength);
 
-        for (int i = currentLength; i < length; i++)
+        for (int i = currentLength; i < targetLength; i++)
             _lazy.Enqueue(i);
     }
 
@@ -197,6 +198,9 @@ internal sealed class Archetype
     }
 
     internal Span<Indexer> GetIndexers() => _indexers.AsSpan(0, _initializedCount);
+
+    internal Span<Storage> GetStorages(int componentStorageIndex) =>
+        _storages[componentStorageIndex].AsSpan(0, _initializedCount);
 
     internal Span<Storage> GetStorages<T>()
         where T : struct =>

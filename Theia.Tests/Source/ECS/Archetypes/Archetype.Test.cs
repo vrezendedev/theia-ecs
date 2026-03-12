@@ -75,7 +75,7 @@ public sealed class ArchetypeTests
 
         EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
 
-        Assert.Same(archetype, accounted._archetype);
+        Assert.Equal(archetype._archetypeId, accounted._archetypeIndex);
         Assert.Equal(accounted._storageIndex, archetype.GetIndexers().Length - 1);
     }
 
@@ -117,12 +117,7 @@ public sealed class ArchetypeTests
         Archetype archetype = new Archetype(1, _fourComponentSignature);
 
         EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
-        EntityMeta meta = new EntityMeta(
-            0,
-            accounted._archetype,
-            accounted._storageIndex,
-            accounted._componentIndex
-        );
+        EntityMeta meta = new EntityMeta(0, 1, accounted._storageIndex, accounted._componentIndex);
 
         EntitySwapped swapped = archetype.Remove(meta);
 
@@ -139,7 +134,7 @@ public sealed class ArchetypeTests
 
         EntityMeta metaOne = new EntityMeta(
             0,
-            accountedOne._archetype,
+            1,
             accountedOne._storageIndex,
             accountedOne._componentIndex
         );
@@ -160,14 +155,14 @@ public sealed class ArchetypeTests
 
         EntityMeta metaOne = new EntityMeta(
             0,
-            accountedOne._archetype,
+            accountedOne._archetypeIndex,
             accountedOne._storageIndex,
             accountedOne._componentIndex
         );
 
         EntityMeta metaTwo = new EntityMeta(
             0,
-            accountedTwo._archetype,
+            accountedTwo._archetypeIndex,
             accountedTwo._storageIndex,
             accountedTwo._componentIndex
         );
@@ -178,7 +173,7 @@ public sealed class ArchetypeTests
 
         EntityMeta swappedMeta = new EntityMeta(
             0,
-            archetype,
+            1,
             swapped._storageIndex,
             swapped._componentIndex
         );
@@ -199,7 +194,7 @@ public sealed class ArchetypeTests
 
         EntityMeta metaOne = new EntityMeta(
             0,
-            accountOne._archetype,
+            accountOne._archetypeIndex,
             accountOne._storageIndex,
             accountOne._componentIndex
         );
@@ -224,7 +219,7 @@ public sealed class ArchetypeTests
         EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
         EntityMeta meta = new EntityMeta(
             0,
-            accounted._archetype,
+            accounted._archetypeIndex,
             accounted._storageIndex,
             accounted._componentIndex
         );
@@ -245,7 +240,7 @@ public sealed class ArchetypeTests
         EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
         EntityMeta meta = new EntityMeta(
             0,
-            accounted._archetype,
+            accounted._archetypeIndex,
             accounted._storageIndex,
             accounted._componentIndex
         );
@@ -266,7 +261,7 @@ public sealed class ArchetypeTests
         EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
         EntityMeta meta = new EntityMeta(
             0,
-            accounted._archetype,
+            accounted._archetypeIndex,
             accounted._storageIndex,
             accounted._componentIndex
         );
@@ -286,13 +281,13 @@ public sealed class ArchetypeTests
         EntityAccounted accountedTwo = archetype.Add(new Entity() { _id = 2 });
         EntityMeta metaOne = new EntityMeta(
             0,
-            accountedOne._archetype,
+            accountedOne._archetypeIndex,
             accountedOne._storageIndex,
             accountedOne._componentIndex
         );
         EntityMeta metaTwo = new EntityMeta(
             0,
-            accountedTwo._archetype,
+            accountedTwo._archetypeIndex,
             accountedTwo._storageIndex,
             accountedTwo._componentIndex
         );
@@ -312,7 +307,7 @@ public sealed class ArchetypeTests
         EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
         EntityMeta meta = new EntityMeta(
             0,
-            accounted._archetype,
+            accounted._archetypeIndex,
             accounted._storageIndex,
             accounted._componentIndex
         );
@@ -335,7 +330,7 @@ public sealed class ArchetypeTests
         EntityAccounted accounted = from.Add(entity);
         EntityMeta meta = new EntityMeta(
             0,
-            accounted._archetype,
+            accounted._archetypeIndex,
             accounted._storageIndex,
             accounted._componentIndex
         );
@@ -362,7 +357,7 @@ public sealed class ArchetypeTests
         EntityAccounted accounted = from.Add(entity);
         EntityMeta meta = new EntityMeta(
             0,
-            accounted._archetype,
+            accounted._archetypeIndex,
             accounted._storageIndex,
             accounted._componentIndex
         );
@@ -389,7 +384,7 @@ public sealed class ArchetypeTests
         EntityAccounted fromAccounted = from.Add(entity);
         EntityMeta fromMeta = new EntityMeta(
             0,
-            fromAccounted._archetype,
+            fromAccounted._archetypeIndex,
             fromAccounted._storageIndex,
             fromAccounted._componentIndex
         );
@@ -400,7 +395,7 @@ public sealed class ArchetypeTests
         EntityAccounted toAccounted = transferred._entityAccounted;
         EntityMeta toMeta = new EntityMeta(
             0,
-            toAccounted._archetype,
+            toAccounted._archetypeIndex,
             toAccounted._storageIndex,
             toAccounted._componentIndex
         );
@@ -421,7 +416,7 @@ public sealed class ArchetypeTests
 
         EntityMeta metaOne = new EntityMeta(
             0,
-            accountedOne._archetype,
+            accountedOne._archetypeIndex,
             accountedOne._storageIndex,
             accountedOne._componentIndex
         );
@@ -442,13 +437,13 @@ public sealed class ArchetypeTests
 
         EntityMeta metaOne = new EntityMeta(
             0,
-            accountedOne._archetype,
+            accountedOne._archetypeIndex,
             accountedOne._storageIndex,
             accountedOne._componentIndex
         );
         EntityMeta metaTwo = new EntityMeta(
             0,
-            accountedTwo._archetype,
+            accountedTwo._archetypeIndex,
             accountedTwo._storageIndex,
             accountedTwo._componentIndex
         );
@@ -459,7 +454,7 @@ public sealed class ArchetypeTests
 
         EntityMeta swappedMeta = new EntityMeta(
             0,
-            from,
+            from._archetypeId,
             transferred._entitySwapped._storageIndex,
             transferred._entitySwapped._componentIndex
         );
@@ -482,7 +477,7 @@ public sealed class ArchetypeTests
             EntityAccounted accounted = archetype.Add(new Entity() { _id = i });
             EntityMeta meta = new EntityMeta(
                 0,
-                accounted._archetype,
+                accounted._archetypeIndex,
                 accounted._storageIndex,
                 accounted._componentIndex
             );

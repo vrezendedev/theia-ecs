@@ -15,17 +15,19 @@ internal static class ComponentsMeta
     private static ComponentType[] s_componentTypeMap = s_componentTypeMap = new ComponentType[
         DefaultComponentTypeMapCapacity
     ];
-    internal static readonly object s_lock = s_lock = new object();
+    internal static readonly object s_lock = new object();
 
     internal static int RegisterComponent<T>(int sizeOfT)
         where T : struct
     {
         lock (s_lock)
         {
-            if (s_count == s_componentTypeMap.Length)
+            int currentLength = s_componentTypeMap.Length;
+
+            if (s_count == currentLength)
                 Array.Resize(
                     ref s_componentTypeMap,
-                    s_componentTypeMap.Length * DefaultComponentTypeGrowthFactor
+                    currentLength * DefaultComponentTypeGrowthFactor
                 );
 
             int index = s_count;

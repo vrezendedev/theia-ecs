@@ -1,0 +1,1 @@
+namespace Theia.ECS.Assemblages;
