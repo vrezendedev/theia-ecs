@@ -1,16 +1,28 @@
 using System;
+using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
+using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Assemblages;
 
-public abstract class Assemblage
+public class Assemblage
 {
-    internal readonly int _worldId;
+    internal readonly World _world;
     internal readonly Signature _signature;
-    internal readonly int _matchedArchetype;
-    internal readonly int[] _componentStorageMapping;
+    internal readonly int _matchedArchetypeId;
+    internal int[] _componentStorageMapping;
 
-    internal Assemblage() { }
+    internal Assemblage(
+        in World world,
+        in Archetype archetype,
+        ReadOnlySpan<int> componentStorageMapping
+    )
+    {
+        _world = world;
+        _signature = archetype._signature;
+        _matchedArchetypeId = archetype._archetypeId;
+        _componentStorageMapping = componentStorageMapping.ToArray();
+    }
 
-    internal ReadOnlySpan<int> ComponentStorageMapping() => _componentStorageMapping.AsSpan();
+    internal ReadOnlySpan<int> GetComponentStorageMapping() => _componentStorageMapping.AsSpan();
 }

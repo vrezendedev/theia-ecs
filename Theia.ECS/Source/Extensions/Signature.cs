@@ -41,40 +41,37 @@ internal static class SignatureExtensions
             {
                 _size = size,
                 _maxId = maxId,
-                _bucketCount = GetBucketCount(maxId),
+                _maskLength = GetMaskLength(maxId),
             };
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int GetBucketCount(int maxId) => (maxId >> 6) + 1;
+        internal static int GetMaskLength(int maxId) => (maxId >> 6) + 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Span<ulong> GetSignatureBuckets(
+        internal static Span<ulong> GetSignatureMask(
             ReadOnlySpan<int> componentIds,
-            Span<ulong> buckets
+            Span<ulong> mask
         )
         {
             for (int i = 0; i < componentIds.Length; i++)
             {
                 int componentId = componentIds[i];
-                buckets[componentId >> 6] |= 1UL << (componentId & 63);
+                mask[componentId >> 6] |= 1UL << (componentId & 63);
             }
 
-            return buckets;
+            return mask;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsSatisfiedBy(
-            ReadOnlySpan<ulong> aBuckets,
-            ReadOnlySpan<ulong> bBuckets
-        )
+        internal static bool IsSatisfiedBy(ReadOnlySpan<ulong> aMask, ReadOnlySpan<ulong> bMask)
         {
-            if (bBuckets.Length < aBuckets.Length)
+            if (bMask.Length < aMask.Length)
                 return false;
 
-            for (int i = 0; i < aBuckets.Length; i++)
+            for (int i = 0; i < aMask.Length; i++)
             {
-                if ((aBuckets[i] & bBuckets[i]) != aBuckets[i])
+                if ((aMask[i] & bMask[i]) != aMask[i])
                     return false;
             }
 
@@ -82,19 +79,19 @@ internal static class SignatureExtensions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool Equals(
+        public static bool IsEqual(
             int aComponentsLength,
             int bComponentsLength,
-            ReadOnlySpan<ulong> aBuckets,
-            ReadOnlySpan<ulong> bBuckets
+            ReadOnlySpan<ulong> aMask,
+            ReadOnlySpan<ulong> bMask
         )
         {
-            if (aComponentsLength != bComponentsLength || aBuckets.Length != bBuckets.Length)
+            if (aComponentsLength != bComponentsLength || aMask.Length != bMask.Length)
                 return false;
 
-            for (int i = 0; i < aBuckets.Length; i++)
+            for (int i = 0; i < aMask.Length; i++)
             {
-                if ((aBuckets[i] ^ bBuckets[i]) != 0)
+                if ((aMask[i] ^ bMask[i]) != 0)
                     return false;
             }
 

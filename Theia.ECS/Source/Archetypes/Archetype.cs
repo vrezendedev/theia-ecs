@@ -35,7 +35,7 @@ internal sealed class Archetype
         _archetypeId = archetypeId;
         _signature = signature;
         _capacity = GetCapacity(signature._sizeOf);
-        _componentStorageMapping = GetStorageMapping(signature._maxId, signature.Components());
+        _componentStorageMapping = GetStorageMapping(signature._maxId, signature.GeComponents());
 
         int componentsLength = signature._length;
 
@@ -104,7 +104,7 @@ internal sealed class Archetype
             for (int i = 0; i < _storages.Length; i++)
                 _storages[i][entityMeta._storageIndex].Move(swapped, componentIndex);
 
-            return new EntitySwapped(indexer.Get(componentIndex)._id, storageIndex, componentIndex);
+            return new EntitySwapped(indexer.Get(componentIndex)._id, componentIndex);
         }
 
         return EntitySwapped.None;
@@ -117,7 +117,7 @@ internal sealed class Archetype
         ReadOnlySpan<int> fromComponentStorageMappedIndexes = _componentStorageMapping;
         ReadOnlySpan<int> toComponentStorageMappedIndexes = to._componentStorageMapping;
 
-        ReadOnlySpan<int> ids = to._signature.Components();
+        ReadOnlySpan<int> ids = to._signature.GeComponents();
 
         for (int i = 0; i < ids.Length; i++)
         {
@@ -169,7 +169,7 @@ internal sealed class Archetype
 
         _indexers[nextId] = new Indexer(nextId, capacity);
 
-        ReadOnlySpan<int> componentIndexes = _signature.Components();
+        ReadOnlySpan<int> componentIndexes = _signature.GeComponents();
 
         for (int i = 0; i < componentIndexes.Length; i++)
         {
@@ -199,6 +199,10 @@ internal sealed class Archetype
 
     internal Span<Indexer> GetIndexers() => _indexers.AsSpan(0, _initializedCount);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetStorageIndex(int id) => _componentStorageMapping[id];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<Storage> GetStorages(int componentStorageIndex) =>
         _storages[componentStorageIndex].AsSpan(0, _initializedCount);
 

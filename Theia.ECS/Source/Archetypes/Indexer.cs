@@ -23,7 +23,7 @@ internal sealed class Indexer
     internal bool IsFull() => _entities.Length == _count;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Span<Entity> Values() => _entities.AsSpan(0, _count);
+    internal Span<Entity> GetValues() => _entities.AsSpan(0, _count);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref Entity Get(int index) => ref _entities[index];

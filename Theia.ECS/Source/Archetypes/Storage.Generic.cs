@@ -11,7 +11,7 @@ internal sealed class Storage<T> : Storage
     internal Storage(int capacity) => _values = new T[capacity];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Span<T> Values(int length) => _values.AsSpan(0, length);
+    internal Span<T> GetValues(int length) => _values.AsSpan(0, length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref T Get(int index) => ref _values[index];

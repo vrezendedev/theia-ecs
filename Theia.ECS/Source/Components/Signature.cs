@@ -13,8 +13,8 @@ internal readonly struct Signature : IEquatable<Signature>
     internal readonly int _sizeOf;
     internal readonly int _maxId;
 
-    private readonly ulong[] _buckets;
-    internal readonly int _bucketCount;
+    private readonly ulong[] _mask;
+    internal readonly int _maskLength;
 
     internal Signature(ReadOnlySpan<int> componentIds)
     {
@@ -27,19 +27,19 @@ internal readonly struct Signature : IEquatable<Signature>
 
         _sizeOf = signatureMeta._size;
         _maxId = signatureMeta._maxId;
-        _bucketCount = signatureMeta._bucketCount;
+        _maskLength = signatureMeta._maskLength;
 
-        Span<ulong> buckets = stackalloc ulong[_bucketCount];
+        Span<ulong> mask = stackalloc ulong[_maskLength];
 
-        Signature.GetSignatureBuckets(componentIds, buckets);
+        Signature.GetSignatureMask(componentIds, mask);
 
-        _buckets = buckets.ToArray();
+        _mask = mask.ToArray();
     }
 
     internal Signature(
         ReadOnlySpan<int> componentIds,
         SignatureMeta signatureMeta,
-        ReadOnlySpan<ulong> buckets
+        ReadOnlySpan<ulong> mask
     )
     {
         Signature.ValidateComponents(componentIds);
@@ -49,9 +49,9 @@ internal readonly struct Signature : IEquatable<Signature>
 
         _sizeOf = signatureMeta._size;
         _maxId = signatureMeta._maxId;
-        _bucketCount = signatureMeta._bucketCount;
+        _maskLength = signatureMeta._maskLength;
 
-        _buckets = buckets.ToArray();
+        _mask = mask.ToArray();
     }
 
     /// <summary>
@@ -77,28 +77,27 @@ internal readonly struct Signature : IEquatable<Signature>
 
         _sizeOf = 0;
         _maxId = maxId;
-        _bucketCount = Signature.GetBucketCount(maxId);
+        _maskLength = Signature.GetMaskLength(maxId);
 
-        Span<ulong> buckets = stackalloc ulong[_bucketCount];
+        Span<ulong> mask = stackalloc ulong[_maskLength];
 
-        Signature.GetSignatureBuckets(componentIds, buckets);
+        Signature.GetSignatureMask(componentIds, mask);
 
-        _buckets = buckets.ToArray();
+        _mask = mask.ToArray();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<int> Components() => _components;
+    internal ReadOnlySpan<int> GeComponents() => _components;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<ulong> Buckets() => _buckets;
+    internal ReadOnlySpan<ulong> GetMask() => _mask;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsSatisfiedBy(Signature other) =>
-        Signature.IsSatisfiedBy(_buckets, other._buckets);
+    internal bool IsSatisfiedBy(Signature other) => Signature.IsSatisfiedBy(_mask, other._mask);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(Signature other) =>
-        Signature.Equals(_length, other._length, _buckets, other._buckets);
+        Signature.IsEqual(_length, other._length, _mask, other._mask);
 
     public override bool Equals(object? obj) => obj is Signature other && Equals(other);
 
@@ -106,14 +105,14 @@ internal readonly struct Signature : IEquatable<Signature>
     {
         HashCode hash = new HashCode();
 
-        for (int i = 0; i < _buckets.Length; i++)
-            hash.Add(_buckets[i]);
+        for (int i = 0; i < _mask.Length; i++)
+            hash.Add(_mask[i]);
 
         return hash.ToHashCode();
     }
 
     public override string ToString() =>
-        $"{nameof(Signature)}(Components: {string.Join(", ", _components)} | Length: {_length} | Sizeof: {_sizeOf} | MaxId: {_maxId} | Buckets: {string.Join(", ", _buckets)} | BucketCount: {_bucketCount})";
+        $"{nameof(Signature)}(Components: {string.Join(", ", _components)} | Length: {_length} | Sizeof: {_sizeOf} | MaxId: {_maxId} | Mask: {string.Join(", ", _mask)} | Mask Length: {_maskLength})";
 
     public static bool operator ==(Signature left, Signature right) => left.Equals(right);
 

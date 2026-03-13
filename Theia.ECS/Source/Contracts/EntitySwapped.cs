@@ -1,24 +1,15 @@
-using System;
-
 namespace Theia.ECS.Contracts;
 
-internal readonly ref struct EntitySwapped : IEquatable<EntitySwapped>
+internal readonly ref struct EntitySwapped
 {
     internal readonly int _entityID = -1;
-    internal readonly int _storageIndex = -1;
     internal readonly int _componentIndex = -1;
 
-    internal EntitySwapped(int entityId, int storageIndex, int componentIndex)
+    internal EntitySwapped(int entityId, int componentIndex)
     {
         _entityID = entityId;
-        _storageIndex = storageIndex;
         _componentIndex = componentIndex;
     }
-
-    public bool Equals(EntitySwapped other) =>
-        _entityID == other._entityID
-        && _storageIndex == other._storageIndex
-        && _componentIndex == other._componentIndex;
 
     internal static EntitySwapped None => new();
 }

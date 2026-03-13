@@ -2,40 +2,30 @@ using System;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
+using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Queries;
 
 public abstract class Query
 {
-    internal readonly int _worldId;
-    internal readonly Signature _signature;
+    internal readonly World _world;
 
-    internal Query(int worldId, ReadOnlySpan<int> componentIds)
-    {
-        _worldId = worldId;
-        _signature = new Signature(componentIds);
-    }
-
-    internal Query(int worldId, Signature signature)
-    {
-        _worldId = worldId;
-        _signature = signature;
-    }
+    internal Query(in World world) => _world = world;
 }
 
 public abstract class SettlerQuery : Query
 {
-    internal readonly int _matchedArchetype;
+    internal readonly int _matchedArchetypeId;
     private readonly int[] _componentStorageMapping;
 
-    internal SettlerQuery(int worldId, in Assemblage assemblage)
-        : base(worldId, assemblage._signature)
+    internal SettlerQuery(in World world, in Assemblage assemblage)
+        : base(world)
     {
-        _matchedArchetype = assemblage._matchedArchetype;
+        _matchedArchetypeId = assemblage._matchedArchetypeId;
         _componentStorageMapping = assemblage._componentStorageMapping;
     }
 
-    internal ReadOnlySpan<int> ComponentStorageMapping() => _componentStorageMapping.AsSpan();
+    internal ReadOnlySpan<int> GetComponentStorageMapping() => _componentStorageMapping.AsSpan();
 }
 
 public abstract class NomadQuery : Query
@@ -43,20 +33,20 @@ public abstract class NomadQuery : Query
     private const int DefaultMatchedArchetypesCapacity = 4;
     private const int DefaultMatchedArchetypesGrowthFactor = 2;
 
+    internal readonly Signature _signature;
+
     private int _matchedArchetypesCount;
     private int[] _matchedArchetypes;
 
-    internal NomadQuery(int worldId, ReadOnlySpan<int> componentIds)
-        : base(worldId, componentIds)
+    internal NomadQuery(in World world, ReadOnlySpan<int> componentIds)
+        : base(world)
     {
-        Span<int> initialArr = stackalloc int[DefaultMatchedArchetypesCapacity];
-        initialArr.Fill(-1);
-
-        _matchedArchetypes = initialArr.ToArray();
+        _signature = new Signature(componentIds);
+        _matchedArchetypes = new int[DefaultMatchedArchetypesCapacity];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<int> Archetypes() =>
+    internal ReadOnlySpan<int> GetMatchedArchetypes() =>
         _matchedArchetypes.AsSpan(0, _matchedArchetypesCount);
 
     internal void Add(int archetypeId)
