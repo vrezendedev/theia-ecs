@@ -49,7 +49,7 @@ internal static class SignatureExtensions
         internal static int GetMaskLength(int maxId) => (maxId >> 6) + 1;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Span<ulong> GetSignatureMask(
+        internal static Span<ulong> SetSignatureMask(
             ReadOnlySpan<int> componentIds,
             Span<ulong> mask
         )

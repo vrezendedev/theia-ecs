@@ -100,7 +100,7 @@ public sealed class SignatureTests
 
         Signature signature = new Signature([posId, velId]);
 
-        ReadOnlySpan<int> values = signature.GeComponents();
+        ReadOnlySpan<int> values = signature.GetComponents();
 
         Assert.Equal(2, values.Length);
         Assert.Contains(posId, values.ToArray());

@@ -19,7 +19,7 @@ public abstract class SettlerQuery : Query
     private readonly int[] _componentStorageMapping;
 
     internal SettlerQuery(in World world, in Assemblage assemblage)
-        : base(world)
+        : base(in world)
     {
         _matchedArchetypeId = assemblage._matchedArchetypeId;
         _componentStorageMapping = assemblage._componentStorageMapping;
@@ -39,7 +39,7 @@ public abstract class NomadQuery : Query
     private int[] _matchedArchetypes;
 
     internal NomadQuery(in World world, ReadOnlySpan<int> componentIds)
-        : base(world)
+        : base(in world)
     {
         _signature = new Signature(componentIds);
         _matchedArchetypes = new int[DefaultMatchedArchetypesCapacity];

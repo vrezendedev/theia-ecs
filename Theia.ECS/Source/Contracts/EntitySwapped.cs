@@ -2,8 +2,9 @@ namespace Theia.ECS.Contracts;
 
 internal readonly ref struct EntitySwapped
 {
-    internal readonly int _entityID = -1;
-    internal readonly int _componentIndex = -1;
+    internal const int InvalidEntitySwappedIndexes = -1;
+    internal readonly int _entityID;
+    internal readonly int _componentIndex;
 
     internal EntitySwapped(int entityId, int componentIndex)
     {
@@ -11,5 +12,6 @@ internal readonly ref struct EntitySwapped
         _componentIndex = componentIndex;
     }
 
-    internal static EntitySwapped None => new();
+    internal static EntitySwapped None =>
+        new(InvalidEntitySwappedIndexes, InvalidEntitySwappedIndexes);
 }

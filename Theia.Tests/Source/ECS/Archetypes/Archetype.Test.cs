@@ -121,7 +121,7 @@ public sealed class ArchetypeTests
 
         EntitySwapped swapped = archetype.Remove(meta);
 
-        Assert.True(EntitySwapped.None._entityID == swapped._entityID);
+        Assert.Equal(EntitySwapped.InvalidEntitySwappedIndexes, swapped._entityID);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public sealed class ArchetypeTests
             swapped._componentIndex
         );
 
-        ref Position position = ref archetype.Get<Position>(swappedMeta);
+        ref Position position = ref archetype.Get<Position>(in swappedMeta);
 
         Assert.Equal(10, position.X);
         Assert.Equal(15, position.Y);
@@ -245,9 +245,9 @@ public sealed class ArchetypeTests
             accounted._componentIndex
         );
 
-        archetype.Set(meta, new Position { X = 3, Y = 7 });
+        archetype.Set(in meta, new Position { X = 3, Y = 7 });
 
-        ref Position pos = ref archetype.Get<Position>(meta);
+        ref Position pos = ref archetype.Get<Position>(in meta);
 
         Assert.Equal(3, pos.X);
         Assert.Equal(7, pos.Y);
@@ -266,10 +266,10 @@ public sealed class ArchetypeTests
             accounted._componentIndex
         );
 
-        archetype.Set(meta, new Position { X = 1, Y = 1 });
+        archetype.Set(in meta, new Position { X = 1, Y = 1 });
         archetype.Get<Position>(meta).X = 99;
 
-        Assert.Equal(99, archetype.Get<Position>(meta).X);
+        Assert.Equal(99, archetype.Get<Position>(in meta).X);
     }
 
     [Fact]
@@ -292,11 +292,11 @@ public sealed class ArchetypeTests
             accountedTwo._componentIndex
         );
 
-        archetype.Set(metaOne, new Position { X = 10 });
-        archetype.Set(metaTwo, new Position { X = 20 });
+        archetype.Set(in metaOne, new Position { X = 10 });
+        archetype.Set(in metaTwo, new Position { X = 20 });
 
-        Assert.Equal(10f, archetype.Get<Position>(metaOne).X);
-        Assert.Equal(20f, archetype.Get<Position>(metaTwo).X);
+        Assert.Equal(10f, archetype.Get<Position>(in metaOne).X);
+        Assert.Equal(20f, archetype.Get<Position>(in metaTwo).X);
     }
 
     [Fact]
@@ -312,12 +312,12 @@ public sealed class ArchetypeTests
             accounted._componentIndex
         );
 
-        archetype.Set(meta, new Position { X = 5, Y = 5 });
-        archetype.Set(meta, new Velocity { X = 1, Y = -1 });
+        archetype.Set(in meta, new Position { X = 5, Y = 5 });
+        archetype.Set(in meta, new Velocity { X = 1, Y = -1 });
 
-        Assert.Equal(5f, archetype.Get<Position>(meta).X);
-        Assert.Equal(1f, archetype.Get<Velocity>(meta).X);
-        Assert.Equal(-1f, archetype.Get<Velocity>(meta).Y);
+        Assert.Equal(5f, archetype.Get<Position>(in meta).X);
+        Assert.Equal(1f, archetype.Get<Velocity>(in meta).X);
+        Assert.Equal(-1f, archetype.Get<Velocity>(in meta).Y);
     }
 
     [Fact]
@@ -389,7 +389,7 @@ public sealed class ArchetypeTests
             fromAccounted._componentIndex
         );
 
-        from.Set(fromMeta, new Position { X = 42, Y = 13 });
+        from.Set(in fromMeta, new Position { X = 42, Y = 13 });
 
         EntityTransferred transferred = from.Transfer(entity, fromMeta, to);
         EntityAccounted toAccounted = transferred._entityAccounted;
@@ -400,8 +400,8 @@ public sealed class ArchetypeTests
             toAccounted._componentIndex
         );
 
-        Assert.Equal(42, to.Get<Position>(toMeta).X);
-        Assert.Equal(13, to.Get<Position>(toMeta).Y);
+        Assert.Equal(42, to.Get<Position>(in toMeta).X);
+        Assert.Equal(13, to.Get<Position>(in toMeta).Y);
     }
 
     [Fact]
@@ -448,7 +448,7 @@ public sealed class ArchetypeTests
             accountedTwo._componentIndex
         );
 
-        from.Set(metaTwo, new Position { X = 99, Y = 42 });
+        from.Set(in metaTwo, new Position { X = 99, Y = 42 });
 
         EntityTransferred transferred = from.Transfer(new Entity() { _id = 1 }, metaOne, to);
 
@@ -459,8 +459,8 @@ public sealed class ArchetypeTests
             transferred._entitySwapped._componentIndex
         );
 
-        Assert.Equal(99, from.Get<Position>(swappedMeta).X);
-        Assert.Equal(42, from.Get<Position>(swappedMeta).Y);
+        Assert.Equal(99, from.Get<Position>(in swappedMeta).X);
+        Assert.Equal(42, from.Get<Position>(in swappedMeta).Y);
     }
 
     [Fact]
@@ -481,7 +481,7 @@ public sealed class ArchetypeTests
                 accounted._storageIndex,
                 accounted._componentIndex
             );
-            archetype.Set(meta, new Position { X = i, Y = -i });
+            archetype.Set(in meta, new Position { X = i, Y = -i });
             entityMetas.Add(meta);
         }
 

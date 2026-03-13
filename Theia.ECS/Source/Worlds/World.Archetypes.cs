@@ -1,6 +1,8 @@
 using System;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
+using Theia.ECS.Contracts;
+using Theia.ECS.Extensions;
 
 namespace Theia.ECS.Worlds;
 
@@ -26,5 +28,38 @@ public sealed partial class World
         _archetypesCount++;
 
         return archetype;
+    }
+
+    internal Archetype FindOrCreateArchetype(ReadOnlySpan<int> componentIds)
+    {
+        int componentLength = componentIds.Length;
+        SignatureMeta signatureMeta = Signature.GetSignatureMeta(componentIds);
+        Span<ulong> mask = stackalloc ulong[signatureMeta._maskLength];
+        Signature.SetSignatureMask(componentIds, mask);
+
+        Archetype? targetArchetype = FindEqualArchetype(componentLength, mask);
+
+        if (targetArchetype is null)
+            targetArchetype = CreateArchetype(new Signature(componentIds, signatureMeta, mask));
+
+        return targetArchetype;
+    }
+
+    internal Archetype? FindEqualArchetype(int componentsLength, ReadOnlySpan<ulong> mask)
+    {
+        Archetype[] archetypes = _archetypes;
+
+        for (int i = 0; i < archetypes.Length; i++)
+        {
+            Signature archetypeSignature = archetypes[i]._signature;
+            ReadOnlySpan<ulong> archetypeMask = archetypeSignature.GetMask();
+
+            if (
+                Signature.IsEqual(componentsLength, archetypeSignature._length, mask, archetypeMask)
+            )
+                return archetypes[i];
+        }
+
+        return null;
     }
 }

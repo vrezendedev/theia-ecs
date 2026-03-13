@@ -17,6 +17,7 @@ internal sealed class Archetype
     private const int AvailableMemoryPerChunk = 16_384 - 128;
     private const int MinimumEntitiesPerChunk = 64;
     private const int DefaultIndexersAndStoragesGrowthFactor = 2;
+    private const int DefaultInvalidStorageMappingIndexes = -1;
 
     internal readonly int _archetypeId;
     internal readonly Signature _signature;
@@ -35,7 +36,7 @@ internal sealed class Archetype
         _archetypeId = archetypeId;
         _signature = signature;
         _capacity = GetCapacity(signature._sizeOf);
-        _componentStorageMapping = GetStorageMapping(signature._maxId, signature.GeComponents());
+        _componentStorageMapping = GetStorageMapping(signature._maxId, signature.GetComponents());
 
         int componentsLength = signature._length;
 
@@ -61,7 +62,7 @@ internal sealed class Archetype
     private int[] GetStorageMapping(int maxId, ReadOnlySpan<int> signatureIds)
     {
         Span<int> ids = stackalloc int[maxId + 1];
-        ids.Fill(-1);
+        ids.Fill(DefaultInvalidStorageMappingIndexes);
 
         int index = 0;
 
@@ -99,7 +100,7 @@ internal sealed class Archetype
 
         _free.Push(storageIndex);
 
-        if (swapped != -1)
+        if (swapped != EntitySwapped.InvalidEntitySwappedIndexes)
         {
             for (int i = 0; i < _storages.Length; i++)
                 _storages[i][entityMeta._storageIndex].Move(swapped, componentIndex);
@@ -117,7 +118,7 @@ internal sealed class Archetype
         ReadOnlySpan<int> fromComponentStorageMappedIndexes = _componentStorageMapping;
         ReadOnlySpan<int> toComponentStorageMappedIndexes = to._componentStorageMapping;
 
-        ReadOnlySpan<int> ids = to._signature.GeComponents();
+        ReadOnlySpan<int> ids = to._signature.GetComponents();
 
         for (int i = 0; i < ids.Length; i++)
         {
@@ -169,7 +170,7 @@ internal sealed class Archetype
 
         _indexers[nextId] = new Indexer(nextId, capacity);
 
-        ReadOnlySpan<int> componentIndexes = _signature.GeComponents();
+        ReadOnlySpan<int> componentIndexes = _signature.GetComponents();
 
         for (int i = 0; i < componentIndexes.Length; i++)
         {
@@ -206,10 +207,19 @@ internal sealed class Archetype
     internal Span<Storage> GetStorages(int componentStorageIndex) =>
         _storages[componentStorageIndex].AsSpan(0, _initializedCount);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<Storage> GetStorages<T>()
         where T : struct =>
         _storages[_componentStorageMapping[ComponentMeta<T>.s_id]].AsSpan(0, _initializedCount);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ref T Get<T>(int storageIndex, in EntityMeta entityMeta)
+        where T : struct =>
+        ref ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Get(
+            entityMeta._componentIndex
+        );
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref T Get<T>(in EntityMeta entityMeta)
         where T : struct
     {
@@ -220,6 +230,15 @@ internal sealed class Archetype
         );
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void Set<T>(int storageIndex, in EntityMeta entityMeta, in T component)
+        where T : struct =>
+        ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Set(
+            entityMeta._componentIndex,
+            component
+        );
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Set<T>(in EntityMeta entityMeta, in T component)
         where T : struct
     {
@@ -230,4 +249,17 @@ internal sealed class Archetype
             component
         );
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool Has(int componentId)
+    {
+        if (componentId >= _componentStorageMapping.Length)
+            return false;
+
+        return _componentStorageMapping[componentId] != DefaultInvalidStorageMappingIndexes;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool Has<T>()
+        where T : struct => Has(ComponentMeta<T>.s_id);
 }

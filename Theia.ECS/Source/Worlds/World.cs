@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Theia.ECS.Archetypes;
-using Theia.ECS.Assemblages;
 using Theia.ECS.Queries;
 
 namespace Theia.ECS.Worlds;
@@ -47,7 +46,6 @@ public sealed partial class World
 
         _entitiesMeta = new Entities.EntityMeta[capacity];
         _ghouls = new Queue<int>(capacity / DefaultGhoulsInitialCapacityDivisor);
-        _assemblages = Array.Empty<Assemblage>();
 
         _archetypes = new Archetype[DefaultArchetypesCapacity];
 

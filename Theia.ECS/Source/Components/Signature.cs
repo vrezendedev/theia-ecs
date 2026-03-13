@@ -31,7 +31,7 @@ internal readonly struct Signature : IEquatable<Signature>
 
         Span<ulong> mask = stackalloc ulong[_maskLength];
 
-        Signature.GetSignatureMask(componentIds, mask);
+        Signature.SetSignatureMask(componentIds, mask);
 
         _mask = mask.ToArray();
     }
@@ -81,13 +81,13 @@ internal readonly struct Signature : IEquatable<Signature>
 
         Span<ulong> mask = stackalloc ulong[_maskLength];
 
-        Signature.GetSignatureMask(componentIds, mask);
+        Signature.SetSignatureMask(componentIds, mask);
 
         _mask = mask.ToArray();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<int> GeComponents() => _components;
+    internal ReadOnlySpan<int> GetComponents() => _components;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ReadOnlySpan<ulong> GetMask() => _mask;
@@ -99,22 +99,6 @@ internal readonly struct Signature : IEquatable<Signature>
     public bool Equals(Signature other) =>
         Signature.IsEqual(_length, other._length, _mask, other._mask);
 
-    public override bool Equals(object? obj) => obj is Signature other && Equals(other);
-
-    public override int GetHashCode()
-    {
-        HashCode hash = new HashCode();
-
-        for (int i = 0; i < _mask.Length; i++)
-            hash.Add(_mask[i]);
-
-        return hash.ToHashCode();
-    }
-
     public override string ToString() =>
         $"{nameof(Signature)}(Components: {string.Join(", ", _components)} | Length: {_length} | Sizeof: {_sizeOf} | MaxId: {_maxId} | Mask: {string.Join(", ", _mask)} | Mask Length: {_maskLength})";
-
-    public static bool operator ==(Signature left, Signature right) => left.Equals(right);
-
-    public static bool operator !=(Signature left, Signature right) => !left.Equals(right);
 }

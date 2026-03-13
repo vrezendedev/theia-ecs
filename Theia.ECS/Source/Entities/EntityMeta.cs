@@ -4,6 +4,8 @@ namespace Theia.ECS.Entities;
 
 internal struct EntityMeta : IEquatable<EntityMeta>
 {
+    internal const int DefaultEntityMetaVersion = 1;
+    internal const int DefaultInvalidEntityMetaIndexes = -1;
     internal int _version { get; set; }
     internal int _archetypeIndex { get; set; }
     internal int _storageIndex { get; set; }
