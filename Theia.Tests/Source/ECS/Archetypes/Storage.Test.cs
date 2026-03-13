@@ -16,7 +16,7 @@ public sealed class StorageTests
         for (int i = 0; i < length; i++)
             storage.Set(i, new ComponentA() { AField = i });
 
-        Span<ComponentA> components = storage.Values(length);
+        Span<ComponentA> components = storage.GetValues(length);
 
         for (int i = 0; i < length; i++)
             Assert.Equal(i, components[i].AField);

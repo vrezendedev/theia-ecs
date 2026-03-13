@@ -52,15 +52,15 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void Constructor_WithComponentIds_BucketCountIsCorrect()
+    public void Constructor_WithComponentIds_MaskLengthIsCorrect()
     {
         Signature signature = new Signature(
             [ComponentMeta<Position>.s_id, ComponentMeta<Velocity>.s_id]
         );
 
-        int expectedBucketCount = (signature._maxId >> 6) + 1;
+        int expectedMaskLength = (signature._maxId >> 6) + 1;
 
-        Assert.Equal(expectedBucketCount, signature._bucketCount);
+        Assert.Equal(expectedMaskLength, signature._maskLength);
     }
 
     [Fact]
@@ -71,8 +71,8 @@ public sealed class SignatureTests
 
         Signature signature = new Signature([posId, velId]);
 
-        Assert.NotEqual(0UL, signature.Buckets()[posId >> 6] & (1UL << (posId & 63)));
-        Assert.NotEqual(0UL, signature.Buckets()[velId >> 6] & (1UL << (velId & 63)));
+        Assert.NotEqual(0UL, signature.GetMask()[posId >> 6] & (1UL << (posId & 63)));
+        Assert.NotEqual(0UL, signature.GetMask()[velId >> 6] & (1UL << (velId & 63)));
     }
 
     [Fact]
@@ -84,12 +84,12 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void Constructor_WithComponentIdAbove63_CreatesTwoBuckets()
+    public void Constructor_WithComponentIdAbove63_CreatesTwoMasks()
     {
         Signature signature = new Signature([0, 64], bypass: true);
 
-        Assert.Equal(2, signature._bucketCount);
-        Assert.Equal(2, signature.Buckets().Length);
+        Assert.Equal(2, signature._maskLength);
+        Assert.Equal(2, signature.GetMask().Length);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public sealed class SignatureTests
 
         Signature signature = new Signature([posId, velId]);
 
-        ReadOnlySpan<int> values = signature.Components();
+        ReadOnlySpan<int> values = signature.GeComponents();
 
         Assert.Equal(2, values.Length);
         Assert.Contains(posId, values.ToArray());
@@ -108,7 +108,7 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void Constructor_WithPreComputedMetaAndBuckets_StoresValuesCorrectly()
+    public void Constructor_WithPreComputedMetaAndMasks_StoresValuesCorrectly()
     {
         int posId = ComponentMeta<Position>.s_id;
         int velId = ComponentMeta<Velocity>.s_id;
@@ -116,7 +116,7 @@ public sealed class SignatureTests
         ReadOnlySpan<int> componentIds = [posId, velId];
 
         int expectedMaxId = Math.Max(posId, velId);
-        int expectedBucketCount = (expectedMaxId >> 6) + 1;
+        int expectedMaskLength = (expectedMaxId >> 6) + 1;
         int expectedSize =
             ComponentsMeta.GetComponentType(posId)._sizeOf
             + ComponentsMeta.GetComponentType(velId)._sizeOf;
@@ -125,20 +125,20 @@ public sealed class SignatureTests
         {
             _size = expectedSize,
             _maxId = expectedMaxId,
-            _bucketCount = expectedBucketCount,
+            _maskLength = expectedMaskLength,
         };
 
-        ulong[] buckets = new ulong[expectedBucketCount];
-        buckets[posId >> 6] |= 1UL << (posId & 63);
-        buckets[velId >> 6] |= 1UL << (velId & 63);
+        ulong[] mask = new ulong[expectedMaskLength];
+        mask[posId >> 6] |= 1UL << (posId & 63);
+        mask[velId >> 6] |= 1UL << (velId & 63);
 
-        Signature signature = new Signature(componentIds, meta, buckets);
+        Signature signature = new Signature(componentIds, meta, mask);
 
         Assert.Equal(expectedSize, signature._sizeOf);
         Assert.Equal(expectedMaxId, signature._maxId);
-        Assert.Equal(expectedBucketCount, signature._bucketCount);
+        Assert.Equal(expectedMaskLength, signature._maskLength);
         Assert.Equal(componentIds.Length, signature._length);
-        Assert.Equal(buckets.Length, signature.Buckets().Length);
+        Assert.Equal(mask.Length, signature.GetMask().Length);
     }
 
     [Fact]
@@ -189,7 +189,7 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void IsSatisfiedBy_OtherIsMissingComponentFromHigherBucket_ReturnsFalse()
+    public void IsSatisfiedBy_OtherIsMissingComponentFromHigherMask_ReturnsFalse()
     {
         Signature signatureA = new Signature([0, 64], bypass: true);
         Signature signatureB = new Signature([0], bypass: true);
@@ -198,7 +198,7 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void IsSatisfiedBy_OtherMissingSecondBucketComponent_ReturnsFalse()
+    public void IsSatisfiedBy_OtherMissingSecondMaskComponent_ReturnsFalse()
     {
         Signature signatureA = new Signature([0, 64], bypass: true);
         Signature signatureB = new Signature([0, 65], bypass: true);
@@ -218,7 +218,7 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void IsSatisfiedBy_ComponentsSpanningMultipleBuckets_ReturnsTrue()
+    public void IsSatisfiedBy_ComponentsSpanningMultipleMasks_ReturnsTrue()
     {
         Signature signatureA = new Signature([0, 64], bypass: true);
         Signature signatureB = new Signature([0, 64, 128], bypass: true);
@@ -295,7 +295,7 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void Equals_ComponentsSpanningMultipleBuckets_ReturnsTrue()
+    public void Equals_ComponentsSpanningMultipleMasks_ReturnsTrue()
     {
         Signature signatureA = new Signature([0, 64], bypass: true);
         Signature signatureB = new Signature([0, 64], bypass: true);
@@ -304,7 +304,7 @@ public sealed class SignatureTests
     }
 
     [Fact]
-    public void Equals_DifferentComponentsInSecondBucket_ReturnsFalse()
+    public void Equals_DifferentComponentsInSecondMask_ReturnsFalse()
     {
         Signature signatureA = new Signature([0, 64], bypass: true);
         Signature signatureB = new Signature([0, 65], bypass: true);

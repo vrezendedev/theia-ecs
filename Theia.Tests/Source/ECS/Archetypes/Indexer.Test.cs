@@ -80,7 +80,7 @@ public sealed class IndexerTests
             indexer.Set(index, new Entity() { _id = i });
         }
 
-        Span<Entity> entities = indexer.Values();
+        Span<Entity> entities = indexer.GetValues();
 
         for (int i = 0; i < length; i++)
             Assert.Equal(i, entities[i]._id);
