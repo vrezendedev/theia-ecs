@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
@@ -30,6 +31,9 @@ public sealed partial class World
         return archetype;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Archetype GetArchetype(int archetypeId) => _archetypes[archetypeId];
+
     internal Archetype FindOrCreateArchetype(ReadOnlySpan<int> componentIds)
     {
         int componentLength = componentIds.Length;
@@ -49,7 +53,7 @@ public sealed partial class World
     {
         Archetype[] archetypes = _archetypes;
 
-        for (int i = 0; i < archetypes.Length; i++)
+        for (int i = 0; i < _archetypesCount; i++)
         {
             Signature archetypeSignature = archetypes[i]._signature;
             ReadOnlySpan<ulong> archetypeMask = archetypeSignature.GetMask();

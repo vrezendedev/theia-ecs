@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Worlds;
@@ -15,13 +16,13 @@ public abstract class Query
 
 public abstract class SettlerQuery : Query
 {
-    internal readonly int _matchedArchetypeId;
+    internal readonly Archetype _archetype;
     private readonly int[] _componentStorageMapping;
 
     internal SettlerQuery(in World world, in Assemblage assemblage)
         : base(in world)
     {
-        _matchedArchetypeId = assemblage._matchedArchetypeId;
+        _archetype = assemblage._archetype;
         _componentStorageMapping = assemblage._componentStorageMapping;
     }
 

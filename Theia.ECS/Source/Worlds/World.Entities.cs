@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
-using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
@@ -19,19 +18,7 @@ public sealed partial class World
     private int _ghoulsCount;
     private Queue<int> _ghouls;
 
-    internal Assemblage CreateAssemblage(ReadOnlySpan<int> componentIds)
-    {
-        Archetype archetype = FindOrCreateArchetype(componentIds);
-
-        Span<int> componentStorageMapping = stackalloc int[componentIds.Length];
-
-        for (int i = 0; i < componentStorageMapping.Length; i++)
-            componentStorageMapping[i] = archetype.GetStorageIndex(componentIds[i]);
-
-        return new Assemblage(this, in archetype, componentStorageMapping);
-    }
-
-    internal EntityCreated CreateEntity()
+    private EntityCreated CreateEntity()
     {
         bool dequeue = _ghoulsCount > 0;
 
@@ -64,19 +51,21 @@ public sealed partial class World
         );
     }
 
+    internal EntityCreated CreateEntity(in Archetype archetype)
+    {
+        EntityCreated entityCreated = CreateEntity();
+        EntityAccounted entityAccounted = archetype.Add(entityCreated._entity);
+        UpdateEntityAccounted(ref entityCreated._entityMeta, entityAccounted);
+
+        return entityCreated;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAlive(Entity entity) =>
         entity._id < _entitiesCount && entity._version == _entitiesMeta[entity._id]._version;
 
-    public bool TryGhoulify(Entity entity)
+    private void Ghoulify(Entity entity, ref EntityMeta entityMeta, in Archetype archetype)
     {
-        if (!IsAlive(entity))
-            return false;
-
-        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
-
-        Archetype archetype = _archetypes[entityMeta._archetypeIndex];
-
         TryUpdateEntitySwapped(archetype.Remove(entityMeta));
 
         entityMeta._version++;
@@ -86,6 +75,32 @@ public sealed partial class World
 
         _ghoulsCount++;
         _ghouls.Enqueue(entity._id);
+    }
+
+    internal bool TryGhoulify(Entity entity, in Archetype archetype)
+    {
+        if (!IsAlive(entity))
+            return false;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+
+        if (entityMeta._archetypeIndex != archetype._archetypeId)
+            return false;
+
+        Ghoulify(entity, ref entityMeta, in archetype);
+
+        return true;
+    }
+
+    public bool TryGhoulify(Entity entity)
+    {
+        if (!IsAlive(entity))
+            return false;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+        Archetype archetype = _archetypes[entityMeta._archetypeIndex];
+
+        Ghoulify(entity, ref entityMeta, in archetype);
 
         return true;
     }
@@ -105,13 +120,20 @@ public sealed partial class World
         if (currentArchetype.Has(componentId))
             return false;
 
-        Signature archetypeSignature = currentArchetype._signature;
+        Archetype? newArchetype = currentArchetype.GetAddEdge(componentId);
 
-        Span<int> ids = stackalloc int[archetypeSignature._length + 1];
-        archetypeSignature.GetComponents().CopyTo(ids);
-        ids[^1] = componentId;
+        if (newArchetype is null)
+        {
+            Signature currentSignature = currentArchetype._signature;
 
-        Archetype newArchetype = FindOrCreateArchetype(ids);
+            Span<int> ids = stackalloc int[currentSignature._length + 1];
+            currentSignature.GetComponents().CopyTo(ids);
+            ids[^1] = componentId;
+
+            newArchetype = FindOrCreateArchetype(ids);
+
+            currentArchetype.SetAddEdge(componentId, newArchetype);
+        }
 
         EntityTransferred transferred = currentArchetype.Transfer(entity, entityMeta, newArchetype);
 
@@ -138,7 +160,39 @@ public sealed partial class World
         if (!currentArchetype.Has(componentId))
             return false;
 
-        //@TO-DO
+        Signature currentSignature = currentArchetype._signature;
+
+        if (currentSignature._length == 1)
+            return TryGhoulify(entity);
+
+        Archetype? newArchetype = currentArchetype.GetRemoveEdge(componentId);
+
+        if (newArchetype is null)
+        {
+            Span<int> ids = stackalloc int[currentSignature._length - 1];
+            ReadOnlySpan<int> currentComponents = currentSignature.GetComponents();
+
+            int index = 0;
+
+            for (int i = 0; i < currentComponents.Length; i++)
+            {
+                int currentComponentId = currentComponents[i];
+                if (currentComponentId != componentId)
+                {
+                    ids[index] = currentComponents[i];
+                    index++;
+                }
+            }
+
+            newArchetype = FindOrCreateArchetype(ids);
+
+            currentArchetype.SetRemoveEdge(componentId, newArchetype);
+        }
+
+        EntityTransferred transferred = currentArchetype.Transfer(entity, entityMeta, newArchetype);
+
+        UpdateEntityAccounted(ref entityMeta, transferred._entityAccounted);
+        TryUpdateEntitySwapped(transferred._entitySwapped);
 
         return true;
     }

@@ -28,6 +28,9 @@ internal sealed class Archetype
     private Indexer[] _indexers;
     private Storage[][] _storages;
 
+    private readonly Dictionary<int, Archetype> _addEdges;
+    private readonly Dictionary<int, Archetype> _removeEdges;
+
     private Stack<int> _free;
     private Queue<int> _lazy;
 
@@ -46,11 +49,12 @@ internal sealed class Archetype
         for (int i = 0; i < _storages.Length; i++)
             _storages[i] = new Storage[1];
 
+        _addEdges = new();
+        _removeEdges = new();
+
         _free = new(1);
         _lazy = new(1);
         _lazy.Enqueue(0);
-
-        _initializedCount = 0;
     }
 
     private int GetCapacity(int signatureSize) =>
@@ -198,6 +202,29 @@ internal sealed class Archetype
         return _free.Pop();
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Archetype? GetAddEdge(int componentId)
+    {
+        _addEdges.TryGetValue(componentId, out Archetype? archetype);
+        return archetype;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void SetAddEdge(int componentId, in Archetype archetype) =>
+        _addEdges.TryAdd(componentId, archetype);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Archetype? GetRemoveEdge(int componentId)
+    {
+        _removeEdges.TryGetValue(componentId, out Archetype? archetype);
+        return archetype;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void SetRemoveEdge(int componentId, in Archetype archetype) =>
+        _removeEdges.TryAdd(componentId, archetype);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<Indexer> GetIndexers() => _indexers.AsSpan(0, _initializedCount);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
