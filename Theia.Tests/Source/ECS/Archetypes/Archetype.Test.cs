@@ -14,6 +14,14 @@ public sealed class ArchetypeTests
         [ComponentMeta<Position>.s_id, ComponentMeta<Velocity>.s_id]
     );
 
+    private readonly Signature _threeWithRotationSignature = new Signature(
+        [ComponentMeta<Position>.s_id, ComponentMeta<Velocity>.s_id, ComponentMeta<Rotation>.s_id]
+    );
+
+    private readonly Signature _threeWithHealthSignature = new Signature(
+        [ComponentMeta<Position>.s_id, ComponentMeta<Velocity>.s_id, ComponentMeta<Health>.s_id]
+    );
+
     private Signature _fourComponentSignature = new Signature(
         [
             ComponentMeta<Position>.s_id,
@@ -547,5 +555,254 @@ public sealed class ArchetypeTests
         Assert.Equal(indexerChunks, storageChunks);
         Assert.Equal(numberOfChunks, indexerChunks);
         Assert.Equal(numberOfChunks, storageChunks);
+    }
+
+    [Fact]
+    public void SetAddEdge_ThenGetAddEdge_ReturnsAssignedArchetype()
+    {
+        Archetype archetype = new Archetype(1, _twoComponentSignature);
+        Archetype target = new Archetype(2, _threeWithRotationSignature);
+
+        archetype.SetAddEdge(ComponentMeta<Rotation>.s_id, target);
+        Archetype? result = archetype.GetAddEdge(ComponentMeta<Rotation>.s_id);
+
+        Assert.Same(target, result);
+    }
+
+    [Fact]
+    public void GetAddEdge_WithUnregisteredComponentId_ReturnsNull()
+    {
+        Archetype archetype = new Archetype(1, _twoComponentSignature);
+
+        Archetype? result = archetype.GetAddEdge(ComponentMeta<Rotation>.s_id);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void SetAddEdge_MultipleEdges_EachResolvedIndependently()
+    {
+        Archetype archetype = new Archetype(1, _twoComponentSignature);
+        Archetype targetRotation = new Archetype(2, _threeWithRotationSignature);
+        Archetype targetHealth = new Archetype(3, _threeWithHealthSignature);
+
+        archetype.SetAddEdge(ComponentMeta<Rotation>.s_id, targetRotation);
+        archetype.SetAddEdge(ComponentMeta<Health>.s_id, targetHealth);
+
+        Assert.Same(targetRotation, archetype.GetAddEdge(ComponentMeta<Rotation>.s_id));
+        Assert.Same(targetHealth, archetype.GetAddEdge(ComponentMeta<Health>.s_id));
+    }
+
+    [Fact]
+    public void SetRemoveEdge_ThenGetRemoveEdge_ReturnsAssignedArchetype()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+        Archetype target = new Archetype(2, _threeWithRotationSignature);
+
+        archetype.SetRemoveEdge(ComponentMeta<Health>.s_id, target);
+        Archetype? result = archetype.GetRemoveEdge(ComponentMeta<Health>.s_id);
+
+        Assert.Same(target, result);
+    }
+
+    [Fact]
+    public void GetRemoveEdge_WithUnregisteredComponentId_ReturnsNull()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        Archetype? result = archetype.GetRemoveEdge(ComponentMeta<Health>.s_id);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void SetRemoveEdge_MultipleEdges_EachResolvedIndependently()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+        Archetype targetNoHealth = new Archetype(2, _threeWithRotationSignature);
+        Archetype targetNoRotation = new Archetype(3, _threeWithHealthSignature);
+
+        archetype.SetRemoveEdge(ComponentMeta<Health>.s_id, targetNoHealth);
+        archetype.SetRemoveEdge(ComponentMeta<Rotation>.s_id, targetNoRotation);
+
+        Assert.Same(targetNoHealth, archetype.GetRemoveEdge(ComponentMeta<Health>.s_id));
+        Assert.Same(targetNoRotation, archetype.GetRemoveEdge(ComponentMeta<Rotation>.s_id));
+    }
+
+    [Fact]
+    public void GetStorageIndex_WithComponentInSignature_ReturnsNonNegativeIndex()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        int index = archetype.GetStorageIndex(ComponentMeta<Position>.s_id);
+
+        Assert.True(index >= 0);
+    }
+
+    [Fact]
+    public void GetStorageIndex_DistinctComponents_ReturnDistinctIndexes()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        int positionIndex = archetype.GetStorageIndex(ComponentMeta<Position>.s_id);
+        int velocityIndex = archetype.GetStorageIndex(ComponentMeta<Velocity>.s_id);
+        int rotationIndex = archetype.GetStorageIndex(ComponentMeta<Rotation>.s_id);
+        int healthIndex = archetype.GetStorageIndex(ComponentMeta<Health>.s_id);
+
+        int[] indexes = [positionIndex, velocityIndex, rotationIndex, healthIndex];
+
+        Assert.Equal(indexes.Length, new HashSet<int>(indexes).Count);
+    }
+
+    [Fact]
+    public void Set_WithStorageIndex_ThenGet_ReturnsStoredValue()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
+        EntityMeta meta = new EntityMeta(
+            0,
+            accounted._archetypeIndex,
+            accounted._storageIndex,
+            accounted._componentIndex
+        );
+
+        int storageIndex = archetype.GetStorageIndex(ComponentMeta<Position>.s_id);
+        archetype.Set(storageIndex, in meta, new Position { X = 7, Y = 3 });
+
+        ref Position position = ref archetype.Get<Position>(storageIndex, in meta);
+
+        Assert.Equal(7, position.X);
+        Assert.Equal(3, position.Y);
+    }
+
+    [Fact]
+    public void Get_WithStorageIndex_ReturnsRefToLiveData_MutationIsPersisted()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
+        EntityMeta meta = new EntityMeta(
+            0,
+            accounted._archetypeIndex,
+            accounted._storageIndex,
+            accounted._componentIndex
+        );
+
+        int storageIndex = archetype.GetStorageIndex(ComponentMeta<Position>.s_id);
+        archetype.Set(storageIndex, in meta, new Position { X = 1, Y = 1 });
+        archetype.Get<Position>(storageIndex, meta).X = 55;
+
+        Assert.Equal(55, archetype.Get<Position>(storageIndex, in meta).X);
+    }
+
+    [Fact]
+    public void Set_WithStorageIndex_IsEquivalentTo_Set_WithGenericOverload()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        EntityAccounted accounted = archetype.Add(new Entity() { _id = 1 });
+        EntityMeta meta = new EntityMeta(
+            0,
+            accounted._archetypeIndex,
+            accounted._storageIndex,
+            accounted._componentIndex
+        );
+
+        int storageIndex = archetype.GetStorageIndex(ComponentMeta<Velocity>.s_id);
+        archetype.Set(storageIndex, in meta, new Velocity { X = 4, Y = -2 });
+
+        Assert.Equal(4, archetype.Get<Velocity>(in meta).X);
+        Assert.Equal(-2, archetype.Get<Velocity>(in meta).Y);
+    }
+
+    [Fact]
+    public void Set_WithStorageIndex_MultipleEntities_DataIsIndependent()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        EntityAccounted accountedOne = archetype.Add(new Entity() { _id = 1 });
+        EntityAccounted accountedTwo = archetype.Add(new Entity() { _id = 2 });
+
+        EntityMeta metaOne = new EntityMeta(
+            0,
+            accountedOne._archetypeIndex,
+            accountedOne._storageIndex,
+            accountedOne._componentIndex
+        );
+        EntityMeta metaTwo = new EntityMeta(
+            0,
+            accountedTwo._archetypeIndex,
+            accountedTwo._storageIndex,
+            accountedTwo._componentIndex
+        );
+
+        int storageIndex = archetype.GetStorageIndex(ComponentMeta<Position>.s_id);
+
+        archetype.Set(storageIndex, in metaOne, new Position { X = 10 });
+        archetype.Set(storageIndex, in metaTwo, new Position { X = 20 });
+
+        Assert.Equal(10, archetype.Get<Position>(storageIndex, in metaOne).X);
+        Assert.Equal(20, archetype.Get<Position>(storageIndex, in metaTwo).X);
+    }
+
+    [Fact]
+    public void Has_WithComponentIdInSignature_ReturnsTrue()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        Assert.True(archetype.Has(ComponentMeta<Position>.s_id));
+    }
+
+    [Fact]
+    public void Has_WithComponentIdNotInSignature_ReturnsFalse()
+    {
+        Archetype archetype = new Archetype(1, _twoComponentSignature);
+
+        Assert.False(archetype.Has(ComponentMeta<Rotation>.s_id));
+    }
+
+    [Fact]
+    public void Has_WithComponentIdExceedingMappingBounds_ReturnsFalse()
+    {
+        Archetype archetype = new Archetype(1, _twoComponentSignature);
+
+        Assert.False(archetype.Has(int.MaxValue));
+    }
+
+    [Fact]
+    public void Has_AllComponentsInSignature_ReturnsTrueForEach()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        Assert.True(archetype.Has(ComponentMeta<Position>.s_id));
+        Assert.True(archetype.Has(ComponentMeta<Velocity>.s_id));
+        Assert.True(archetype.Has(ComponentMeta<Rotation>.s_id));
+        Assert.True(archetype.Has(ComponentMeta<Health>.s_id));
+    }
+
+    [Fact]
+    public void Has_Generic_WithComponentInSignature_ReturnsTrue()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        Assert.True(archetype.Has<Position>());
+    }
+
+    [Fact]
+    public void Has_Generic_WithComponentNotInSignature_ReturnsFalse()
+    {
+        Archetype archetype = new Archetype(1, _twoComponentSignature);
+
+        Assert.False(archetype.Has<Rotation>());
+    }
+
+    [Fact]
+    public void Has_Generic_IsConsistentWith_Has_ById()
+    {
+        Archetype archetype = new Archetype(1, _fourComponentSignature);
+
+        Assert.Equal(archetype.Has(ComponentMeta<Position>.s_id), archetype.Has<Position>());
+        Assert.Equal(archetype.Has(ComponentMeta<Velocity>.s_id), archetype.Has<Velocity>());
     }
 }

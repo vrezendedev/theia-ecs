@@ -211,7 +211,7 @@ internal sealed class Archetype
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void SetAddEdge(int componentId, in Archetype archetype) =>
-        _addEdges.TryAdd(componentId, archetype);
+        _addEdges.Add(componentId, archetype);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Archetype? GetRemoveEdge(int componentId)
@@ -222,7 +222,7 @@ internal sealed class Archetype
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void SetRemoveEdge(int componentId, in Archetype archetype) =>
-        _removeEdges.TryAdd(componentId, archetype);
+        _removeEdges.Add(componentId, archetype);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<Indexer> GetIndexers() => _indexers.AsSpan(0, _initializedCount);

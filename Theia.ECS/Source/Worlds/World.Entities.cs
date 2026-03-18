@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
@@ -83,7 +84,7 @@ public sealed partial class World
             return false;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
-        Archetype archetype = _archetypes[entityMeta._archetypeIndex];
+        Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
 
         Ghoulify(entity, ref entityMeta, in archetype);
 
@@ -104,7 +105,7 @@ public sealed partial class World
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
 
-        Archetype currentArchetype = _archetypes[entityMeta._archetypeIndex];
+        Archetype currentArchetype = GetArchetype(entityMeta._archetypeIndex);
 
         if (currentArchetype.Has(componentId))
             return EntityReferences.Invalid;
@@ -152,7 +153,7 @@ public sealed partial class World
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
 
-        Archetype currentArchetype = _archetypes[entityMeta._archetypeIndex];
+        Archetype currentArchetype = GetArchetype(entityMeta._archetypeIndex);
 
         if (!currentArchetype.Has(componentId))
             return false;
@@ -202,6 +203,57 @@ public sealed partial class World
         return AttemptRemove(entity, ComponentMeta<T>.s_id);
     }
 
+    public ref T Get<T>(Entity entity)
+        where T : struct
+    {
+        if (!IsAlive(entity))
+            ThrowIfEntityNotAlive(entity);
+
+        int componentId = ComponentMeta<T>.s_id;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+
+        Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
+
+        if (!archetype.Has(componentId))
+            ThrowIfEntityMissingComponent<T>(entity);
+
+        return ref archetype.Get<T>(in entityMeta);
+    }
+
+    public void Set<T>(Entity entity, in T component)
+        where T : struct
+    {
+        if (!IsAlive(entity))
+            ThrowIfEntityNotAlive(entity);
+
+        int componentId = ComponentMeta<T>.s_id;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+
+        Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
+
+        if (!archetype.Has(componentId))
+            ThrowIfEntityMissingComponent<T>(entity);
+
+        archetype.Set(in entityMeta, component);
+    }
+
+    public bool Has<T>(Entity entity)
+        where T : struct
+    {
+        if (!IsAlive(entity))
+            return false;
+
+        int componentId = ComponentMeta<T>.s_id;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+
+        Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
+
+        return archetype.Has(componentId);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void TryUpdateEntitySwapped(EntitySwapped swapped)
     {
@@ -218,5 +270,22 @@ public sealed partial class World
         entityMeta._archetypeIndex = entityAccounted._archetypeIndex;
         entityMeta._storageIndex = entityAccounted._storageIndex;
         entityMeta._componentIndex = entityAccounted._componentIndex;
+    }
+
+    [DoesNotReturn]
+    internal static void ThrowIfEntityNotAlive(Entity entity)
+    {
+        throw new InvalidOperationException(
+            $"{entity} is not alive. Component access requires a live entity."
+        );
+    }
+
+    [DoesNotReturn]
+    internal static void ThrowIfEntityMissingComponent<T>(Entity entity)
+        where T : struct
+    {
+        throw new InvalidOperationException(
+            $"{entity} does not have component '{typeof(T).Name}'. Add the component before attempting to access it."
+        );
     }
 }
