@@ -1,12 +1,12 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Theia.ECS.Archetypes;
+namespace Theia.ECS.Components;
 
 internal sealed class Storage<T> : Storage
     where T : struct
 {
-    private T[] _values;
+    private readonly T[] _values;
 
     internal Storage(int capacity) => _values = new T[capacity];
 

@@ -77,22 +77,7 @@ public sealed partial class World
         _ghouls.Enqueue(entity._id);
     }
 
-    internal bool TryGhoulify(Entity entity, in Archetype archetype)
-    {
-        if (!IsAlive(entity))
-            return false;
-
-        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
-
-        if (entityMeta._archetypeIndex != archetype._archetypeId)
-            return false;
-
-        Ghoulify(entity, ref entityMeta, in archetype);
-
-        return true;
-    }
-
-    public bool TryGhoulify(Entity entity)
+    private bool AttemptGhoulify(Entity entity)
     {
         if (!IsAlive(entity))
             return false;
@@ -105,20 +90,24 @@ public sealed partial class World
         return true;
     }
 
-    public bool TryAdd<T>(Entity entity, in T component)
-        where T : struct
+    public bool TryGhoulify(Entity entity)
+    {
+        ThrowIfQueriesExecuting();
+
+        return AttemptGhoulify(entity);
+    }
+
+    private EntityReferences AttemptAdd(Entity entity, int componentId)
     {
         if (!IsAlive(entity))
-            return false;
-
-        int componentId = ComponentMeta<T>.s_id;
+            return EntityReferences.Invalid;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
 
         Archetype currentArchetype = _archetypes[entityMeta._archetypeIndex];
 
         if (currentArchetype.Has(componentId))
-            return false;
+            return EntityReferences.Invalid;
 
         Archetype? newArchetype = currentArchetype.GetAddEdge(componentId);
 
@@ -140,18 +129,26 @@ public sealed partial class World
         UpdateEntityAccounted(ref entityMeta, transferred._entityAccounted);
         TryUpdateEntitySwapped(transferred._entitySwapped);
 
-        newArchetype.Set(in entityMeta, in component);
-
-        return true;
+        return new EntityReferences(ref entityMeta, newArchetype);
     }
 
-    public bool TryRemove<T>(Entity entity)
+    public bool TryAdd<T>(Entity entity, in T component = default)
         where T : struct
+    {
+        ThrowIfQueriesExecuting();
+
+        EntityReferences entityReferences = AttemptAdd(entity, ComponentMeta<T>.s_id);
+
+        if (entityReferences._valid)
+            entityReferences._archetype!.Set(in entityReferences._entityMeta, in component);
+
+        return entityReferences._valid;
+    }
+
+    private bool AttemptRemove(Entity entity, int componentId)
     {
         if (!IsAlive(entity))
             return false;
-
-        int componentId = ComponentMeta<T>.s_id;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
 
@@ -163,7 +160,7 @@ public sealed partial class World
         Signature currentSignature = currentArchetype._signature;
 
         if (currentSignature._length == 1)
-            return TryGhoulify(entity);
+            return AttemptGhoulify(entity);
 
         Archetype? newArchetype = currentArchetype.GetRemoveEdge(componentId);
 
@@ -195,6 +192,14 @@ public sealed partial class World
         TryUpdateEntitySwapped(transferred._entitySwapped);
 
         return true;
+    }
+
+    public bool TryRemove<T>(Entity entity)
+        where T : struct
+    {
+        ThrowIfQueriesExecuting();
+
+        return AttemptRemove(entity, ComponentMeta<T>.s_id);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

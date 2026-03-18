@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
 using Theia.Tests.Resources;
 

@@ -1,4 +1,4 @@
-namespace Theia.ECS.Archetypes;
+namespace Theia.ECS.Components;
 
 internal abstract class Storage
 {

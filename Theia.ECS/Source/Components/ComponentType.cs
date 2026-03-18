@@ -1,5 +1,4 @@
 using System;
-using Theia.ECS.Archetypes;
 
 namespace Theia.ECS.Components;
 

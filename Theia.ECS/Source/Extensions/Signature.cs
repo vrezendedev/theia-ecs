@@ -25,7 +25,6 @@ internal static class SignatureExtensions
                 $"Component '{ComponentsMeta.GetComponentType(id)._type.Name}' with ID {id} is duplicated on Signature."
             );
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static SignatureMeta GetSignatureMeta(ReadOnlySpan<int> componentIds)
         {
             int size = 0;
@@ -48,7 +47,6 @@ internal static class SignatureExtensions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetMaskLength(int maxId) => (maxId >> 6) + 1;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Span<ulong> SetSignatureMask(
             ReadOnlySpan<int> componentIds,
             Span<ulong> mask
@@ -63,7 +61,6 @@ internal static class SignatureExtensions
             return mask;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool IsSatisfiedBy(ReadOnlySpan<ulong> aMask, ReadOnlySpan<ulong> bMask)
         {
             if (bMask.Length < aMask.Length)
@@ -78,7 +75,6 @@ internal static class SignatureExtensions
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEqual(
             int aComponentsLength,
             int bComponentsLength,

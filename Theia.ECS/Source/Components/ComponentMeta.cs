@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Theia.ECS.Reflection.Types;
 
 namespace Theia.ECS.Components;
@@ -15,7 +16,7 @@ internal static class ComponentsMeta
     private static ComponentType[] s_componentTypeMap = s_componentTypeMap = new ComponentType[
         DefaultComponentTypeMapCapacity
     ];
-    internal static readonly object s_lock = new object();
+    internal static readonly Lock s_lock = new();
 
     internal static int RegisterComponent<T>(int sizeOfT)
         where T : struct

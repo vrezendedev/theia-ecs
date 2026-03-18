@@ -1,8 +1,8 @@
 using System;
-using Theia.ECS.Archetypes;
+using Theia.ECS.Components;
 using Theia.Tests.Resources;
 
-namespace Theia.Tests.ECS.Archetypes;
+namespace Theia.Tests.ECS.Components;
 
 public sealed class StorageTests
 {
