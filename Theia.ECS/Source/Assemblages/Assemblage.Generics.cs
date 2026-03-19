@@ -31,7 +31,7 @@ public class Assemblage<T1> : Assemblage
     {
         EntityCreated entityCreated = _world.CreateEntity(_archetype);
 
-        int[] mapping = _componentStorageMapping;
+        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
 
         _archetype.Set(mapping[0], in entityCreated._entityMeta, in componentT1);
 

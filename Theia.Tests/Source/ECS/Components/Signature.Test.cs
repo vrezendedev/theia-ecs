@@ -152,6 +152,20 @@ public sealed class SignatureTests
     }
 
     [Fact]
+    public void IsSatisfiedBy_SameComponents_ReturnsTrue()
+    {
+        Signature signatureA = new Signature(
+            [ComponentMeta<Position>.s_id, ComponentMeta<Velocity>.s_id]
+        );
+
+        Signature signatureB = new Signature(
+            [ComponentMeta<Position>.s_id, ComponentMeta<Velocity>.s_id]
+        );
+
+        Assert.True(signatureA.IsSatisfiedBy(signatureB));
+    }
+
+    [Fact]
     public void IsSatisfiedBy_OtherHasMoreComponents_ReturnsTrue()
     {
         Signature signatureA = new Signature(

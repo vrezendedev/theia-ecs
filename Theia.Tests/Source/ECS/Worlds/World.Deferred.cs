@@ -309,31 +309,4 @@ public sealed class WorldDeferredTests
         foreach (Entity entity in entities)
             Assert.Throws<InvalidOperationException>(() => world.Get<Velocity>(entity));
     }
-
-    [Fact]
-    public async Task CreateAssemblage_ConcurrentCalls_AllRegisteredInWorld()
-    {
-        World world = new();
-
-        const int count = 8;
-
-        Assemblage[] assemblages = new Assemblage[count];
-
-        Task[] tasks =
-        [
-            Task.Run(() => assemblages[0] = world.CreateAssemblage<Position>()),
-            Task.Run(() => assemblages[1] = world.CreateAssemblage<Velocity>()),
-            Task.Run(() => assemblages[2] = world.CreateAssemblage<Rotation>()),
-            Task.Run(() => assemblages[3] = world.CreateAssemblage<Health>()),
-            Task.Run(() => assemblages[4] = world.CreateAssemblage<Position>()),
-            Task.Run(() => assemblages[5] = world.CreateAssemblage<Velocity>()),
-            Task.Run(() => assemblages[6] = world.CreateAssemblage<Rotation>()),
-            Task.Run(() => assemblages[7] = world.CreateAssemblage<Health>()),
-        ];
-
-        await Task.WhenAll(tasks);
-
-        foreach (Assemblage assemblage in assemblages)
-            Assert.Contains(assemblage, world._assemblages);
-    }
 }

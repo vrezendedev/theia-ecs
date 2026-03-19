@@ -9,10 +9,7 @@ internal readonly ref struct EntityReferences
     internal readonly ref EntityMeta _entityMeta;
     internal readonly Archetype? _archetype;
 
-    public EntityReferences()
-    {
-        _valid = false;
-    }
+    public EntityReferences() => _valid = false;
 
     internal EntityReferences(ref EntityMeta entityMeta, Archetype archetype)
     {

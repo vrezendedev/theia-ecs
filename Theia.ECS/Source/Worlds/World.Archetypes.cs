@@ -4,6 +4,7 @@ using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Extensions;
+using Theia.ECS.Queries;
 
 namespace Theia.ECS.Worlds;
 
@@ -14,7 +15,7 @@ public sealed partial class World
     private int _archetypesCount;
     private Archetype[] _archetypes;
 
-    internal Archetype CreateArchetype(in Signature signature)
+    private Archetype CreateArchetype(in Signature signature)
     {
         int currentLength = _archetypes.Length;
 
@@ -27,6 +28,16 @@ public sealed partial class World
         _archetypes[index] = archetype;
 
         _archetypesCount++;
+
+        NomadQuery[] queries = _nomadQueries;
+
+        for (int i = 0; i < queries.Length; i++)
+        {
+            NomadQuery nomadQuery = queries[i];
+
+            if (nomadQuery._signature.IsSatisfiedBy(archetype._signature))
+                nomadQuery.Add(archetype);
+        }
 
         return archetype;
     }
@@ -49,7 +60,7 @@ public sealed partial class World
         return targetArchetype;
     }
 
-    internal Archetype? FindEqualArchetype(int componentsLength, ReadOnlySpan<ulong> mask)
+    private Archetype? FindEqualArchetype(int componentsLength, ReadOnlySpan<ulong> mask)
     {
         Archetype[] archetypes = _archetypes;
 

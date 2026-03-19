@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
@@ -14,6 +15,8 @@ public sealed partial class World
     private Queue<EntityComponentDeferred> _deferredAdd;
     private Dictionary<int, DeferredStorage> _deferredAddStorages;
     private Queue<EntityComponentDeferred> _deferredRemove;
+
+    internal bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
 
     public void DeferredGhoulify(Entity entity)
     {
@@ -110,9 +113,9 @@ public sealed partial class World
 
     internal void ThrowIfFlushingDeferred()
     {
-        if (_isFlushingDeferred)
+        if (IsFlushingDeferred())
             throw new InvalidOperationException(
-                "Deferred operations cannot be enqueued during a flush. Use synchronous operations instead."
+                "Cannot perform structural changes or entity modifications during a deferred flush. Enqueue the operation as a deferred command or wait until the flush completes."
             );
     }
 }

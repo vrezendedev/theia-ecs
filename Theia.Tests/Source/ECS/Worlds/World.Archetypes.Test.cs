@@ -75,4 +75,16 @@ public sealed class WorldArchetypeTests
 
         Assert.Same(created, retrieved);
     }
+
+    [Fact]
+    public void GetMatchedAssemblage_BeforeAnySet_ReturnsNull()
+    {
+        World world = new();
+
+        Archetype archetype = world.FindOrCreateArchetype(
+            stackalloc int[1] { ComponentMeta<Position>.s_id }
+        );
+
+        Assert.Null(archetype.GetMatchedAssemblage());
+    }
 }

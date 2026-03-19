@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
@@ -34,28 +35,6 @@ public sealed class AssemblageTests
     }
 
     [Fact]
-    public void CreateAssemblage_CalledTwiceForSameType_BothShareSameArchetype()
-    {
-        World world = new();
-
-        Assemblage<Position> first = world.CreateAssemblage<Position>();
-        Assemblage<Position> second = world.CreateAssemblage<Position>();
-
-        Assert.Same(first._archetype, second._archetype);
-    }
-
-    [Fact]
-    public void CreateAssemblage_CalledTwiceForSameType_ReturnsDifferentInstances()
-    {
-        World world = new();
-
-        Assemblage<Position> first = world.CreateAssemblage<Position>();
-        Assemblage<Position> second = world.CreateAssemblage<Position>();
-
-        Assert.NotSame(first, second);
-    }
-
-    [Fact]
     public void CreateAssemblage_RegistersAssemblageInWorld()
     {
         World world = new();
@@ -71,6 +50,38 @@ public sealed class AssemblageTests
         Assemblage<Position> assemblage = new World().CreateAssemblage<Position>();
 
         Assert.Equal(1, assemblage.GetComponentStorageMapping().Length);
+    }
+
+    [Fact]
+    public void CreateAssemblage_SetsMatchedAssemblageOnArchetype()
+    {
+        World world = new();
+
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        Assert.Same(assemblage, assemblage._archetype.GetMatchedAssemblage());
+    }
+
+    [Fact]
+    public void CreateAssemblage_CalledTwiceForSameType_Throws()
+    {
+        World world = new();
+
+        world.CreateAssemblage<Position>();
+
+        Assert.Throws<InvalidOperationException>(() => world.CreateAssemblage<Position>());
+    }
+
+    [Fact]
+    public void CreateAssemblage_DifferentTypes_EachArchetypeHasOwnMatchedAssemblage()
+    {
+        World world = new();
+
+        Assemblage<Position> positionAssemblage = world.CreateAssemblage<Position>();
+        Assemblage<Velocity> velocityAssemblage = world.CreateAssemblage<Velocity>();
+
+        Assert.Same(positionAssemblage, positionAssemblage._archetype.GetMatchedAssemblage());
+        Assert.Same(velocityAssemblage, velocityAssemblage._archetype.GetMatchedAssemblage());
     }
 
     [Fact]

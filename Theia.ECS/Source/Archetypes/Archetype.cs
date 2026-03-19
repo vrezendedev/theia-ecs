@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
@@ -22,12 +23,14 @@ internal sealed class Archetype
     internal readonly int _archetypeId;
     internal readonly Signature _signature;
     internal readonly int _capacity;
+
     private readonly int[] _componentStorageMapping;
 
     private int _initializedCount;
     private Indexer[] _indexers;
     private Storage[][] _storages;
 
+    private Assemblage? _assemblage;
     private readonly Dictionary<int, Archetype> _addEdges;
     private readonly Dictionary<int, Archetype> _removeEdges;
 
@@ -56,6 +59,21 @@ internal sealed class Archetype
         _lazy = new(1);
         _lazy.Enqueue(0);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool TrySetMatchedAssemblage(Assemblage assemblage)
+    {
+        if (_assemblage is null)
+        {
+            _assemblage = assemblage;
+            return true;
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Assemblage? GetMatchedAssemblage() => _assemblage;
 
     private int GetCapacity(int signatureSize) =>
         Math.Max(

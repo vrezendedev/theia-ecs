@@ -9,7 +9,7 @@ namespace Theia.ECS.Queries;
 
 public abstract class Query
 {
-    internal readonly World _world;
+    protected readonly World _world;
 
     internal Query(in World world) => _world = world;
 }
@@ -36,21 +36,21 @@ public abstract class NomadQuery : Query
 
     internal readonly Signature _signature;
 
-    private int _matchedArchetypesCount;
-    private int[] _matchedArchetypes;
+    protected int _matchedArchetypesCount;
+    private Archetype[] _matchedArchetypes;
 
     internal NomadQuery(in World world, ReadOnlySpan<int> componentIds)
         : base(in world)
     {
         _signature = new Signature(componentIds);
-        _matchedArchetypes = new int[DefaultMatchedArchetypesCapacity];
+        _matchedArchetypes = new Archetype[DefaultMatchedArchetypesCapacity];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<int> GetMatchedArchetypes() =>
+    internal ReadOnlySpan<Archetype> GetMatchedArchetypes() =>
         _matchedArchetypes.AsSpan(0, _matchedArchetypesCount);
 
-    internal void Add(int archetypeId)
+    internal void Add(Archetype archetype)
     {
         int currentLength = _matchedArchetypes.Length;
 
@@ -62,7 +62,7 @@ public abstract class NomadQuery : Query
 
         int index = _matchedArchetypesCount;
 
-        _matchedArchetypes[index] = archetypeId;
+        _matchedArchetypes[index] = archetype;
 
         _matchedArchetypesCount++;
     }
