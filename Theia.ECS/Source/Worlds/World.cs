@@ -63,6 +63,8 @@ public sealed partial class World
         _deferredRemove = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);
         _deferredGhoulify = new Queue<Entity>(DefaultDeferredCommandsCapacity);
 
+        Events = new();
+
         lock (s_lock)
         {
             _worldId = s_worldsCount;
