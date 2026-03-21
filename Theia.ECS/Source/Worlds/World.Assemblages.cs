@@ -19,13 +19,13 @@ public sealed partial class World
         _assemblages[index] = assemblage;
     }
 
-    public Assemblage<T> CreateAssemblage<T>()
-        where T : struct
+    public Assemblage<TComponent> CreateAssemblage<TComponent>()
+        where TComponent : struct
     {
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
 
-        int componentId = ComponentMeta<T>.s_id;
+        int componentId = ComponentMeta<TComponent>.s_id;
 
         Archetype archetype = FindOrCreateArchetype(stackalloc int[1] { componentId });
 
@@ -33,18 +33,22 @@ public sealed partial class World
 
         componentStorageMapping[0] = archetype.GetStorageIndex(componentId);
 
-        Assemblage<T> assemblage = new Assemblage<T>(this, in archetype, componentStorageMapping);
+        Assemblage<TComponent> assemblage = new Assemblage<TComponent>(
+            this,
+            in archetype,
+            componentStorageMapping
+        );
 
         AddAssemblage(assemblage);
 
         if (!archetype.TrySetMatchedAssemblage(assemblage))
-            ThrowInvalidOperationDuplicatedAssemblage();
+            ThrowDuplicatedAssemblage();
 
         return assemblage;
     }
 
     [DoesNotReturn]
-    internal static void ThrowInvalidOperationDuplicatedAssemblage() =>
+    internal static void ThrowDuplicatedAssemblage() =>
         throw new InvalidOperationException(
             "An Assemblage for the matched Archetype already exists. Assemblages must be unique."
         );

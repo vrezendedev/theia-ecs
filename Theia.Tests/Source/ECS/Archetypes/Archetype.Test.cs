@@ -564,7 +564,7 @@ public sealed class ArchetypeTests
         Archetype target = new Archetype(2, _threeWithRotationSignature);
 
         archetype.SetAddEdge(ComponentMeta<Rotation>.s_id, target);
-        Archetype? result = archetype.GetAddEdge(ComponentMeta<Rotation>.s_id);
+        Archetype? result = archetype.TryGetAddEdge(ComponentMeta<Rotation>.s_id);
 
         Assert.Same(target, result);
     }
@@ -574,7 +574,7 @@ public sealed class ArchetypeTests
     {
         Archetype archetype = new Archetype(1, _twoComponentSignature);
 
-        Archetype? result = archetype.GetAddEdge(ComponentMeta<Rotation>.s_id);
+        Archetype? result = archetype.TryGetAddEdge(ComponentMeta<Rotation>.s_id);
 
         Assert.Null(result);
     }
@@ -589,8 +589,8 @@ public sealed class ArchetypeTests
         archetype.SetAddEdge(ComponentMeta<Rotation>.s_id, targetRotation);
         archetype.SetAddEdge(ComponentMeta<Health>.s_id, targetHealth);
 
-        Assert.Same(targetRotation, archetype.GetAddEdge(ComponentMeta<Rotation>.s_id));
-        Assert.Same(targetHealth, archetype.GetAddEdge(ComponentMeta<Health>.s_id));
+        Assert.Same(targetRotation, archetype.TryGetAddEdge(ComponentMeta<Rotation>.s_id));
+        Assert.Same(targetHealth, archetype.TryGetAddEdge(ComponentMeta<Health>.s_id));
     }
 
     [Fact]
@@ -600,7 +600,7 @@ public sealed class ArchetypeTests
         Archetype target = new Archetype(2, _threeWithRotationSignature);
 
         archetype.SetRemoveEdge(ComponentMeta<Health>.s_id, target);
-        Archetype? result = archetype.GetRemoveEdge(ComponentMeta<Health>.s_id);
+        Archetype? result = archetype.TryGetRemoveEdge(ComponentMeta<Health>.s_id);
 
         Assert.Same(target, result);
     }
@@ -610,7 +610,7 @@ public sealed class ArchetypeTests
     {
         Archetype archetype = new Archetype(1, _fourComponentSignature);
 
-        Archetype? result = archetype.GetRemoveEdge(ComponentMeta<Health>.s_id);
+        Archetype? result = archetype.TryGetRemoveEdge(ComponentMeta<Health>.s_id);
 
         Assert.Null(result);
     }
@@ -625,8 +625,8 @@ public sealed class ArchetypeTests
         archetype.SetRemoveEdge(ComponentMeta<Health>.s_id, targetNoHealth);
         archetype.SetRemoveEdge(ComponentMeta<Rotation>.s_id, targetNoRotation);
 
-        Assert.Same(targetNoHealth, archetype.GetRemoveEdge(ComponentMeta<Health>.s_id));
-        Assert.Same(targetNoRotation, archetype.GetRemoveEdge(ComponentMeta<Rotation>.s_id));
+        Assert.Same(targetNoHealth, archetype.TryGetRemoveEdge(ComponentMeta<Health>.s_id));
+        Assert.Same(targetNoRotation, archetype.TryGetRemoveEdge(ComponentMeta<Rotation>.s_id));
     }
 
     [Fact]

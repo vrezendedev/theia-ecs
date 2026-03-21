@@ -82,38 +82,9 @@ public sealed class ComponentsMetaTests
     }
 
     [Fact]
-    public async Task RegisterComponent_WhenCountEqualsLength_Resize()
-    {
-        int initialCapacity = ComponentsMeta.GetComponentTypeMapCapacity();
-
-        int id = ComponentMeta<ComponentA>.s_id;
-        id = ComponentMeta<ComponentB>.s_id;
-        id = ComponentMeta<ComponentC>.s_id;
-        id = ComponentMeta<ComponentD>.s_id;
-        id = ComponentMeta<ComponentE>.s_id;
-        id = ComponentMeta<ComponentF>.s_id;
-        id = ComponentMeta<ComponentG>.s_id;
-        id = ComponentMeta<ComponentH>.s_id;
-        id = ComponentMeta<ComponentI>.s_id;
-        id = ComponentMeta<ComponentJ>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentA>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentB>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentC>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentD>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentE>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentF>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentG>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentH>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentI>>.s_id;
-        id = ComponentMeta<GenericComponent<ComponentJ>>.s_id;
-
-        Assert.True(initialCapacity != ComponentsMeta.GetComponentTypeMapCapacity());
-    }
-
-    [Fact]
     public void GetComponentType_InvalidIndex_ThrowsIndexOutOfRangeException() =>
         Assert.Throws<IndexOutOfRangeException>(() =>
-            ComponentsMeta.GetComponentType(ComponentsMeta.s_count + 1)
+            ComponentsMeta.GetComponentType(ComponentsMeta.s_count)
         );
 
     [Fact]

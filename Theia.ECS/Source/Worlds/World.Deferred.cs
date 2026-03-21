@@ -30,8 +30,8 @@ public sealed partial class World
 
     private void DeferredGhoulifyHandler(Entity entity) => AttemptGhoulify(entity);
 
-    private DeferredStorage<T> GetOrAddDeferredStorage<T>(int componentId)
-        where T : struct
+    private DeferredStorage<TComponent> GetOrAddDeferredStorage<TComponent>(int componentId)
+        where TComponent : struct
     {
         DeferredStorage deferredStorage;
 
@@ -42,19 +42,19 @@ public sealed partial class World
 
         if (deferredStorage is null)
         {
-            deferredStorage = new DeferredStorage<T>(DefaultDeferredCommandsCapacity);
+            deferredStorage = new DeferredStorage<TComponent>(DefaultDeferredCommandsCapacity);
             _deferredAddStorages[componentId] = deferredStorage;
         }
 
-        return (DeferredStorage<T>)deferredStorage;
+        return (DeferredStorage<TComponent>)deferredStorage;
     }
 
-    public void DeferredAdd<T>(Entity entity, in T component = default)
-        where T : struct
+    public void DeferredAdd<TComponent>(Entity entity, in TComponent component = default)
+        where TComponent : struct
     {
         ThrowIfFlushingDeferred();
 
-        int componentId = ComponentMeta<T>.s_id;
+        int componentId = ComponentMeta<TComponent>.s_id;
 
         lock (_deferredAdd)
         {
@@ -62,7 +62,7 @@ public sealed partial class World
                 new EntityComponentDeferred() { _entity = entity, _componentId = componentId }
             );
 
-            DeferredStorage<T> storage = GetOrAddDeferredStorage<T>(componentId);
+            DeferredStorage<TComponent> storage = GetOrAddDeferredStorage<TComponent>(componentId);
 
             storage.EnqueueDeferred(component);
         }
@@ -83,8 +83,8 @@ public sealed partial class World
             storage.DiscardNext();
     }
 
-    public void DeferredRemove<T>(Entity entity)
-        where T : struct
+    public void DeferredRemove<TComponent>(Entity entity)
+        where TComponent : struct
     {
         ThrowIfFlushingDeferred();
 
@@ -94,7 +94,7 @@ public sealed partial class World
                 new EntityComponentDeferred()
                 {
                     _entity = entity,
-                    _componentId = ComponentMeta<T>.s_id,
+                    _componentId = ComponentMeta<TComponent>.s_id,
                 }
             );
         }

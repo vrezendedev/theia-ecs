@@ -16,11 +16,11 @@ internal static class SignatureExtensions
             for (int i = 0; i < componentIds.Length; i++)
             for (int j = i + 1; j < componentIds.Length; j++)
                 if (componentIds[i] == componentIds[j])
-                    ThrowArgumentExceptionDuplicatedComponentOnSignature(componentIds[i]);
+                    ThrowDuplicatedComponentOnSignatureException(componentIds[i]);
         }
 
         [DoesNotReturn]
-        private static void ThrowArgumentExceptionDuplicatedComponentOnSignature(int id) =>
+        private static void ThrowDuplicatedComponentOnSignatureException(int id) =>
             throw new ArgumentException(
                 $"Component '{ComponentsMeta.GetComponentType(id)._type.Name}' with ID {id} is duplicated on Signature."
             );

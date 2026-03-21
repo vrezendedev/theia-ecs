@@ -5,15 +5,15 @@ using Theia.ECS.Entities;
 
 namespace Theia.ECS.Components;
 
-internal sealed class DeferredStorage<T> : DeferredStorage
-    where T : struct
+internal sealed class DeferredStorage<TComponent> : DeferredStorage
+    where TComponent : struct
 {
-    private readonly Queue<T> _values;
+    private readonly Queue<TComponent> _values;
 
-    internal DeferredStorage(int capacity) => _values = new Queue<T>(capacity);
+    internal DeferredStorage(int capacity) => _values = new Queue<TComponent>(capacity);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void EnqueueDeferred(T component) => _values.Enqueue(component);
+    internal void EnqueueDeferred(TComponent component) => _values.Enqueue(component);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal override void SetWithNext(in EntityMeta entityMeta, Archetype to) =>

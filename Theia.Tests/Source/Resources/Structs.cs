@@ -158,5 +158,29 @@ public struct StructWithBlittableGenerics<T, TT>
     public TT ValueTT;
 }
 
+public struct MatchesComponentA
+{
+    public int Value;
+}
+
+public struct IncludesComponentA
+{
+    public int Value;
+}
+
+public struct IncludesComponentB
+{
+    public int Value;
+}
+
+public struct IncludesOnlyComponentA
+{
+    public int Value;
+}
+
+public struct UnmappedComponent
+{
+    public int Value;
+}
 
 #pragma warning restore CS0649

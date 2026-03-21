@@ -234,14 +234,15 @@ internal sealed class Archetype
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Archetype? GetAddEdge(int componentId) => TryGetEdge(componentId, ref _addEdges);
+    internal Archetype? TryGetAddEdge(int componentId) => TryGetEdge(componentId, ref _addEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void SetAddEdge(int componentId, in Archetype archetype) =>
         SetEdge(componentId, archetype, ref _addEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Archetype? GetRemoveEdge(int componentId) => TryGetEdge(componentId, ref _removeEdges);
+    internal Archetype? TryGetRemoveEdge(int componentId) =>
+        TryGetEdge(componentId, ref _removeEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void SetRemoveEdge(int componentId, in Archetype archetype) =>
@@ -258,43 +259,48 @@ internal sealed class Archetype
         _storages[componentStorageIndex].AsSpan(0, _initializedCount);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Span<Storage> GetStorages<T>()
-        where T : struct =>
-        _storages[_componentStorageMapping[ComponentMeta<T>.s_id]].AsSpan(0, _initializedCount);
+    internal Span<Storage> GetStorages<TComponent>()
+        where TComponent : struct =>
+        _storages[_componentStorageMapping[ComponentMeta<TComponent>.s_id]]
+            .AsSpan(0, _initializedCount);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ref T Get<T>(int storageIndex, in EntityMeta entityMeta)
-        where T : struct =>
-        ref ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Get(
+    internal ref TComponent Get<TComponent>(int storageIndex, in EntityMeta entityMeta)
+        where TComponent : struct =>
+        ref ((Storage<TComponent>)_storages[storageIndex][entityMeta._storageIndex]).Get(
             entityMeta._componentIndex
         );
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ref T Get<T>(in EntityMeta entityMeta)
-        where T : struct
+    internal ref TComponent Get<TComponent>(in EntityMeta entityMeta)
+        where TComponent : struct
     {
-        int storageIndex = _componentStorageMapping[ComponentMeta<T>.s_id];
+        int storageIndex = _componentStorageMapping[ComponentMeta<TComponent>.s_id];
 
-        return ref ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Get(
+        return ref ((Storage<TComponent>)_storages[storageIndex][entityMeta._storageIndex]).Get(
             entityMeta._componentIndex
         );
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void Set<T>(int storageIndex, in EntityMeta entityMeta, in T component)
-        where T : struct =>
-        ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Set(
+    internal void Set<TComponent>(
+        int storageIndex,
+        in EntityMeta entityMeta,
+        in TComponent component
+    )
+        where TComponent : struct =>
+        ((Storage<TComponent>)_storages[storageIndex][entityMeta._storageIndex]).Set(
             entityMeta._componentIndex,
             component
         );
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void Set<T>(in EntityMeta entityMeta, in T component)
-        where T : struct
+    internal void Set<TComponent>(in EntityMeta entityMeta, in TComponent component)
+        where TComponent : struct
     {
-        int storageIndex = _componentStorageMapping[ComponentMeta<T>.s_id];
+        int storageIndex = _componentStorageMapping[ComponentMeta<TComponent>.s_id];
 
-        ((Storage<T>)_storages[storageIndex][entityMeta._storageIndex]).Set(
+        ((Storage<TComponent>)_storages[storageIndex][entityMeta._storageIndex]).Set(
             entityMeta._componentIndex,
             component
         );
@@ -310,6 +316,6 @@ internal sealed class Archetype
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool Has<T>()
-        where T : struct => Has(ComponentMeta<T>.s_id);
+    internal bool Has<TComponent>()
+        where TComponent : struct => Has(ComponentMeta<TComponent>.s_id);
 }

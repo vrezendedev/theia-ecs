@@ -110,7 +110,7 @@ public sealed partial class World
         if (currentArchetype.Has(componentId))
             return EntityReferences.Invalid;
 
-        Archetype? newArchetype = currentArchetype.GetAddEdge(componentId);
+        Archetype? newArchetype = currentArchetype.TryGetAddEdge(componentId);
 
         if (newArchetype is null)
         {
@@ -133,12 +133,12 @@ public sealed partial class World
         return new EntityReferences(ref entityMeta, newArchetype);
     }
 
-    public bool TryAdd<T>(Entity entity, in T component = default)
-        where T : struct
+    public bool TryAdd<TComponent>(Entity entity, in TComponent component = default)
+        where TComponent : struct
     {
         ThrowIfQueriesExecuting();
 
-        EntityReferences entityReferences = AttemptAdd(entity, ComponentMeta<T>.s_id);
+        EntityReferences entityReferences = AttemptAdd(entity, ComponentMeta<TComponent>.s_id);
 
         if (entityReferences._valid)
             entityReferences._archetype!.Set(in entityReferences._entityMeta, in component);
@@ -163,7 +163,7 @@ public sealed partial class World
         if (currentSignature._length == 1)
             return AttemptGhoulify(entity);
 
-        Archetype? newArchetype = currentArchetype.GetRemoveEdge(componentId);
+        Archetype? newArchetype = currentArchetype.TryGetRemoveEdge(componentId);
 
         if (newArchetype is null)
         {
@@ -195,57 +195,57 @@ public sealed partial class World
         return true;
     }
 
-    public bool TryRemove<T>(Entity entity)
-        where T : struct
+    public bool TryRemove<TComponent>(Entity entity)
+        where TComponent : struct
     {
         ThrowIfQueriesExecuting();
 
-        return AttemptRemove(entity, ComponentMeta<T>.s_id);
+        return AttemptRemove(entity, ComponentMeta<TComponent>.s_id);
     }
 
-    public ref T Get<T>(Entity entity)
-        where T : struct
+    public ref TComponent Get<TComponent>(Entity entity)
+        where TComponent : struct
     {
         if (!IsAlive(entity))
-            ThrowIfEntityNotAlive(entity);
+            ThrowEntityNotAlive(entity);
 
-        int componentId = ComponentMeta<T>.s_id;
+        int componentId = ComponentMeta<TComponent>.s_id;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
 
         Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
 
         if (!archetype.Has(componentId))
-            ThrowIfEntityMissingComponent<T>(entity);
+            ThrowEntityMissingComponent<TComponent>(entity);
 
-        return ref archetype.Get<T>(in entityMeta);
+        return ref archetype.Get<TComponent>(in entityMeta);
     }
 
-    public void Set<T>(Entity entity, in T component)
-        where T : struct
+    public void Set<TComponent>(Entity entity, in TComponent component)
+        where TComponent : struct
     {
         if (!IsAlive(entity))
-            ThrowIfEntityNotAlive(entity);
+            ThrowEntityNotAlive(entity);
 
-        int componentId = ComponentMeta<T>.s_id;
+        int componentId = ComponentMeta<TComponent>.s_id;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
 
         Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
 
         if (!archetype.Has(componentId))
-            ThrowIfEntityMissingComponent<T>(entity);
+            ThrowEntityMissingComponent<TComponent>(entity);
 
         archetype.Set(in entityMeta, component);
     }
 
-    public bool Has<T>(Entity entity)
-        where T : struct
+    public bool Has<TComponent>(Entity entity)
+        where TComponent : struct
     {
         if (!IsAlive(entity))
             return false;
 
-        int componentId = ComponentMeta<T>.s_id;
+        int componentId = ComponentMeta<TComponent>.s_id;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
 
@@ -273,19 +273,15 @@ public sealed partial class World
     }
 
     [DoesNotReturn]
-    internal static void ThrowIfEntityNotAlive(Entity entity)
-    {
+    internal static void ThrowEntityNotAlive(Entity entity) =>
         throw new InvalidOperationException(
             $"{entity} is not alive. Component access requires a live entity."
         );
-    }
 
     [DoesNotReturn]
-    internal static void ThrowIfEntityMissingComponent<T>(Entity entity)
-        where T : struct
-    {
+    internal static void ThrowEntityMissingComponent<TComponent>(Entity entity)
+        where TComponent : struct =>
         throw new InvalidOperationException(
-            $"{entity} does not have component '{typeof(T).Name}'. Add the component before attempting to access it."
+            $"{entity} does not have component '{typeof(TComponent).Name}'. Add the component before attempting to access it."
         );
-    }
 }

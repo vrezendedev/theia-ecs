@@ -7,13 +7,13 @@ using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Queries;
 
-public sealed class SettlerQuery<T1> : SettlerQuery
-    where T1 : struct
+public sealed class SettlerQuery<ComponentT1> : SettlerQuery
+    where ComponentT1 : struct
 {
-    internal SettlerQuery(in World world, in Assemblage<T1> assemblage)
+    internal SettlerQuery(in World world, in Assemblage<ComponentT1> assemblage)
         : base(world, assemblage) { }
 
-    public void ForEachEntity(ForEachEntity<T1> forEachEntity)
+    public void ForEachEntity(ForEachEntity<ComponentT1> forEachEntity)
     {
         _world.IncrementQueriesBeingExecuted();
 
@@ -36,7 +36,7 @@ public sealed class SettlerQuery<T1> : SettlerQuery
 
             Span<Entity> entities = indexer.GetValues();
 
-            Span<T1> storageT1 = ((Storage<T1>)storagesT1[i]).GetValues(count);
+            Span<ComponentT1> storageT1 = ((Storage<ComponentT1>)storagesT1[i]).GetValues(count);
 
             for (int j = 0; j < count; j++)
                 forEachEntity(entities[j], ref storageT1[j]);
@@ -45,7 +45,7 @@ public sealed class SettlerQuery<T1> : SettlerQuery
         _world.DecrementQueriesBeingExecuted();
     }
 
-    public void ForEach(ForEach<T1> forEach)
+    public void ForEach(ForEach<ComponentT1> forEach)
     {
         _world.IncrementQueriesBeingExecuted();
 
@@ -66,7 +66,7 @@ public sealed class SettlerQuery<T1> : SettlerQuery
             if (count == 0)
                 continue;
 
-            Span<T1> storageT1 = ((Storage<T1>)storagesT1[i]).GetValues(count);
+            Span<ComponentT1> storageT1 = ((Storage<ComponentT1>)storagesT1[i]).GetValues(count);
 
             for (int j = 0; j < count; j++)
                 forEach(ref storageT1[j]);
@@ -76,13 +76,13 @@ public sealed class SettlerQuery<T1> : SettlerQuery
     }
 }
 
-public sealed class NomadQuery<T1> : NomadQuery
-    where T1 : struct
+public sealed class NomadQuery<ComponentT1> : NomadQuery
+    where ComponentT1 : struct
 {
     internal NomadQuery(in World world, ReadOnlySpan<int> componentIds)
         : base(world, componentIds) { }
 
-    public void ForEachEntity(ForEachEntity<T1> forEachEntity)
+    public void ForEachEntity(ForEachEntity<ComponentT1> forEachEntity)
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 
@@ -93,7 +93,7 @@ public sealed class NomadQuery<T1> : NomadQuery
 
         ReadOnlySpan<Archetype> matchedArchetypesIds = GetMatchedArchetypes();
 
-        int componentT1Id = ComponentMeta<T1>.s_id;
+        int componentT1Id = ComponentMeta<ComponentT1>.s_id;
 
         foreach (Archetype archetype in matchedArchetypesIds)
         {
@@ -113,7 +113,9 @@ public sealed class NomadQuery<T1> : NomadQuery
 
                 Span<Entity> entities = indexer.GetValues();
 
-                Span<T1> storageT1 = ((Storage<T1>)storagesT1[i]).GetValues(count);
+                Span<ComponentT1> storageT1 = ((Storage<ComponentT1>)storagesT1[i]).GetValues(
+                    count
+                );
 
                 for (int j = 0; j < count; j++)
                     forEachEntity(entities[j], ref storageT1[j]);
@@ -123,7 +125,7 @@ public sealed class NomadQuery<T1> : NomadQuery
         _world.DecrementQueriesBeingExecuted();
     }
 
-    public void ForEach(ForEach<T1> forEach)
+    public void ForEach(ForEach<ComponentT1> forEach)
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 
@@ -134,7 +136,7 @@ public sealed class NomadQuery<T1> : NomadQuery
 
         ReadOnlySpan<Archetype> matchedArchetypesIds = GetMatchedArchetypes();
 
-        int componentT1Id = ComponentMeta<T1>.s_id;
+        int componentT1Id = ComponentMeta<ComponentT1>.s_id;
 
         foreach (Archetype archetype in matchedArchetypesIds)
         {
@@ -152,7 +154,9 @@ public sealed class NomadQuery<T1> : NomadQuery
                 if (count == 0)
                     continue;
 
-                Span<T1> storageT1 = ((Storage<T1>)storagesT1[i]).GetValues(count);
+                Span<ComponentT1> storageT1 = ((Storage<ComponentT1>)storagesT1[i]).GetValues(
+                    count
+                );
 
                 for (int j = 0; j < count; j++)
                     forEach(ref storageT1[j]);

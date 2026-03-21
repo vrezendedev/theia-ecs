@@ -45,24 +45,26 @@ public sealed partial class World
         }
     }
 
-    public SettlerQuery<T1> CreateSettlerQuery<T1>(Assemblage<T1> assemblage)
-        where T1 : struct
+    public SettlerQuery<ComponentT1> CreateSettlerQuery<ComponentT1>(
+        Assemblage<ComponentT1> assemblage
+    )
+        where ComponentT1 : struct
     {
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
 
-        return new SettlerQuery<T1>(this, assemblage);
+        return new SettlerQuery<ComponentT1>(this, assemblage);
     }
 
-    public NomadQuery<T1> CreateNomadQuery<T1>()
-        where T1 : struct
+    public NomadQuery<ComponentT1> CreateNomadQuery<ComponentT1>()
+        where ComponentT1 : struct
     {
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
 
-        ReadOnlySpan<int> componentIds = stackalloc int[1] { ComponentMeta<T1>.s_id };
+        ReadOnlySpan<int> componentIds = stackalloc int[1] { ComponentMeta<ComponentT1>.s_id };
 
-        NomadQuery<T1> nomadQuery = new NomadQuery<T1>(this, componentIds);
+        NomadQuery<ComponentT1> nomadQuery = new NomadQuery<ComponentT1>(this, componentIds);
 
         AddNomadQuery(nomadQuery);
 

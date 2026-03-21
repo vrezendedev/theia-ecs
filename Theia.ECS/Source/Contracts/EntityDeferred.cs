@@ -2,9 +2,9 @@ using Theia.ECS.Entities;
 
 namespace Theia.ECS.Contracts;
 
-internal readonly struct EntityCreateDeferred<T1>
+internal readonly struct EntityCreateDeferred<ComponentT1>
 {
-    internal readonly required T1 _componentT1 { get; init; }
+    internal readonly required ComponentT1 _componentT1 { get; init; }
 }
 
 internal readonly struct EntityComponentDeferred
