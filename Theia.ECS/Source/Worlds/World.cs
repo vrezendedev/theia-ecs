@@ -4,6 +4,7 @@ using System.Numerics;
 using System.Threading;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
+using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
 using Theia.ECS.Queries;
@@ -58,7 +59,7 @@ public sealed partial class World
         _nomadQueries = Array.Empty<NomadQuery>();
 
         _deferredAdd = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);
-        _deferredAddStorages = new Dictionary<int, Components.DeferredStorage>();
+        _deferredAddStorages = Array.Empty<DeferredStorage>();
         _deferredRemove = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);
         _deferredGhoulify = new Queue<Entity>(DefaultDeferredCommandsCapacity);
 

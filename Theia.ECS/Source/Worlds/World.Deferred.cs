@@ -13,7 +13,7 @@ public sealed partial class World
     private bool _isFlushingDeferred;
     private Queue<Entity> _deferredGhoulify;
     private Queue<EntityComponentDeferred> _deferredAdd;
-    private Dictionary<int, DeferredStorage> _deferredAddStorages;
+    private DeferredStorage[] _deferredAddStorages;
     private Queue<EntityComponentDeferred> _deferredRemove;
 
     internal bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
@@ -30,6 +30,25 @@ public sealed partial class World
 
     private void DeferredGhoulifyHandler(Entity entity) => AttemptGhoulify(entity);
 
+    private DeferredStorage<T> GetOrAddDeferredStorage<T>(int componentId)
+        where T : struct
+    {
+        DeferredStorage deferredStorage;
+
+        if (componentId > _deferredAddStorages.Length - 1)
+            Array.Resize(ref _deferredAddStorages, componentId + 1);
+
+        deferredStorage = _deferredAddStorages[componentId];
+
+        if (deferredStorage is null)
+        {
+            deferredStorage = new DeferredStorage<T>(DefaultDeferredCommandsCapacity);
+            _deferredAddStorages[componentId] = deferredStorage;
+        }
+
+        return (DeferredStorage<T>)deferredStorage;
+    }
+
     public void DeferredAdd<T>(Entity entity, in T component = default)
         where T : struct
     {
@@ -43,13 +62,9 @@ public sealed partial class World
                 new EntityComponentDeferred() { _entity = entity, _componentId = componentId }
             );
 
-            if (!_deferredAddStorages.TryGetValue(componentId, out DeferredStorage? storage))
-            {
-                storage = new DeferredStorage<T>(DefaultDeferredCommandsCapacity);
-                _deferredAddStorages.Add(componentId, storage);
-            }
+            DeferredStorage<T> storage = GetOrAddDeferredStorage<T>(componentId);
 
-            ((DeferredStorage<T>)storage).EnqueueDeferred(component);
+            storage.EnqueueDeferred(component);
         }
     }
 

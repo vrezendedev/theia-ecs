@@ -31,8 +31,8 @@ internal sealed class Archetype
     private Storage[][] _storages;
 
     private Assemblage? _assemblage;
-    private readonly Dictionary<int, Archetype> _addEdges;
-    private readonly Dictionary<int, Archetype> _removeEdges;
+    private Archetype[] _addEdges;
+    private Archetype[] _removeEdges;
 
     private Stack<int> _free;
     private Queue<int> _lazy;
@@ -52,8 +52,8 @@ internal sealed class Archetype
         for (int i = 0; i < _storages.Length; i++)
             _storages[i] = new Storage[1];
 
-        _addEdges = new();
-        _removeEdges = new();
+        _addEdges = Array.Empty<Archetype>();
+        _removeEdges = Array.Empty<Archetype>();
 
         _free = new(1);
         _lazy = new(1);
@@ -221,26 +221,31 @@ internal sealed class Archetype
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Archetype? GetAddEdge(int componentId)
+    private Archetype? TryGetEdge(int componentId, ref Archetype[] edges) =>
+        componentId > edges.Length - 1 ? null : edges[componentId];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SetEdge(int componentId, Archetype archetype, ref Archetype[] edges)
     {
-        _addEdges.TryGetValue(componentId, out Archetype? archetype);
-        return archetype;
+        if (componentId > edges.Length - 1)
+            Array.Resize(ref edges, componentId + 1);
+
+        edges[componentId] = archetype;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Archetype? GetAddEdge(int componentId) => TryGetEdge(componentId, ref _addEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void SetAddEdge(int componentId, in Archetype archetype) =>
-        _addEdges.Add(componentId, archetype);
+        SetEdge(componentId, archetype, ref _addEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Archetype? GetRemoveEdge(int componentId)
-    {
-        _removeEdges.TryGetValue(componentId, out Archetype? archetype);
-        return archetype;
-    }
+    internal Archetype? GetRemoveEdge(int componentId) => TryGetEdge(componentId, ref _removeEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void SetRemoveEdge(int componentId, in Archetype archetype) =>
-        _removeEdges.Add(componentId, archetype);
+        SetEdge(componentId, archetype, ref _removeEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<Indexer> GetIndexers() => _indexers.AsSpan(0, _initializedCount);
