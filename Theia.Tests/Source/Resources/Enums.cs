@@ -51,3 +51,21 @@ public enum MixedAttributesEnum
     [Matches<MatchesComponentA>]
     ComponentA,
 }
+
+public enum ManagedDataKey : int
+{
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    Unregistered = 99,
+}
+
+public enum ByteKeyEnum : byte
+{
+    A,
+}

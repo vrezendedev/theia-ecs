@@ -70,10 +70,10 @@ public sealed class ComponentEnumTests
     [Fact]
     public void FromComponent_MixedAttributesEnum_ThrowsInvalidOperationException()
     {
-        TypeInitializationException ex = Assert.Throws<TypeInitializationException>(() =>
+        TypeInitializationException exception = Assert.Throws<TypeInitializationException>(() =>
             ComponentEnum<MixedAttributesEnum>.FromComponent(0)
         );
 
-        Assert.IsType<InvalidOperationException>(ex.InnerException);
+        Assert.IsType<InvalidOperationException>(exception.InnerException);
     }
 }
