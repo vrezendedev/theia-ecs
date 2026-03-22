@@ -56,6 +56,8 @@ public sealed partial class World
 
         _archetypes = new Archetype[DefaultArchetypesCapacity];
 
+        _uniques = Array.Empty<Unique>();
+
         _nomadQueries = Array.Empty<NomadQuery>();
 
         _deferredAdd = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);

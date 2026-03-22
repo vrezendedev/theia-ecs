@@ -16,7 +16,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.True(world.IsAlive(entity));
     }
@@ -26,7 +26,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -38,7 +38,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -56,7 +56,7 @@ public sealed class WorldEntityLifecycleTests
 
         int before = world.CountEntities();
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         Assert.Equal(before + 1, world.CountEntities());
     }
@@ -66,7 +66,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         int before = world.CountEntities();
 
@@ -80,7 +80,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         int before = world.CountGhouls();
 
@@ -96,13 +96,13 @@ public sealed class WorldEntityLifecycleTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         world.TryGhoulify(entity);
 
         int ghoulsBefore = world.CountGhouls();
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         Assert.Equal(ghoulsBefore - 1, world.CountGhouls());
     }
@@ -112,7 +112,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.True(world.TryGhoulify(entity));
     }
@@ -122,7 +122,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -144,11 +144,11 @@ public sealed class WorldEntityLifecycleTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity original = assemblage.TryCreate(new Position());
+        Entity original = assemblage.Create(new Position());
 
         world.TryGhoulify(original);
 
-        Entity recycled = assemblage.TryCreate(new Position());
+        Entity recycled = assemblage.Create(new Position());
 
         Assert.Equal(original._id, recycled._id);
     }
@@ -160,11 +160,11 @@ public sealed class WorldEntityLifecycleTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity original = assemblage.TryCreate(new Position());
+        Entity original = assemblage.Create(new Position());
 
         world.TryGhoulify(original);
 
-        Entity recycled = assemblage.TryCreate(new Position());
+        Entity recycled = assemblage.Create(new Position());
 
         Assert.True(recycled._version > original._version);
     }
@@ -176,8 +176,8 @@ public sealed class WorldEntityLifecycleTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entityA = assemblage.TryCreate(new Position());
-        Entity entityB = assemblage.TryCreate(new Position());
+        Entity entityA = assemblage.Create(new Position());
+        Entity entityB = assemblage.Create(new Position());
 
         world.TryGhoulify(entityA);
 
@@ -190,7 +190,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.True(world.TryAdd<Velocity>(entity));
     }
@@ -200,7 +200,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -212,7 +212,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.False(world.TryAdd<Position>(entity));
     }
@@ -222,7 +222,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryAdd(entity, new Velocity { X = 3, Y = 7 });
 
@@ -237,7 +237,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryAdd<Velocity>(entity);
 
@@ -249,9 +249,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world
-            .CreateAssemblage<Position>()
-            .TryCreate(new Position { X = 42, Y = 13 });
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position { X = 42, Y = 13 });
 
         world.TryAdd<Velocity>(entity);
 
@@ -266,7 +264,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryAdd<Velocity>(entity);
         world.TryAdd<Rotation>(entity);
@@ -284,7 +282,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryAdd<Velocity>(entity);
 
@@ -296,7 +294,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.False(world.TryRemove<Velocity>(entity));
     }
@@ -306,7 +304,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
         world.TryGhoulify(entity);
 
         Assert.False(world.TryRemove<Position>(entity));
@@ -317,7 +315,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryAdd<Velocity>(entity);
         world.TryRemove<Velocity>(entity);
@@ -330,7 +328,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryRemove<Position>(entity);
 
@@ -342,7 +340,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.True(world.TryRemove<Position>(entity));
     }
@@ -352,7 +350,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position { X = 5, Y = 9 });
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position { X = 5, Y = 9 });
 
         world.TryAdd<Velocity>(entity);
         world.TryRemove<Velocity>(entity);
@@ -368,7 +366,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position { X = 3, Y = 7 });
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position { X = 3, Y = 7 });
 
         ref Position position = ref world.Get<Position>(entity);
 
@@ -381,7 +379,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position { X = 1, Y = 1 });
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position { X = 1, Y = 1 });
 
         world.Get<Position>(entity).X = 99;
 
@@ -393,7 +391,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -413,7 +411,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() => world.Get<Velocity>(entity));
     }
@@ -423,7 +421,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.Set(entity, new Position { X = 5, Y = 8 });
 
@@ -436,7 +434,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.Set(entity, new Position { X = 1 });
         world.Set(entity, new Position { X = 2 });
@@ -450,7 +448,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -462,7 +460,7 @@ public sealed class WorldEntityLifecycleTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() => world.Set(entity, new Velocity()));
     }

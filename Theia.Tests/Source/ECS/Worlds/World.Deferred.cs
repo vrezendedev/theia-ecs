@@ -21,7 +21,7 @@ public sealed class WorldDeferredTests
         Entity[] entities = new Entity[threadCount * commandsPerThread];
 
         for (int i = 0; i < entities.Length; i++)
-            entities[i] = assemblage.TryCreate(new Position());
+            entities[i] = assemblage.Create(new Position());
 
         onEachEntityCreated?.Invoke(entities);
 
@@ -48,7 +48,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredGhoulify(entity);
 
@@ -60,7 +60,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredGhoulify(entity);
 
@@ -74,7 +74,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -87,7 +87,7 @@ public sealed class WorldDeferredTests
     public void DeferredAdd_BeforeFlush_EntityDoesNotHaveComponent()
     {
         World world = new();
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredAdd<Velocity>(entity);
 
@@ -98,7 +98,7 @@ public sealed class WorldDeferredTests
     public void DeferredAdd_AfterFlush_EntityHasComponent()
     {
         World world = new();
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredAdd<Velocity>(entity);
 
@@ -111,7 +111,7 @@ public sealed class WorldDeferredTests
     public void DeferredAdd_AfterFlush_ComponentDataIsCorrect()
     {
         World world = new();
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredAdd(entity, new Velocity { X = 4, Y = 8 });
         world.FlushDeferred();
@@ -126,7 +126,7 @@ public sealed class WorldDeferredTests
     public void DeferredAdd_ToDeadEntity_AfterFlush_IsDiscardedSilently()
     {
         World world = new();
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
         world.TryGhoulify(entity);
 
         world.DeferredAdd<Velocity>(entity);
@@ -138,7 +138,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredAdd(entity, new Position { X = 99 });
 
@@ -152,7 +152,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryAdd<Velocity>(entity);
 
@@ -166,7 +166,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryAdd<Velocity>(entity);
 
@@ -182,7 +182,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredRemove<Position>(entity);
 
@@ -196,7 +196,7 @@ public sealed class WorldDeferredTests
     {
         World world = new();
 
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.TryGhoulify(entity);
 
@@ -220,8 +220,8 @@ public sealed class WorldDeferredTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entityA = assemblage.TryCreate(new Position());
-        Entity entityB = assemblage.TryCreate(new Position());
+        Entity entityA = assemblage.Create(new Position());
+        Entity entityB = assemblage.Create(new Position());
 
         world.DeferredGhoulify(entityA);
         world.DeferredAdd(entityB, new Velocity { X = 5 });
@@ -238,7 +238,7 @@ public sealed class WorldDeferredTests
     public void FlushDeferred_CalledTwice_SecondFlushDoesNotApplyCommandsAgain()
     {
         World world = new();
-        Entity entity = world.CreateAssemblage<Position>().TryCreate(new Position());
+        Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
         world.DeferredAdd<Velocity>(entity);
         world.FlushDeferred();

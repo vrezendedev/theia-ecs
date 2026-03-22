@@ -33,7 +33,7 @@ public sealed class WorldConstructorTests
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
         for (int i = 0; i < 1024; i++)
-            assemblage.TryCreate(new Position { X = i });
+            assemblage.Create(new Position { X = i });
     }
 
     [Fact]

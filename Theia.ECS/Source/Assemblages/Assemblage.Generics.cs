@@ -20,14 +20,14 @@ public class Assemblage<ComponentT1> : Assemblage
         : base(world, archetype, componentStorageMapping) =>
         _deferredCreate = new(World.DefaultDeferredCommandsCapacity);
 
-    public Entity TryCreate(in ComponentT1 componentT1)
+    public Entity Create(in ComponentT1 componentT1)
     {
         _world.ThrowIfQueriesExecuting();
 
-        return Create(in componentT1)._entity;
+        return CreateAndSet(in componentT1)._entity;
     }
 
-    internal EntityCreated Create(in ComponentT1 componentT1)
+    internal EntityCreated CreateAndSet(in ComponentT1 componentT1)
     {
         EntityCreated entityCreated = _world.CreateEntity(_archetype);
 
@@ -55,6 +55,6 @@ public class Assemblage<ComponentT1> : Assemblage
     internal override void DeferredCreate()
     {
         while (_deferredCreate.Count > 0)
-            Create(_deferredCreate.Dequeue()._componentT1);
+            CreateAndSet(_deferredCreate.Dequeue()._componentT1);
     }
 }

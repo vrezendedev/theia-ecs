@@ -60,7 +60,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        assemblage.TryCreate(new Position { X = 1 });
+        assemblage.Create(new Position { X = 1 });
 
         NomadQuery<Position> query = world.CreateNomadQuery<Position>();
 
@@ -80,7 +80,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        assemblage.TryCreate(new Position { X = 1 });
+        assemblage.Create(new Position { X = 1 });
 
         int callCount = 0;
 
@@ -128,7 +128,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        assemblage.TryCreate(new Position { X = 1 });
+        assemblage.Create(new Position { X = 1 });
 
         int callCount = 0;
 
@@ -146,7 +146,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        assemblage.TryCreate(new Position { X = 1 });
+        assemblage.Create(new Position { X = 1 });
 
         int callCount = 0;
 
@@ -167,7 +167,7 @@ public sealed class WorldQueriesTest
         const int count = 10;
 
         for (int i = 0; i < count; i++)
-            assemblage.TryCreate(new Position { X = i });
+            assemblage.Create(new Position { X = i });
 
         int callCount = 0;
 
@@ -185,7 +185,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity entity = assemblage.TryCreate(new Position { X = 1, Y = 2 });
+        Entity entity = assemblage.Create(new Position { X = 1, Y = 2 });
 
         query.ForEach(
             (ref Position position) =>
@@ -208,7 +208,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position { X = 1 });
+        Entity entity = assemblage.Create(new Position { X = 1 });
 
         query.ForEach((ref Position position) => position.X = 55);
 
@@ -229,7 +229,7 @@ public sealed class WorldQueriesTest
         Entity[] entities = new Entity[count];
 
         for (int i = 0; i < count; i++)
-            entities[i] = assemblage.TryCreate(new Position { X = i });
+            entities[i] = assemblage.Create(new Position { X = i });
 
         query.ForEach((ref Position position) => position.X *= 2);
 
@@ -246,11 +246,11 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> positionOnly = world.CreateAssemblage<Position>();
 
-        Entity entityA = positionOnly.TryCreate(new Position { X = 1 });
+        Entity entityA = positionOnly.Create(new Position { X = 1 });
 
         Assert.True(world.TryAdd<Velocity>(entityA));
 
-        Entity entityB = positionOnly.TryCreate(new Position { X = 2 });
+        Entity entityB = positionOnly.Create(new Position { X = 2 });
 
         int callCount = 0;
 
@@ -268,7 +268,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position { X = 3 });
+        Entity entity = assemblage.Create(new Position { X = 3 });
 
         world.TryAdd<Velocity>(entity);
 
@@ -288,7 +288,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Velocity> velocityOnly = world.CreateAssemblage<Velocity>();
 
-        velocityOnly.TryCreate(new Velocity { X = 1 });
+        velocityOnly.Create(new Velocity { X = 1 });
 
         int callCount = 0;
 
@@ -306,7 +306,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         query.ForEach((ref Position _) => { });
 
@@ -322,7 +322,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         query.ForEach((ref Position _) => { });
 
@@ -338,7 +338,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() =>
             query.ForEach((ref Position _) => world.TryAdd<Velocity>(entity))
@@ -354,7 +354,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() =>
             query.ForEach((ref Position _) => world.TryAdd<Velocity>(entity))
@@ -373,7 +373,7 @@ public sealed class WorldQueriesTest
         int count = assemblage._archetype._capacity * 2;
 
         for (int i = 0; i < count; i++)
-            assemblage.TryCreate(new Position { X = i });
+            assemblage.Create(new Position { X = i });
 
         int callCount = 0;
 
@@ -394,7 +394,7 @@ public sealed class WorldQueriesTest
         int count = assemblage._archetype._capacity * 2;
 
         for (int i = 0; i < count; i++)
-            assemblage.TryCreate(new Position { X = i });
+            assemblage.Create(new Position { X = i });
 
         int callCount = 0;
 
@@ -442,7 +442,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         int callCount = 0;
 
@@ -460,7 +460,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity created = assemblage.TryCreate(new Position { X = 5, Y = 10 });
+        Entity created = assemblage.Create(new Position { X = 5, Y = 10 });
 
         Entity receivedEntity = default;
 
@@ -487,7 +487,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity created = assemblage.TryCreate(new Position { X = 7, Y = 3 });
+        Entity created = assemblage.Create(new Position { X = 7, Y = 3 });
 
         Entity receivedEntity = default;
 
@@ -514,7 +514,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity entity = assemblage.TryCreate(new Position { X = 1 });
+        Entity entity = assemblage.Create(new Position { X = 1 });
 
         query.ForEachEntity((Entity _, ref Position position) => position.X = 42);
 
@@ -530,11 +530,11 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> positionOnly = world.CreateAssemblage<Position>();
 
-        Entity entityA = positionOnly.TryCreate(new Position { X = 1 });
+        Entity entityA = positionOnly.Create(new Position { X = 1 });
 
         Assert.True(world.TryAdd<Velocity>(entityA));
 
-        Entity entityB = positionOnly.TryCreate(new Position { X = 2 });
+        Entity entityB = positionOnly.Create(new Position { X = 2 });
 
         int callCount = 0;
 
@@ -552,7 +552,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         query.ForEachEntity((Entity _, ref Position __) => { });
 
@@ -568,7 +568,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         query.ForEachEntity((Entity _, ref Position __) => { });
 
@@ -584,7 +584,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() =>
             query.ForEachEntity((Entity _, ref Position __) => world.TryGhoulify(entity))
@@ -600,7 +600,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() =>
             query.ForEachEntity((Entity _, ref Position __) => world.TryGhoulify(entity))
@@ -616,7 +616,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         int countBefore = world.CountEntities();
 
@@ -638,7 +638,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        assemblage.TryCreate(new Position());
+        assemblage.Create(new Position());
 
         int countBefore = world.CountEntities();
 
@@ -660,7 +660,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         query.ForEachEntity((Entity e, ref Position _) => world.DeferredGhoulify(e));
 
@@ -678,7 +678,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         query.ForEachEntity((Entity e, ref Position _) => world.DeferredGhoulify(e));
 
@@ -696,7 +696,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         query.ForEachEntity((Entity e, ref Position _) => world.DeferredAdd<Velocity>(e));
 
@@ -714,7 +714,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         query.ForEachEntity((Entity e, ref Position _) => world.DeferredAdd<Velocity>(e));
 
@@ -732,7 +732,7 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         query.ForEachEntity((Entity e, ref Position _) => world.DeferredRemove<Position>(e));
 
@@ -750,7 +750,7 @@ public sealed class WorldQueriesTest
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position());
+        Entity entity = assemblage.Create(new Position());
 
         world.TryAdd<Velocity>(entity);
 

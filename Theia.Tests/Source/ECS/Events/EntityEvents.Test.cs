@@ -19,7 +19,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnEntityCreated += (_) => fired = true;
 
-        assemblage.TryCreate(new ComponentA { A = 1 });
+        assemblage.Create(new ComponentA { A = 1 });
 
         Assert.True(fired);
     }
@@ -35,7 +35,7 @@ public sealed class EntityEventsTests
 
         assemblage.Events.OnEntityCreated += (_) => fired = true;
 
-        assemblage.TryCreate(new ComponentA { A = 1 });
+        assemblage.Create(new ComponentA { A = 1 });
 
         Assert.True(fired);
     }
@@ -51,7 +51,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnEntityCreated += (data) => createdEntity = data.Entity;
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         Assert.Equal(entity, createdEntity);
     }
@@ -67,7 +67,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnEntityCreated += (data) => hasComponent = data.Has<ComponentA>();
 
-        assemblage.TryCreate(new ComponentA { A = 1 });
+        assemblage.Create(new ComponentA { A = 1 });
 
         Assert.True(hasComponent);
     }
@@ -83,7 +83,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnEntityCreated += (data) => isAssemblage = data.Is(assemblage);
 
-        assemblage.TryCreate(new ComponentA { A = 1 });
+        assemblage.Create(new ComponentA { A = 1 });
 
         Assert.True(isAssemblage);
     }
@@ -95,7 +95,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool fired = false;
 
@@ -113,7 +113,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool fired = false;
 
@@ -131,7 +131,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         Entity ghoulifiedEntity = default;
 
@@ -149,7 +149,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool hadComponent = false;
 
@@ -167,7 +167,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryGhoulify(entity);
 
@@ -187,7 +187,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool wasAssemblage = false;
 
@@ -205,7 +205,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool fired = false;
 
@@ -223,7 +223,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool fired = false;
 
@@ -241,7 +241,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         Entity modifiedEntity = default;
 
@@ -259,7 +259,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         Type? type = null;
 
@@ -277,7 +277,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryGhoulify(entity);
 
@@ -297,7 +297,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool fired = false;
 
@@ -315,7 +315,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool has = false;
 
@@ -333,7 +333,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool had = false;
 
@@ -351,7 +351,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool had = false;
 
@@ -369,7 +369,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool is_ = false;
 
@@ -387,7 +387,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool was = false;
 
@@ -405,7 +405,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<ComponentB>(entity);
 
@@ -425,7 +425,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<ComponentB>(entity);
 
@@ -445,7 +445,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<ComponentB>(entity);
 
@@ -465,7 +465,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryGhoulify(entity);
 
@@ -485,7 +485,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         bool fired = false;
 
@@ -503,7 +503,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<ComponentB>(entity);
 
@@ -523,7 +523,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<ComponentB>(entity);
 
@@ -543,7 +543,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<ComponentB>(entity);
 
@@ -563,7 +563,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         MatchesEnum result = default;
 
@@ -581,7 +581,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         IncludesEnum result = default;
 
@@ -599,7 +599,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         MatchesEnum result = default;
 
@@ -617,7 +617,7 @@ public sealed class EntityEventsTests
 
         Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<MatchesComponentA>(entity);
 
@@ -646,7 +646,7 @@ public sealed class EntityEventsTests
 
         world.Events.Reset();
 
-        Entity entity = assemblage.TryCreate(new ComponentA { A = 1 });
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
         world.TryAdd<ComponentB>(entity);
 

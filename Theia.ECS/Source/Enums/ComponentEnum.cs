@@ -21,7 +21,7 @@ internal static class ComponentEnum<TEnum>
 
     private static readonly TEnum[] s_componentMap;
 
-    static ComponentEnum() => s_componentMap = TryInitialize();
+    static ComponentEnum() => s_componentMap = Initialize();
 
     private static ComponentEnumMappingType ValidateEnum(in TEnum[] enumValues)
     {
@@ -46,7 +46,7 @@ internal static class ComponentEnum<TEnum>
             : ComponentEnumMappingType.None;
     }
 
-    private static TEnum[] TryInitialize()
+    private static TEnum[] Initialize()
     {
         TEnum[] enumValues = (TEnum[])Enum.GetValues(typeof(TEnum));
 

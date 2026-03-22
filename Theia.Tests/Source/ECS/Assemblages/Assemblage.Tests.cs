@@ -35,16 +35,6 @@ public sealed class AssemblageTests
     }
 
     [Fact]
-    public void CreateAssemblage_RegistersAssemblageInWorld()
-    {
-        World world = new();
-
-        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
-
-        Assert.Contains(assemblage, world._assemblages);
-    }
-
-    [Fact]
     public void CreateAssemblage_ComponentStorageMappingHasOneEntry()
     {
         Assemblage<Position> assemblage = new World().CreateAssemblage<Position>();
@@ -85,25 +75,25 @@ public sealed class AssemblageTests
     }
 
     [Fact]
-    public void TryCreate_ReturnsAliveEntity()
+    public void Create_ReturnsAliveEntity()
     {
         World world = new();
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position { X = 1, Y = 2 });
+        Entity entity = assemblage.Create(new Position { X = 1, Y = 2 });
 
         Assert.True(world.IsAlive(entity));
     }
 
     [Fact]
-    public void TryCreate_ComponentDataIsStoredCorrectly()
+    public void Create_ComponentDataIsStoredCorrectly()
     {
         World world = new();
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entity = assemblage.TryCreate(new Position { X = 5, Y = 10 });
+        Entity entity = assemblage.Create(new Position { X = 5, Y = 10 });
 
         ref Position position = ref world.Get<Position>(entity);
 
@@ -112,40 +102,40 @@ public sealed class AssemblageTests
     }
 
     [Fact]
-    public void TryCreate_IncreasesEntityCount()
+    public void Create_IncreasesEntityCount()
     {
         World world = new();
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
         int countBefore = world.CountEntities();
-        assemblage.TryCreate(new Position { X = 1, Y = 2 });
+        assemblage.Create(new Position { X = 1, Y = 2 });
 
         Assert.Equal(countBefore + 1, world.CountEntities());
     }
 
     [Fact]
-    public void TryCreate_MultipleEntities_ReturnDistinctEntities()
+    public void Create_MultipleEntities_ReturnDistinctEntities()
     {
         World world = new();
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entityA = assemblage.TryCreate(new Position { X = 1 });
-        Entity entityB = assemblage.TryCreate(new Position { X = 2 });
+        Entity entityA = assemblage.Create(new Position { X = 1 });
+        Entity entityB = assemblage.Create(new Position { X = 2 });
 
         Assert.NotEqual(entityA._id, entityB._id);
     }
 
     [Fact]
-    public void TryCreate_MultipleEntities_ComponentDataIsIndependent()
+    public void Create_MultipleEntities_ComponentDataIsIndependent()
     {
         World world = new();
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        Entity entityA = assemblage.TryCreate(new Position { X = 1, Y = 2 });
-        Entity entityB = assemblage.TryCreate(new Position { X = 3, Y = 4 });
+        Entity entityA = assemblage.Create(new Position { X = 1, Y = 2 });
+        Entity entityB = assemblage.Create(new Position { X = 3, Y = 4 });
 
         ref Position positionA = ref world.Get<Position>(entityA);
         ref Position positionB = ref world.Get<Position>(entityB);
@@ -157,15 +147,15 @@ public sealed class AssemblageTests
     }
 
     [Fact]
-    public void TryCreate_DifferentAssemblages_EntitiesAreBothAlive()
+    public void Create_DifferentAssemblages_EntitiesAreBothAlive()
     {
         World world = new();
 
         Assemblage<Position> positionAssemblage = world.CreateAssemblage<Position>();
         Assemblage<Velocity> velocityAssemblage = world.CreateAssemblage<Velocity>();
 
-        Entity positionEntity = positionAssemblage.TryCreate(new Position { X = 1 });
-        Entity velocityEntity = velocityAssemblage.TryCreate(new Velocity { X = 2 });
+        Entity positionEntity = positionAssemblage.Create(new Position { X = 1 });
+        Entity velocityEntity = velocityAssemblage.Create(new Velocity { X = 2 });
 
         Assert.True(world.IsAlive(positionEntity));
         Assert.True(world.IsAlive(velocityEntity));
@@ -208,7 +198,7 @@ public sealed class AssemblageTests
         int x = 7;
         int y = 13;
 
-        Entity prior = assemblage.TryCreate(new Position { X = 0 });
+        Entity prior = assemblage.Create(new Position { X = 0 });
         assemblage.DeferredCreate(new Position { X = x, Y = y });
         world.FlushDeferred();
 

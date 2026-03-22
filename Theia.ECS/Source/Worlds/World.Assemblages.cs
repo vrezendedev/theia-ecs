@@ -8,7 +8,7 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
-    internal Assemblage[] _assemblages;
+    private Assemblage[] _assemblages;
 
     private void AddAssemblage(in Assemblage assemblage)
     {

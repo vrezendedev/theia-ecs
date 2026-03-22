@@ -67,7 +67,7 @@ public sealed partial class World
 
     private void Ghoulify(Entity entity, ref EntityMeta entityMeta, in Archetype archetype)
     {
-        TryUpdateEntitySwapped(archetype.Remove(entityMeta));
+        UpdateEntitySwappedIfValid(archetype.Remove(entityMeta));
 
         entityMeta._version++;
         entityMeta._archetypeIndex = EntityMeta.DefaultInvalidEntityMetaIndexes;
@@ -130,7 +130,7 @@ public sealed partial class World
         EntityTransferred transferred = currentArchetype.Transfer(entity, entityMeta, newArchetype);
 
         UpdateEntityAccounted(ref entityMeta, transferred._entityAccounted);
-        TryUpdateEntitySwapped(transferred._entitySwapped);
+        UpdateEntitySwappedIfValid(transferred._entitySwapped);
 
         return new EntityReferences(ref entityMeta, currentArchetype, newArchetype);
     }
@@ -206,7 +206,7 @@ public sealed partial class World
         EntityTransferred transferred = currentArchetype.Transfer(entity, entityMeta, newArchetype);
 
         UpdateEntityAccounted(ref entityMeta, transferred._entityAccounted);
-        TryUpdateEntitySwapped(transferred._entitySwapped);
+        UpdateEntitySwappedIfValid(transferred._entitySwapped);
 
         InvokeOnComponentRemoved(
             new EntityModified(
@@ -281,7 +281,7 @@ public sealed partial class World
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void TryUpdateEntitySwapped(EntitySwapped swapped)
+    private void UpdateEntitySwappedIfValid(EntitySwapped swapped)
     {
         if (swapped._entityID != EntitySwapped.InvalidEntitySwappedIndexes)
         {
