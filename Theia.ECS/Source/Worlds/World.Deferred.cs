@@ -70,15 +70,30 @@ public sealed partial class World
 
     private void DeferredAddHandler(EntityComponentDeferred entityComponentDeferred)
     {
-        DeferredStorage storage = _deferredAddStorages[entityComponentDeferred._componentId];
+        Entity entity = entityComponentDeferred._entity;
+        int componentId = entityComponentDeferred._componentId;
 
-        EntityReferences entityReferences = AttemptAdd(
-            entityComponentDeferred._entity,
-            entityComponentDeferred._componentId
-        );
+        DeferredStorage storage = _deferredAddStorages[componentId];
+
+        EntityReferences entityReferences = AttemptAdd(entity, componentId);
 
         if (entityReferences._valid)
-            storage.SetWithNext(in entityReferences._entityMeta, entityReferences._archetype!);
+        {
+            storage.SetWithNext(
+                in entityReferences._entityMeta,
+                entityReferences._currentArchetype!
+            );
+
+            InvokeOnComponentAdded(
+                new EntityModified(
+                    entity,
+                    in ComponentsMeta.GetComponentType(componentId)._type,
+                    in entityReferences._previousArchetype!,
+                    in entityReferences._currentArchetype!,
+                    componentId
+                )
+            );
+        }
         else
             storage.DiscardNext();
     }

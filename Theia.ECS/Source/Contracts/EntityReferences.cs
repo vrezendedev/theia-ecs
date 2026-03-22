@@ -7,14 +7,20 @@ internal readonly ref struct EntityReferences
 {
     internal readonly bool _valid;
     internal readonly ref EntityMeta _entityMeta;
-    internal readonly Archetype? _archetype;
+    internal readonly Archetype? _previousArchetype;
+    internal readonly Archetype? _currentArchetype;
 
     public EntityReferences() => _valid = false;
 
-    internal EntityReferences(ref EntityMeta entityMeta, Archetype archetype)
+    internal EntityReferences(
+        ref EntityMeta entityMeta,
+        Archetype previousArchetype,
+        Archetype currentArchetype
+    )
     {
         _entityMeta = ref entityMeta;
-        _archetype = archetype;
+        _previousArchetype = previousArchetype;
+        _currentArchetype = currentArchetype;
         _valid = true;
     }
 

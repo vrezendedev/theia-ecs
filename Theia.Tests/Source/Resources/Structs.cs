@@ -19,7 +19,7 @@ public struct GenericComponent<T>
 
 public struct ComponentA
 {
-    public int AField;
+    public int A;
 }
 
 public struct ComponentB
@@ -159,6 +159,11 @@ public struct StructWithBlittableGenerics<T, TT>
 }
 
 public struct MatchesComponentA
+{
+    public int Value;
+}
+
+public struct MatchesComponentB
 {
     public int Value;
 }

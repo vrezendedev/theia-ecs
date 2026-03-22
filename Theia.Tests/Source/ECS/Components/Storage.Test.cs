@@ -14,12 +14,12 @@ public sealed class StorageTests
         Storage<ComponentA> storage = new Storage<ComponentA>(length);
 
         for (int i = 0; i < length; i++)
-            storage.Set(i, new ComponentA() { AField = i });
+            storage.Set(i, new ComponentA() { A = i });
 
         Span<ComponentA> components = storage.GetValues(length);
 
         for (int i = 0; i < length; i++)
-            Assert.Equal(i, components[i].AField);
+            Assert.Equal(i, components[i].A);
     }
 
     [Fact]
@@ -30,11 +30,11 @@ public sealed class StorageTests
 
         int targetIndex = 0;
         int x = 10;
-        ComponentA component = new ComponentA() { AField = x };
+        ComponentA component = new ComponentA() { A = x };
 
         storage.Set(targetIndex, component);
 
-        Assert.Equal(x, storage.Get(targetIndex).AField);
+        Assert.Equal(x, storage.Get(targetIndex).A);
     }
 
     [Fact]
@@ -47,13 +47,13 @@ public sealed class StorageTests
         int from = 0;
         int value = 5;
 
-        storage.Set(from, new ComponentA() { AField = value });
+        storage.Set(from, new ComponentA() { A = value });
 
         int to = 5;
 
         storage.Move(from, to);
 
-        Assert.Equal(storage.Get(from).AField, storage.Get(to).AField);
+        Assert.Equal(storage.Get(from).A, storage.Get(to).A);
     }
 
     [Fact]
@@ -69,13 +69,10 @@ public sealed class StorageTests
         int oldIndex = 9;
         int newIndex = 15;
 
-        storageA.Set(oldIndex, new ComponentA() { AField = value });
+        storageA.Set(oldIndex, new ComponentA() { A = value });
 
         storageA.Transfer(oldIndex, newIndex, storageB);
 
-        Assert.Equal(
-            storageA.Get(oldIndex).AField,
-            ((Storage<ComponentA>)storageB).Get(newIndex).AField
-        );
+        Assert.Equal(storageA.Get(oldIndex).A, ((Storage<ComponentA>)storageB).Get(newIndex).A);
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
+using Theia.ECS.Contracts;
 using Theia.ECS.Events;
 using Theia.ECS.Worlds;
 
@@ -31,6 +32,13 @@ public abstract class Assemblage
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ReadOnlySpan<int> GetComponentStorageMapping() => _componentStorageMapping.AsSpan();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected void InvokeOnEntityCreated(EntityAssembled entityAssembled)
+    {
+        _world.Events.InvokeOnEntityCreated(entityAssembled);
+        Events.InvokeOnEntityCreated(entityAssembled);
+    }
 
     internal abstract void DeferredCreate();
 }

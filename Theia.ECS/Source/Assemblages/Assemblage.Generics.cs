@@ -35,6 +35,8 @@ public class Assemblage<ComponentT1> : Assemblage
 
         _archetype.Set(mapping[0], in entityCreated._entityMeta, in componentT1);
 
+        InvokeOnEntityCreated(new EntityAssembled(entityCreated._entity, in _archetype));
+
         return entityCreated;
     }
 

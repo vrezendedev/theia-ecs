@@ -88,6 +88,8 @@ public sealed partial class World
 
         Ghoulify(entity, ref entityMeta, in archetype);
 
+        InvokeOnEntityGhoulified(new EntityGhoulified(entity, in archetype));
+
         return true;
     }
 
@@ -130,7 +132,7 @@ public sealed partial class World
         UpdateEntityAccounted(ref entityMeta, transferred._entityAccounted);
         TryUpdateEntitySwapped(transferred._entitySwapped);
 
-        return new EntityReferences(ref entityMeta, newArchetype);
+        return new EntityReferences(ref entityMeta, currentArchetype, newArchetype);
     }
 
     public bool TryAdd<TComponent>(Entity entity, in TComponent component = default)
@@ -138,10 +140,24 @@ public sealed partial class World
     {
         ThrowIfQueriesExecuting();
 
-        EntityReferences entityReferences = AttemptAdd(entity, ComponentMeta<TComponent>.s_id);
+        int componentId = ComponentMeta<TComponent>.s_id;
+
+        EntityReferences entityReferences = AttemptAdd(entity, componentId);
 
         if (entityReferences._valid)
-            entityReferences._archetype!.Set(in entityReferences._entityMeta, in component);
+        {
+            entityReferences._currentArchetype!.Set(in entityReferences._entityMeta, in component);
+
+            InvokeOnComponentAdded(
+                new EntityModified(
+                    entity,
+                    ComponentsMeta.GetComponentType(componentId)._type,
+                    entityReferences._previousArchetype!,
+                    entityReferences._currentArchetype!,
+                    componentId
+                )
+            );
+        }
 
         return entityReferences._valid;
     }
@@ -191,6 +207,16 @@ public sealed partial class World
 
         UpdateEntityAccounted(ref entityMeta, transferred._entityAccounted);
         TryUpdateEntitySwapped(transferred._entitySwapped);
+
+        InvokeOnComponentRemoved(
+            new EntityModified(
+                entity,
+                ComponentsMeta.GetComponentType(componentId)._type,
+                currentArchetype,
+                newArchetype,
+                componentId
+            )
+        );
 
         return true;
     }
