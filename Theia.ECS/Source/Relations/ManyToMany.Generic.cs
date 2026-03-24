@@ -1,9 +1,7 @@
 namespace Theia.ECS.Relations;
 
-internal sealed class ManyToMany<TRelation> : Relation
+internal class ManyToMany<TRelation> : Relation
+    where TRelation : struct
 {
-    internal override void Reset()
-    {
-        throw new System.NotImplementedException();
-    }
+    internal override void Reset() { }
 }

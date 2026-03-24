@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Theia.ECS.Blittables;
@@ -9,7 +10,7 @@ namespace Theia.ECS.Reflection.Types;
 
 internal static class BlittableMeta
 {
-    private const BindingFlags Flags =
+    internal const BindingFlags Flags =
         BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
     private static readonly ConcurrentDictionary<Type, bool> s_cachedBlittables;
@@ -69,6 +70,9 @@ internal static class BlittableMeta
             return false;
         }
 
+        if (type.GetFields(BindingFlags.Static).Length > 0)
+            ThrowStaticFieldsNotAllowed(type);
+
         foreach (FieldInfo field in type.GetFields(Flags))
         {
             if (!IsStrictlyBlittable(field.FieldType))
@@ -81,4 +85,16 @@ internal static class BlittableMeta
         s_cachedBlittables[type] = true;
         return true;
     }
+
+    [DoesNotReturn]
+    private static void ThrowStaticFieldsNotAllowed(Type type) =>
+        throw new InvalidOperationException(
+            $"Type '{type.Name}' cannot declare static fields. Blittable types must contain only instance data."
+        );
+
+    [DoesNotReturn]
+    internal static void ThrowBlittableException<T>() =>
+        throw new InvalidOperationException(
+            $"'{typeof(T).Name}' must be a blittable struct. Ensure it contains only blittable value types and no bools, chars, strings, or reference types."
+        );
 }

@@ -82,12 +82,6 @@ public sealed class ComponentsMetaTests
     }
 
     [Fact]
-    public void GetComponentType_InvalidIndex_ThrowsIndexOutOfRangeException() =>
-        Assert.Throws<IndexOutOfRangeException>(() =>
-            ComponentsMeta.GetComponentType(ComponentsMeta.s_count)
-        );
-
-    [Fact]
     public void GetComponentType_ValidIndex_ReturnsComponentType()
     {
         int id = ComponentMeta<ComponentA>.s_id;

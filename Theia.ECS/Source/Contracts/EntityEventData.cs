@@ -1,6 +1,7 @@
 using System;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
+using Theia.ECS.Components;
 using Theia.ECS.Entities;
 using Theia.ECS.Enums;
 
@@ -70,7 +71,7 @@ public readonly ref struct EntityModified : IComponentSetChanged, IEntitySet, IE
     }
 
     public TEnum As<TEnum>()
-        where TEnum : unmanaged, Enum => ComponentEnum<TEnum>.FromComponent(_componentId);
+        where TEnum : unmanaged, Enum => StructEnum<TEnum, ComponentType>.FromStruct(_componentId);
 
     public bool Has<TComponent>()
         where TComponent : struct => _belongsTo.Has<TComponent>();

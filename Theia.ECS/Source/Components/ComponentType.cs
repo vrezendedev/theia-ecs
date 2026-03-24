@@ -1,17 +1,14 @@
 using System;
+using Theia.ECS.Reflection;
 
 namespace Theia.ECS.Components;
 
-internal abstract class ComponentType
+internal abstract class ComponentType : TypeMeta
 {
-    internal readonly Type _type;
     internal readonly int _sizeOf;
 
     internal ComponentType(Type type, int sizeOf)
-    {
-        _type = type;
-        _sizeOf = sizeOf;
-    }
+        : base(type) => _sizeOf = sizeOf;
 
     internal abstract Storage CreateStorage(int capacity);
 }

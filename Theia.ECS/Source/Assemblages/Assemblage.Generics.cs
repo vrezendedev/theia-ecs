@@ -44,7 +44,7 @@ public class Assemblage<ComponentT1> : Assemblage
     {
         _world.ThrowIfFlushingDeferred();
 
-        lock (_deferredCreate)
+        lock (_deferredCreateLock)
         {
             _deferredCreate.Enqueue(
                 new EntityCreateDeferred<ComponentT1>() { _componentT1 = componentT1 }

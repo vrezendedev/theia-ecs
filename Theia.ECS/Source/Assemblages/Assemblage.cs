@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
@@ -11,6 +12,8 @@ namespace Theia.ECS.Assemblages;
 public abstract class Assemblage
 {
     public readonly EntityEvents Events;
+
+    protected Lock _deferredCreateLock = new();
 
     internal readonly World _world;
     internal readonly Signature _signature;

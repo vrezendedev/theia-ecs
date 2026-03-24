@@ -11,10 +11,16 @@ namespace Theia.ECS.Worlds;
 public sealed partial class World
 {
     private bool _isFlushingDeferred;
+
     private Queue<Entity> _deferredGhoulify;
+    private Lock _deferredGhoulifyLock = new();
+
     private Queue<EntityComponentDeferred> _deferredAdd;
+    private Lock _deferredAddLock = new();
     private DeferredStorage[] _deferredAddStorages;
+
     private Queue<EntityComponentDeferred> _deferredRemove;
+    private Lock _deferredRemoveLock = new();
 
     internal bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
 
@@ -22,7 +28,7 @@ public sealed partial class World
     {
         ThrowIfFlushingDeferred();
 
-        lock (_deferredGhoulify)
+        lock (_deferredGhoulifyLock)
         {
             _deferredGhoulify.Enqueue(entity);
         }
@@ -56,7 +62,7 @@ public sealed partial class World
 
         int componentId = ComponentMeta<TComponent>.s_id;
 
-        lock (_deferredAdd)
+        lock (_deferredAddLock)
         {
             _deferredAdd.Enqueue(
                 new EntityComponentDeferred() { _entity = entity, _componentId = componentId }
@@ -103,7 +109,7 @@ public sealed partial class World
     {
         ThrowIfFlushingDeferred();
 
-        lock (_deferredRemove)
+        lock (_deferredRemoveLock)
         {
             _deferredRemove.Enqueue(
                 new EntityComponentDeferred()
