@@ -1,7 +1,6 @@
 #pragma warning disable CS0649
 using System.Runtime.InteropServices;
 using Theia.ECS.Blittables;
-using Theia.ECS.Blittables.Attributes;
 
 namespace Theia.Tests.Resources;
 
@@ -113,20 +112,6 @@ public ref struct NonBlittableRefStruct { }
 
 [StructLayout(LayoutKind.Auto)]
 public struct NonBlittableStructWithAutoLayout { }
-
-[AssumeBlittable]
-public struct AssumedBlittableStruct { }
-
-[AssumeBlittable]
-public struct AssumedBlittableOnNonBlittableStruct
-{
-    public string Value;
-}
-
-public struct StructWithAssumedBlittableOnNonBlittableStruct
-{
-    public AssumedBlittableOnNonBlittableStruct Value;
-}
 
 public struct StructWithPrimitiveBlittableFields
 {

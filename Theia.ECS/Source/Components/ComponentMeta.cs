@@ -20,14 +20,11 @@ internal static class ComponentsMeta
         DefaultComponentTypeMapCapacity
     ];
 
-    internal static readonly Lock s_lock = new();
+    private static readonly Lock s_lock = new();
 
     internal static int RegisterComponent<TComponent>(int sizeOfT)
         where TComponent : struct
     {
-        if (s_componentTypeId.TryGetValue(typeof(TComponent), out int id))
-            return id;
-
         lock (s_lock)
         {
             int currentLength = s_componentTypeMap.Length;

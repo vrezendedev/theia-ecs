@@ -135,24 +135,6 @@ public sealed partial class BlittableMetaTests
     [Fact]
     public void IsStrictlyBlittable_StructsWithStructLayoutAuto_ReturnsFalse() =>
         Assert.False(BlittableMeta.IsStrictlyBlittable(typeof(NonBlittableStructWithAutoLayout)));
-
-    [Fact]
-    public void IsStrictlyBlittable_StructsWithAssumeBlittableAttribute_ReturnsTrue() =>
-        Assert.True(BlittableMeta.IsStrictlyBlittable(typeof(AssumedBlittableStruct)));
-
-    [Fact]
-    public void IsStrictlyBlittable_AssumedBlittableWithReferenceField_ReturnsTrue() =>
-        Assert.True(
-            BlittableMeta.IsStrictlyBlittable(typeof(AssumedBlittableOnNonBlittableStruct))
-        );
-
-    [Fact]
-    public void IsStrictlyBlittable_StructWithAssumedBlittableOnNonBlittableStruct_ReturnsTrue() =>
-        Assert.True(
-            BlittableMeta.IsStrictlyBlittable(
-                typeof(StructWithAssumedBlittableOnNonBlittableStruct)
-            )
-        );
 }
 #endregion
 

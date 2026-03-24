@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Theia.ECS.Blittables;
-using Theia.ECS.Blittables.Attributes;
 using Theia.ECS.Entities;
 
 namespace Theia.ECS.Reflection.Types;
@@ -48,11 +47,6 @@ internal static class BlittableMeta
 
         if (s_cachedBlittables.TryGetValue(type, out bool cached))
             return cached;
-        else if (Attribute.IsDefined(type, typeof(AssumeBlittable)))
-        {
-            s_cachedBlittables[type] = true;
-            return true;
-        }
 
         if (type.IsGenericType)
         {
