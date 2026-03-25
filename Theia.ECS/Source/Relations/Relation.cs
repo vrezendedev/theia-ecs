@@ -2,7 +2,14 @@ namespace Theia.ECS.Relations;
 
 internal abstract class Relation
 {
-    protected const int DefaultRelationGrowthFactor = 2;
+    internal readonly RelationCardinality _cardinality;
+    internal readonly RelationSubtype _subtype;
+
+    internal Relation(RelationCardinality cardinality, RelationSubtype subtype)
+    {
+        _cardinality = cardinality;
+        _subtype = subtype;
+    }
 
     internal abstract void Reset();
 }

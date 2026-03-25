@@ -132,7 +132,7 @@ public sealed class RelationsMetaTests
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<OneToOne<OneToOneTag>>(relation);
+        Assert.IsType<Singular>(relation);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public sealed class RelationsMetaTests
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<OneToMany<OneToManyTag>>(relation);
+        Assert.IsType<Many>(relation);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public sealed class RelationsMetaTests
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<ManyToMany<ManyToManyTag>>(relation);
+        Assert.IsType<Many>(relation);
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public sealed class RelationsMetaTests
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<OneToOneData<OneToOneData>>(relation);
+        Assert.IsType<Singular<OneToOneData>>(relation);
     }
 
     [Fact]
@@ -184,7 +184,7 @@ public sealed class RelationsMetaTests
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<OneToManyData<OneToManyData>>(relation);
+        Assert.IsType<Many<OneToManyData>>(relation);
     }
 
     [Fact]
@@ -197,7 +197,7 @@ public sealed class RelationsMetaTests
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<ManyToManyData<ManyToManyData>>(relation);
+        Assert.IsType<Many<ManyToManyData>>(relation);
     }
 
     [Fact]

@@ -15,23 +15,31 @@ internal sealed class RelationType<TRelation> : RelationType
             _pool.TryDequeue(out Relation? relation);
 
             if (relation is null)
+            {
+                RelationCardinality cardinality = _cardinality;
+                RelationSubtype subtype = _subtype;
 #pragma warning disable CS8524
-                relation = (_cardinality, _subtype) switch
+                relation = (cardinality, subtype) switch
                 {
-                    (RelationCardinality.OneToOne, RelationSubtype.Tag) =>
-                        new OneToOne<TRelation>(),
-                    (RelationCardinality.OneToMany, RelationSubtype.Tag) =>
-                        new OneToMany<TRelation>(),
-                    (RelationCardinality.ManyToMany, RelationSubtype.Tag) =>
-                        new ManyToMany<TRelation>(),
-                    (RelationCardinality.OneToOne, RelationSubtype.Data) =>
-                        new OneToOneData<TRelation>(),
-                    (RelationCardinality.OneToMany, RelationSubtype.Data) =>
-                        new OneToManyData<TRelation>(),
-                    (RelationCardinality.ManyToMany, RelationSubtype.Data) =>
-                        new ManyToManyData<TRelation>(),
+                    (RelationCardinality.OneToOne, RelationSubtype.Tag) => new Singular(
+                        cardinality,
+                        subtype
+                    ),
+                    (RelationCardinality.OneToOne, RelationSubtype.Data) => new Singular<TRelation>(
+                        cardinality,
+                        subtype
+                    ),
+                    (RelationCardinality.OneToMany, RelationSubtype.Tag)
+                    or (RelationCardinality.ManyToMany, RelationSubtype.Tag) => new Many(
+                        cardinality,
+                        subtype
+                    ),
+                    (RelationCardinality.OneToMany, RelationSubtype.Data)
+                    or (RelationCardinality.ManyToMany, RelationSubtype.Data) =>
+                        new Many<TRelation>(cardinality, subtype),
                 };
 #pragma warning restore CS8524
+            }
 
             return relation;
         }
