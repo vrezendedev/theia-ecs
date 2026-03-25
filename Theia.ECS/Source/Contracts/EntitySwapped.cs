@@ -4,12 +4,12 @@ internal readonly ref struct EntitySwapped
 {
     internal const int InvalidEntitySwappedIndexes = -1;
     internal readonly int _entityID;
-    internal readonly int _componentIndex;
+    internal readonly int _dataIndex;
 
-    internal EntitySwapped(int entityId, int componentIndex)
+    internal EntitySwapped(int entityId, int dataIndex)
     {
         _entityID = entityId;
-        _componentIndex = componentIndex;
+        _dataIndex = dataIndex;
     }
 
     internal static EntitySwapped None =>

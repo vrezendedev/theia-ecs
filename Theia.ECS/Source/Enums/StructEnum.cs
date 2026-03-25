@@ -1,16 +1,14 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using Theia.ECS.Components;
 using Theia.ECS.Enums.Attributes;
 using Theia.ECS.Reflection;
-using Theia.ECS.Relations;
 
 namespace Theia.ECS.Enums;
 
-internal static class StructEnum<TEnum, TOverload>
+internal static class StructEnum<TEnum, TTypeMeta>
     where TEnum : unmanaged, Enum
-    where TOverload : TypeMeta
+    where TTypeMeta : ITypeMeta
 {
     private const BindingFlags Flags =
         BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
@@ -63,25 +61,12 @@ internal static class StructEnum<TEnum, TOverload>
         };
     }
 
-    private static int GetStructMapSize()
-    {
-        if (typeof(TOverload) == typeof(ComponentType))
-            return ComponentsMeta.Count();
-        else if (typeof(TOverload) == typeof(RelationType))
-            return RelationsMeta.Count();
-        else
-            return 0;
-    }
+    private static int GetStructMapSize() => TTypeMeta.Count();
 
-    private static int GetStructId(in Type type)
-    {
-        if (typeof(TOverload) == typeof(ComponentType))
-            return ComponentsMeta.GetComponentId(type);
-        else if (typeof(TOverload) == typeof(RelationType))
-            return RelationsMeta.GetRelationId(type);
-        else
-            return 0;
-    }
+    private static int GetStructId(in Type type) => TTypeMeta.GetId(type);
+
+    private static int GetSingleGenericStructId(in Attribute attribute) =>
+        GetStructId(attribute.GetType().GenericTypeArguments[0]);
 
     private static TEnum[] InitializeIncludes(in TEnum[] enumValues)
     {
@@ -122,9 +107,6 @@ internal static class StructEnum<TEnum, TOverload>
         return structMap;
     }
 
-    private static int GetSingleGenericStructId(in Attribute attribute) =>
-        GetStructId(attribute.GetType().GenericTypeArguments[0]);
-
     internal static TEnum FromStruct(int structId)
     {
         if ((uint)structId >= (uint)s_structMap.Length)
@@ -138,7 +120,7 @@ internal static class StructEnum<TEnum, TOverload>
         throw new InvalidOperationException(
             @$"
 Enum '{typeof(TEnum).Name}' mixes Includes<> and Matches<> attributes, which is not allowed.
-An enum must either group components/relations using Includes<> or map components/relations directly using Matches<>, never both.
+An enum must either group using Includes<> or map directly using Matches<>, never both.
 "
         );
 }

@@ -54,13 +54,13 @@ public abstract class NomadQuery : Query
     {
         int currentLength = _matchedArchetypes.Length;
 
-        if (_matchedArchetypesCount == currentLength)
+        int index = _matchedArchetypesCount;
+
+        if (index == currentLength)
             Array.Resize(
                 ref _matchedArchetypes,
                 currentLength * DefaultMatchedArchetypesGrowthFactor
             );
-
-        int index = _matchedArchetypesCount;
 
         _matchedArchetypes[index] = archetype;
 

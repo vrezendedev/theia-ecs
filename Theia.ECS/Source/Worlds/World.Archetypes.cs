@@ -18,11 +18,10 @@ public sealed partial class World
     private Archetype CreateArchetype(in Signature signature)
     {
         int currentLength = _archetypes.Length;
-
-        if (_archetypesCount == currentLength)
-            Array.Resize(ref _archetypes, currentLength * DefaultArchetypesGrowthFactor);
-
         int index = _archetypesCount;
+
+        if (index == currentLength)
+            Array.Resize(ref _archetypes, currentLength * DefaultArchetypesGrowthFactor);
 
         Archetype archetype = new Archetype(index, signature);
         _archetypes[index] = archetype;

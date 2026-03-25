@@ -5,10 +5,11 @@ using Theia.ECS.Reflection;
 
 namespace Theia.ECS.Relations;
 
-internal abstract class RelationType : TypeMeta
+internal abstract class RelationType : ITypeMeta
 {
     private const int DefaultRelationPoolCapacity = 4;
 
+    internal readonly Type _type;
     internal readonly RelationCardinality _cardinality;
     internal readonly RelationSubtype _subtype;
 
@@ -16,8 +17,8 @@ internal abstract class RelationType : TypeMeta
     protected Lock _poolLock = new();
 
     internal RelationType(Type type, RelationCardinality cardinality, RelationSubtype subtype)
-        : base(type)
     {
+        _type = type;
         _cardinality = cardinality;
         _subtype = subtype;
         _pool = new(DefaultRelationPoolCapacity);
@@ -30,6 +31,12 @@ internal abstract class RelationType : TypeMeta
             _pool.Enqueue(relation);
         }
     }
+
+    public Type Get() => _type;
+
+    public static int Count() => RelationsMeta.Count();
+
+    public static int GetId(Type type) => RelationsMeta.GetRelationId(type);
 
     internal abstract Relation CreateRelation();
 }

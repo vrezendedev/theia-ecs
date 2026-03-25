@@ -286,7 +286,7 @@ public sealed partial class World
         if (swapped._entityID != EntitySwapped.InvalidEntitySwappedIndexes)
         {
             ref EntityMeta swappedMeta = ref _entitiesMeta[swapped._entityID];
-            swappedMeta._componentIndex = swapped._componentIndex;
+            swappedMeta._componentIndex = swapped._dataIndex;
         }
     }
 

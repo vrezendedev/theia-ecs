@@ -6,7 +6,7 @@ using System.Threading;
 namespace Theia.ECS.Reflection;
 
 internal sealed class TypeRegistry<T>
-    where T : TypeMeta
+    where T : ITypeMeta
 {
     private const int DefaultTypeMetaMapCapacity = 16;
     private const int DefaultTypeMetaGrowthFactor = 2;
@@ -16,18 +16,18 @@ internal sealed class TypeRegistry<T>
     private readonly Dictionary<Type, int> _typeId = new();
     private T[] _typeMetaMap = new T[DefaultTypeMetaMapCapacity];
 
-    private readonly Lock s_lock = new();
+    private readonly Lock _lock = new();
 
     internal int Account()
     {
-        lock (s_lock)
+        lock (_lock)
         {
             int currentLength = _typeMetaMap.Length;
 
-            if (_count == currentLength)
-                Array.Resize(ref _typeMetaMap, currentLength * DefaultTypeMetaGrowthFactor);
-
             int index = _count;
+
+            if (index == currentLength)
+                Array.Resize(ref _typeMetaMap, currentLength * DefaultTypeMetaGrowthFactor);
 
             _count++;
 
@@ -39,7 +39,7 @@ internal sealed class TypeRegistry<T>
     internal void Set(int index, in T typeMeta)
     {
         _typeMetaMap[index] = typeMeta;
-        _typeId[typeMeta._type] = index;
+        _typeId[typeMeta.Get()] = index;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

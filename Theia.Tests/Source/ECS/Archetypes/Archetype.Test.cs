@@ -150,7 +150,7 @@ public sealed class ArchetypeTests
         EntitySwapped swapped = archetype.Remove(metaOne);
 
         Assert.Equal(2, swapped._entityID);
-        Assert.Equal(0, swapped._componentIndex);
+        Assert.Equal(0, swapped._dataIndex);
     }
 
     [Fact]
@@ -179,12 +179,7 @@ public sealed class ArchetypeTests
 
         EntitySwapped swapped = archetype.Remove(metaOne);
 
-        EntityMeta swappedMeta = new EntityMeta(
-            0,
-            1,
-            metaTwo._storageIndex,
-            swapped._componentIndex
-        );
+        EntityMeta swappedMeta = new EntityMeta(0, 1, metaTwo._storageIndex, swapped._dataIndex);
 
         ref Position position = ref archetype.Get<Position>(in swappedMeta);
 
@@ -464,7 +459,7 @@ public sealed class ArchetypeTests
             0,
             from._archetypeId,
             accountedOne._storageIndex,
-            transferred._entitySwapped._componentIndex
+            transferred._entitySwapped._dataIndex
         );
 
         Assert.Equal(99, from.Get<Position>(in swappedMeta).X);

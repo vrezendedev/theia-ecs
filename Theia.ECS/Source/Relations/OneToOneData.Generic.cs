@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Theia.ECS.Relations;
 
-internal sealed class OneToOneStore<TRelation> : OneToOne<TRelation>
+internal sealed class OneToOneData<TRelation> : OneToOne<TRelation>
     where TRelation : struct
 {
     private TRelation _data;

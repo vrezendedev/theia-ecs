@@ -17,6 +17,9 @@ internal class OneToOne<TRelation> : Relation
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void Disrelate() => Reset();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Entity To(Entity e) => e == _a ? _b : _a;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

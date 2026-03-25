@@ -1,6 +1,7 @@
 #pragma warning disable CS0649
 using System.Runtime.InteropServices;
 using Theia.ECS.Blittables;
+using Theia.ECS.Relations.Attributes;
 
 namespace Theia.Tests.Resources;
 
@@ -171,6 +172,45 @@ public struct IncludesOnlyComponentA
 public struct UnmappedComponent
 {
     public int Value;
+}
+
+[OneToOne]
+internal struct OneToOneTag { }
+
+[OneToMany]
+internal struct OneToManyTag { }
+
+[ManyToMany]
+internal struct ManyToManyTag { }
+
+[OneToOne]
+internal struct OneToOneData
+{
+    public int Value;
+}
+
+[OneToMany]
+internal struct OneToManyData
+{
+    public int Value;
+}
+
+[ManyToMany]
+internal struct ManyToManyData
+{
+    public int Value;
+}
+
+internal struct NoAttributeRelation { }
+
+[OneToOne]
+[OneToMany]
+internal struct MultipleCardinalitiesRelation { }
+
+[OneToOne]
+internal struct NonBlittableRelation
+{
+    public string ManagedField;
 }
 
 #pragma warning restore CS0649

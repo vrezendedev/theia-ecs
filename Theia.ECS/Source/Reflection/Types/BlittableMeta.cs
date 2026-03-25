@@ -83,6 +83,7 @@ internal static class BlittableMeta
         }
 
         s_cachedBlittables[type] = true;
+
         return true;
     }
 

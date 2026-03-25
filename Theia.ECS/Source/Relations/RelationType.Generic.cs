@@ -25,11 +25,11 @@ internal sealed class RelationType<TRelation> : RelationType
                     (RelationCardinality.ManyToMany, RelationSubtype.Tag) =>
                         new ManyToMany<TRelation>(),
                     (RelationCardinality.OneToOne, RelationSubtype.Data) =>
-                        new OneToOneStore<TRelation>(),
+                        new OneToOneData<TRelation>(),
                     (RelationCardinality.OneToMany, RelationSubtype.Data) =>
-                        new OneToManyStore<TRelation>(),
+                        new OneToManyData<TRelation>(),
                     (RelationCardinality.ManyToMany, RelationSubtype.Data) =>
-                        new ManyToManyStore<TRelation>(),
+                        new ManyToManyData<TRelation>(),
                 };
 #pragma warning restore CS8524
 
