@@ -22,7 +22,10 @@ internal class Singular : Relation
     internal void Disrelate() => Reset();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Entity To(Entity e) => e == _a ? _b : _a;
+    internal Entity To(Entity e) =>
+        e == _a ? _b
+        : e == _b ? _a
+        : default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal override void Reset()

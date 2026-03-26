@@ -6,17 +6,22 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
-    private Unique[] _uniques;
-    private Lock _uniquesLock = new();
+    private Unique[] _uniques = Array.Empty<Unique>();
+    private readonly Lock _uniquesLock = new();
 
     private Unique<TComponent> GetOrCreateUnique<TComponent>()
         where TComponent : struct
     {
         int componentId = ComponentMeta<TComponent>.s_id;
 
+        Unique[] uniques = _uniques;
+
+        if ((uint)componentId < (uint)uniques.Length && uniques[componentId] is not null)
+            return (Unique<TComponent>)uniques[componentId];
+
         lock (_uniquesLock)
         {
-            if (componentId > _uniques.Length - 1)
+            if (componentId >= _uniques.Length)
                 Array.Resize(ref _uniques, componentId + 1);
 
             if (_uniques[componentId] is null)
@@ -29,9 +34,6 @@ public sealed partial class World
     public TComponent ReadUnique<TComponent>()
         where TComponent : struct => GetOrCreateUnique<TComponent>().Read();
 
-    public ref TComponent GetUnique<TComponent>()
-        where TComponent : struct => ref GetOrCreateUnique<TComponent>().Get();
-
-    public void SetUnique<TComponent>(in TComponent component)
-        where TComponent : struct => GetOrCreateUnique<TComponent>().Set(component);
+    public void SetUnique<TComponent>(SetUnique<TComponent> set)
+        where TComponent : struct => GetOrCreateUnique<TComponent>().Set(set);
 }

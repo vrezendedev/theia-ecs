@@ -1,13 +1,22 @@
+using System.Runtime.CompilerServices;
+using System.Threading;
+
 namespace Theia.ECS.Components;
 
-internal sealed class Unique<T> : Unique
-    where T : struct
+internal sealed class Unique<TComponent> : Unique
+    where TComponent : struct
 {
-    private T _value;
+    private TComponent _value;
+    private readonly Lock _uniqueQueryLock = new();
 
-    internal T Read() => _value;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal TComponent Read() => _value;
 
-    internal ref T Get() => ref _value;
-
-    internal void Set(in T value) => _value = value;
+    internal void Set(SetUnique<TComponent> set)
+    {
+        lock (_uniqueQueryLock)
+        {
+            set(ref _value);
+        }
+    }
 }

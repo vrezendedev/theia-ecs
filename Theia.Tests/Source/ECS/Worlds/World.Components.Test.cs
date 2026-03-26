@@ -6,62 +6,6 @@ namespace Theia.Tests.ECS.Worlds;
 public sealed partial class WorldUniqueTests
 {
     [Fact]
-    public void GetUnique_ReturnsRef_MutationAffectsStoredValue()
-    {
-        World world = new();
-
-        ref ComponentA unique = ref world.GetUnique<ComponentA>();
-        unique.A = 99;
-
-        Assert.Equal(99, world.GetUnique<ComponentA>().A);
-    }
-
-    [Fact]
-    public void GetUnique_DefaultsToDefault_WhenNeverSet()
-    {
-        World world = new();
-
-        Assert.Equal(default, world.GetUnique<ComponentA>());
-    }
-
-    [Fact]
-    public void GetUnique_MultipleTypes_AreIndependent()
-    {
-        World world = new();
-
-        world.SetUnique(new ComponentA { A = 1 });
-        world.SetUnique(new ComponentB { B = 2 });
-        world.SetUnique(new ComponentC { C = 3 });
-
-        Assert.Equal(1, world.GetUnique<ComponentA>().A);
-        Assert.Equal(2, world.GetUnique<ComponentB>().B);
-        Assert.Equal(3, world.GetUnique<ComponentC>().C);
-    }
-
-    [Fact]
-    public void ReadUnique_ReturnsValue_WhenSet()
-    {
-        World world = new();
-
-        world.SetUnique(new ComponentA { A = 42 });
-
-        Assert.Equal(42, world.ReadUnique<ComponentA>().A);
-    }
-
-    [Fact]
-    public void ReadUnique_ReturnsCopy_MutationDoesNotAffectStoredValue()
-    {
-        World world = new();
-
-        world.SetUnique(new ComponentA { A = 42 });
-
-        ComponentA copy = world.ReadUnique<ComponentA>();
-        copy.A = 99;
-
-        Assert.Equal(42, world.ReadUnique<ComponentA>().A);
-    }
-
-    [Fact]
     public void ReadUnique_DefaultsToDefault_WhenNeverSet()
     {
         World world = new();
@@ -70,13 +14,31 @@ public sealed partial class WorldUniqueTests
     }
 
     [Fact]
-    public void SetUnique_SetsValue()
+    public void SetUnique_DefaultsToDefault_WhenNeverSet()
     {
         World world = new();
 
-        world.SetUnique(new ComponentA { A = 42 });
+        world.SetUnique((ref ComponentA c) => Assert.Equal(default, c));
+    }
 
-        Assert.Equal(42, world.ReadUnique<ComponentA>().A);
+    [Fact]
+    public void SetUnique_MutationAffectsStoredValue()
+    {
+        World world = new();
+
+        world.SetUnique((ref ComponentA c) => c.A = 99);
+
+        Assert.Equal(99, world.ReadUnique<ComponentA>().A);
+    }
+
+    [Fact]
+    public void SetUnique_ReadsCurrentValue()
+    {
+        World world = new();
+
+        world.SetUnique((ref ComponentA c) => c.A = 42);
+
+        world.SetUnique((ref ComponentA c) => Assert.Equal(42, c.A));
     }
 
     [Fact]
@@ -84,8 +46,8 @@ public sealed partial class WorldUniqueTests
     {
         World world = new();
 
-        world.SetUnique(new ComponentA { A = 1 });
-        world.SetUnique(new ComponentA { A = 99 });
+        world.ReadUnique<ComponentA>();
+        world.SetUnique((ref ComponentA c) => c.A = 99);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
     }
@@ -95,10 +57,8 @@ public sealed partial class WorldUniqueTests
     {
         World world = new();
 
-        world.SetUnique(new ComponentA { A = 1 });
-        world.SetUnique(new ComponentB { B = 2 });
-
-        world.SetUnique(new ComponentA { A = 99 });
+        world.SetUnique((ref ComponentA c) => c.A = 99);
+        world.SetUnique((ref ComponentB c) => c.B = 2);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
         Assert.Equal(2, world.ReadUnique<ComponentB>().B);
