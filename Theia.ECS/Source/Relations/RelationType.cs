@@ -13,22 +13,33 @@ internal abstract class RelationType : ITypeMeta
     internal readonly RelationCardinality _cardinality;
     internal readonly RelationSubtype _subtype;
 
-    protected Queue<Relation> _pool;
-    protected Lock _poolLock = new();
+    protected Lock _relationPoolLock = new();
+    protected Queue<Relation> _relationPool;
+    protected Lock _relationKeyPoolLock = new();
+    protected Queue<RelationKey> _relationKeyPool;
 
     internal RelationType(Type type, RelationCardinality cardinality, RelationSubtype subtype)
     {
         _type = type;
         _cardinality = cardinality;
         _subtype = subtype;
-        _pool = new(DefaultRelationPoolCapacity);
+        _relationPool = new(DefaultRelationPoolCapacity);
+        _relationKeyPool = new(DefaultRelationPoolCapacity);
     }
 
-    internal void Pool(Relation relation)
+    internal void PoolRelation(Relation relation)
     {
-        lock (_poolLock)
+        lock (_relationPoolLock)
         {
-            _pool.Enqueue(relation);
+            _relationPool.Enqueue(relation);
+        }
+    }
+
+    internal void PoolRelationKey(RelationKey relationKey)
+    {
+        lock (_relationKeyPoolLock)
+        {
+            _relationKeyPool.Enqueue(relationKey);
         }
     }
 
@@ -39,4 +50,5 @@ internal abstract class RelationType : ITypeMeta
     public static int GetId(Type type) => RelationsMeta.GetRelationId(type);
 
     internal abstract Relation CreateRelation();
+    internal abstract RelationKey CreateKey();
 }

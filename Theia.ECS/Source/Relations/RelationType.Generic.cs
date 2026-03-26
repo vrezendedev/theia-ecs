@@ -10,9 +10,9 @@ internal sealed class RelationType<TRelation> : RelationType
 
     internal override Relation CreateRelation()
     {
-        lock (_poolLock)
+        lock (_relationPoolLock)
         {
-            _pool.TryDequeue(out Relation? relation);
+            _relationPool.TryDequeue(out Relation? relation);
 
             if (relation is null)
             {
@@ -42,6 +42,28 @@ internal sealed class RelationType<TRelation> : RelationType
             }
 
             return relation;
+        }
+    }
+
+    internal override RelationKey CreateKey()
+    {
+        lock (_relationKeyPoolLock)
+        {
+            _relationKeyPool.TryDequeue(out RelationKey? relationKey);
+
+            if (relationKey is null)
+            {
+#pragma warning disable CS8524
+                relationKey = _cardinality switch
+                {
+                    RelationCardinality.OneToOne => new OneToOneKey(),
+                    RelationCardinality.OneToMany => new OneToManyKey(),
+                    RelationCardinality.ManyToMany => new ManyToManyKey(),
+                };
+#pragma warning restore CS8524
+            }
+
+            return relationKey;
         }
     }
 }

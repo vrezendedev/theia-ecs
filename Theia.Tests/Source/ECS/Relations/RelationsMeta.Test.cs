@@ -209,7 +209,7 @@ public sealed class RelationsMetaTests
         );
 
         Relation created = relationType.CreateRelation();
-        relationType.Pool(created);
+        relationType.PoolRelation(created);
 
         Relation fromPool = relationType.CreateRelation();
         Assert.Same(created, fromPool);
