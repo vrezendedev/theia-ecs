@@ -1,6 +1,5 @@
 using System;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
 
@@ -13,39 +12,37 @@ internal class Many : Relation
     protected int _count;
     protected Entity[] _relatedTo;
 
-    protected readonly Lock _lock = new();
-
     internal Many(RelationCardinality cardinality, RelationSubtype subtype)
         : base(cardinality, subtype) => _relatedTo = new Entity[1];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int Relate(Entity entity)
     {
-        lock (_lock)
-        {
-            int index = Account();
+        ThrowIfUpdating();
 
-            _relatedTo[index] = entity;
+        int index = Account();
 
-            return index;
-        }
+        _relatedTo[index] = entity;
+
+        return index;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal EntitySwapped Disrelate(int relationIndex)
     {
-        lock (_lock)
+        ThrowIfUpdating();
+
+        int last = _count - 1;
+
+        _count--;
+
+        if (relationIndex < last)
         {
-            int last = _count - 1;
-
-            _count--;
-
-            if (relationIndex < last)
-            {
-                Swap(last, relationIndex);
-                return new EntitySwapped(_relatedTo[relationIndex]._id, relationIndex);
-            }
-
-            return EntitySwapped.None;
+            Swap(last, relationIndex);
+            return new EntitySwapped(_relatedTo[relationIndex]._id, relationIndex);
         }
+
+        return EntitySwapped.None;
     }
 
     private int Account()
@@ -63,7 +60,31 @@ internal class Many : Relation
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<Entity> To() => _relatedTo.AsSpan(0, _count);
+    internal ReadOnlySpan<Entity> To()
+    {
+        Entity[] entities = _relatedTo;
+        return entities.AsSpan(0, _count);
+    }
+
+    internal void Update(UpdateRelation update)
+    {
+        IncrementUpdateCount();
+
+        lock (_updateLock)
+        {
+            int count = _count;
+
+            if (count > 0)
+            {
+                ReadOnlySpan<Entity> entities = To();
+
+                for (int i = 0; i < count; i++)
+                    update(entities[i]);
+            }
+
+            DecrementUpdateCount();
+        }
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual void Resize(int currentLength) =>
@@ -73,7 +94,11 @@ internal class Many : Relation
     protected virtual void Swap(int from, int to) => _relatedTo[to] = _relatedTo[from];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal override void Reset() => _count = 0;
+    internal override void Reset()
+    {
+        base.Reset();
+        _count = 0;
+    }
 }
 
 internal sealed class Many<TRelation> : Many
@@ -97,14 +122,39 @@ internal sealed class Many<TRelation> : Many
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<TRelation> Read() => _data.AsSpan(0, _count);
+    internal ReadOnlySpan<TRelation> Read() => Get();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Span<TRelation> Get() => _data.AsSpan(0, _count);
+    internal Span<TRelation> Get()
+    {
+        TRelation[] data = _data;
+        return data.AsSpan(0, _count);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref TRelation Get(int index) => ref _data[index];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Set(int index, in TRelation data) => _data[index] = data;
+
+    internal void Update(UpdateRelation<TRelation> update)
+    {
+        IncrementUpdateCount();
+
+        lock (_updateLock)
+        {
+            int count = _count;
+
+            if (count > 0)
+            {
+                ReadOnlySpan<Entity> entities = To();
+                Span<TRelation> relations = Get();
+
+                for (int i = 0; i < count; i++)
+                    update(entities[i], ref relations[i]);
+            }
+
+            DecrementUpdateCount();
+        }
+    }
 }

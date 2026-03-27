@@ -34,6 +34,12 @@ public sealed partial class World
     public TComponent ReadUnique<TComponent>()
         where TComponent : struct => GetOrCreateUnique<TComponent>().Read();
 
-    public void SetUnique<TComponent>(SetUnique<TComponent> set)
-        where TComponent : struct => GetOrCreateUnique<TComponent>().Set(set);
+    public ref TComponent GetUnique<TComponent>()
+        where TComponent : struct => ref GetOrCreateUnique<TComponent>().Get();
+
+    public void SetUnique<TComponent>(in TComponent component)
+        where TComponent : struct => GetOrCreateUnique<TComponent>().Set(component);
+
+    public void UpdateUnique<TComponent>(UpdateUnique<TComponent> update)
+        where TComponent : struct => GetOrCreateUnique<TComponent>().Update(update);
 }

@@ -1,3 +1,3 @@
 namespace Theia.ECS.Components;
 
-public delegate void SetUnique<TComponent>(ref TComponent component);
+public delegate void UpdateUnique<TComponent>(ref TComponent component);

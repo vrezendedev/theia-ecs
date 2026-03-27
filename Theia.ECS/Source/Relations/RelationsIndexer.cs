@@ -46,13 +46,13 @@ internal sealed class RelationsIndexer
 
     internal RelationKey? DeleteKey(int relationId)
     {
+        RelationKey[] keys = _keys;
+
+        if ((uint)relationId >= (uint)keys.Length)
+            return null;
+
         lock (_lock)
         {
-            RelationKey[] keys = _keys;
-
-            if ((uint)relationId >= (uint)keys.Length)
-                return null;
-
             RelationKey key = keys[relationId];
 
             if (key is not null)

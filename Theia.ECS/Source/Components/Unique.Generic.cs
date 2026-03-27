@@ -7,16 +7,22 @@ internal sealed class Unique<TComponent> : Unique
     where TComponent : struct
 {
     private TComponent _value;
-    private readonly Lock _uniqueQueryLock = new();
+    private readonly Lock _uniqueSet = new();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal TComponent Read() => _value;
 
-    internal void Set(SetUnique<TComponent> set)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ref TComponent Get() => ref _value;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void Set(TComponent component) => _value = component;
+
+    internal void Update(UpdateUnique<TComponent> update)
     {
-        lock (_uniqueQueryLock)
+        lock (_uniqueSet)
         {
-            set(ref _value);
+            update(ref _value);
         }
     }
 }
