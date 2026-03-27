@@ -14,16 +14,16 @@ public sealed class RelationsMetaTests
         new RelationType<TRelation>(typeof(TRelation), cardinality, subtype);
 
     [Fact]
-    public void ContainsRelationsAttributes_WithOneToOneAttribute_ReturnsTrue() =>
-        Assert.True(RelationsMeta.ContainsRelationsAttributes<OneToOneTag>());
+    public void ContainsRelationsAttributes_WithExclusiveAttribute_ReturnsTrue() =>
+        Assert.True(RelationsMeta.ContainsRelationsAttributes<ExclusiveTag>());
 
     [Fact]
-    public void ContainsRelationsAttributes_WithOneToManyAttribute_ReturnsTrue() =>
-        Assert.True(RelationsMeta.ContainsRelationsAttributes<OneToManyTag>());
+    public void ContainsRelationsAttributes_WithTreeAttribute_ReturnsTrue() =>
+        Assert.True(RelationsMeta.ContainsRelationsAttributes<TreeTag>());
 
     [Fact]
-    public void ContainsRelationsAttributes_WithManyToManyAttribute_ReturnsTrue() =>
-        Assert.True(RelationsMeta.ContainsRelationsAttributes<ManyToManyTag>());
+    public void ContainsRelationsAttributes_WithMultipleAttribute_ReturnsTrue() =>
+        Assert.True(RelationsMeta.ContainsRelationsAttributes<MultipleTag>());
 
     [Fact]
     public void ContainsRelationsAttributes_WithoutAttribute_ReturnsFalse() =>
@@ -31,31 +31,31 @@ public sealed class RelationsMetaTests
 
     [Fact]
     public void IsTag_WithStructWithNoFields_ReturnsTrue() =>
-        Assert.True(RelationsMeta.IsTag<OneToOneTag>());
+        Assert.True(RelationsMeta.IsTag<ExclusiveTag>());
 
     [Fact]
     public void IsTag_WithStructWithFields_ReturnsFalse() =>
-        Assert.False(RelationsMeta.IsTag<OneToOneData>());
+        Assert.False(RelationsMeta.IsTag<ExclusiveData>());
 
     [Fact]
-    public void ValidateRelation_WithOneToOneAttribute_ReturnsOneToOneCardinality()
+    public void ValidateRelation_WithExclusiveAttribute_ReturnsExclusiveCardinality()
     {
-        RelationCardinality cardinality = RelationsMeta.ValidateRelation<OneToOneTag>();
-        Assert.Equal(RelationCardinality.OneToOne, cardinality);
+        RelationCardinality cardinality = RelationsMeta.ValidateRelation<ExclusiveTag>();
+        Assert.Equal(RelationCardinality.Exclusive, cardinality);
     }
 
     [Fact]
-    public void ValidateRelation_WithOneToManyAttribute_ReturnsOneToManyCardinality()
+    public void ValidateRelation_WithTreeAttribute_ReturnsTreeCardinality()
     {
-        RelationCardinality cardinality = RelationsMeta.ValidateRelation<OneToManyTag>();
-        Assert.Equal(RelationCardinality.OneToMany, cardinality);
+        RelationCardinality cardinality = RelationsMeta.ValidateRelation<TreeTag>();
+        Assert.Equal(RelationCardinality.Tree, cardinality);
     }
 
     [Fact]
-    public void ValidateRelation_WithManyToManyAttribute_ReturnsManyToManyCardinality()
+    public void ValidateRelation_WithMultipleAttribute_ReturnsMultipleCardinality()
     {
-        RelationCardinality cardinality = RelationsMeta.ValidateRelation<ManyToManyTag>();
-        Assert.Equal(RelationCardinality.ManyToMany, cardinality);
+        RelationCardinality cardinality = RelationsMeta.ValidateRelation<MultipleTag>();
+        Assert.Equal(RelationCardinality.Multiple, cardinality);
     }
 
     [Fact]
@@ -72,34 +72,34 @@ public sealed class RelationsMetaTests
 
     [Fact]
     public void RelationMeta_AssignsNonNegativeId_ReturnsNonNegative() =>
-        Assert.True(RelationMeta<OneToOneTag>.s_id >= 0);
+        Assert.True(RelationMeta<ExclusiveTag>.s_id >= 0);
 
     [Fact]
     public void RelationMeta_WithSameType_ReturnsSameId()
     {
-        int first = RelationMeta<OneToManyTag>.s_id;
-        int second = RelationMeta<OneToManyTag>.s_id;
+        int first = RelationMeta<TreeTag>.s_id;
+        int second = RelationMeta<TreeTag>.s_id;
         Assert.Equal(first, second);
     }
 
     [Fact]
     public void RelationMeta_WithDifferentTypes_ReturnsDifferentIds() =>
-        Assert.NotEqual(RelationMeta<OneToOneTag>.s_id, RelationMeta<ManyToManyTag>.s_id);
+        Assert.NotEqual(RelationMeta<ExclusiveTag>.s_id, RelationMeta<MultipleTag>.s_id);
 
     [Fact]
     public void GetRelationId_WithRegisteredType_ReturnsMatchingId()
     {
-        int expected = RelationMeta<OneToOneData>.s_id;
-        int actual = RelationsMeta.GetRelationId(typeof(OneToOneData));
+        int expected = RelationMeta<ExclusiveData>.s_id;
+        int actual = RelationsMeta.GetRelationId(typeof(ExclusiveData));
         Assert.Equal(expected, actual);
     }
 
     [Fact]
     public void GetRelationType_WithValidId_ReturnsCorrectType()
     {
-        int id = RelationMeta<OneToManyData>.s_id;
+        int id = RelationMeta<TreeData>.s_id;
         RelationType meta = RelationsMeta.GetRelationType(id);
-        Assert.Equal(typeof(OneToManyData), meta.Get());
+        Assert.Equal(typeof(TreeData), meta.Get());
     }
 
     [Fact]
@@ -116,17 +116,17 @@ public sealed class RelationsMetaTests
     public void RelationsMeta_Count_AfterNewRegistration_IncreasesOrStaysSame()
     {
         int before = RelationsMeta.Count();
-        _ = RelationMeta<ManyToManyData>.s_id;
+        _ = RelationMeta<MultipleData>.s_id;
         int after = RelationsMeta.Count();
 
         Assert.True(after >= before);
     }
 
     [Fact]
-    public void CreateRelation_WithOneToOneTag_ReturnsOneToOneRelation()
+    public void CreateRelation_WithExclusiveTag_ReturnsExclusiveRelation()
     {
-        RelationType<OneToOneTag> relationType = BuildRelationType<OneToOneTag>(
-            RelationCardinality.OneToOne,
+        RelationType<ExclusiveTag> relationType = BuildRelationType<ExclusiveTag>(
+            RelationCardinality.Exclusive,
             RelationSubtype.Tag
         );
 
@@ -136,10 +136,10 @@ public sealed class RelationsMetaTests
     }
 
     [Fact]
-    public void CreateRelation_WithOneToManyTag_ReturnsOneToManyRelation()
+    public void CreateRelation_WithTreeTag_ReturnsTreeRelation()
     {
-        RelationType<OneToManyTag> relationType = BuildRelationType<OneToManyTag>(
-            RelationCardinality.OneToMany,
+        RelationType<TreeTag> relationType = BuildRelationType<TreeTag>(
+            RelationCardinality.Tree,
             RelationSubtype.Tag
         );
 
@@ -149,10 +149,10 @@ public sealed class RelationsMetaTests
     }
 
     [Fact]
-    public void CreateRelation_WithManyToManyTag_ReturnsManyToManyRelation()
+    public void CreateRelation_WithMultipleTag_ReturnsMultipleRelation()
     {
-        RelationType<ManyToManyTag> relationType = BuildRelationType<ManyToManyTag>(
-            RelationCardinality.ManyToMany,
+        RelationType<MultipleTag> relationType = BuildRelationType<MultipleTag>(
+            RelationCardinality.Multiple,
             RelationSubtype.Tag
         );
 
@@ -162,49 +162,49 @@ public sealed class RelationsMetaTests
     }
 
     [Fact]
-    public void CreateRelation_WithOneToOneData_ReturnsOneToOneStore()
+    public void CreateRelation_WithExclusiveData_ReturnsExclusiveStore()
     {
-        RelationType<OneToOneData> relationType = BuildRelationType<OneToOneData>(
-            RelationCardinality.OneToOne,
+        RelationType<ExclusiveData> relationType = BuildRelationType<ExclusiveData>(
+            RelationCardinality.Exclusive,
             RelationSubtype.Data
         );
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<Singular<OneToOneData>>(relation);
+        Assert.IsType<Singular<ExclusiveData>>(relation);
     }
 
     [Fact]
-    public void CreateRelation_WithOneToManyData_ReturnsOneToManyStore()
+    public void CreateRelation_WithTreeData_ReturnsTreeStore()
     {
-        RelationType<OneToManyData> relationType = BuildRelationType<OneToManyData>(
-            RelationCardinality.OneToMany,
+        RelationType<TreeData> relationType = BuildRelationType<TreeData>(
+            RelationCardinality.Tree,
             RelationSubtype.Data
         );
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<Many<OneToManyData>>(relation);
+        Assert.IsType<Many<TreeData>>(relation);
     }
 
     [Fact]
-    public void CreateRelation_WithManyToManyData_ReturnsManyToManyStore()
+    public void CreateRelation_WithMultipleData_ReturnsMultipleStore()
     {
-        RelationType<ManyToManyData> relationType = BuildRelationType<ManyToManyData>(
-            RelationCardinality.ManyToMany,
+        RelationType<MultipleData> relationType = BuildRelationType<MultipleData>(
+            RelationCardinality.Multiple,
             RelationSubtype.Data
         );
 
         Relation relation = relationType.CreateRelation();
 
-        Assert.IsType<Many<ManyToManyData>>(relation);
+        Assert.IsType<Many<MultipleData>>(relation);
     }
 
     [Fact]
     public void CreateRelation_AfterPooling_ReturnsSameInstance()
     {
-        RelationType<OneToOneTag> relationType = BuildRelationType<OneToOneTag>(
-            RelationCardinality.OneToOne,
+        RelationType<ExclusiveTag> relationType = BuildRelationType<ExclusiveTag>(
+            RelationCardinality.Exclusive,
             RelationSubtype.Tag
         );
 
@@ -218,8 +218,8 @@ public sealed class RelationsMetaTests
     [Fact]
     public void CreateRelation_WithEmptyPool_ReturnsNewInstance()
     {
-        RelationType<OneToOneTag> relationType = BuildRelationType<OneToOneTag>(
-            RelationCardinality.OneToOne,
+        RelationType<ExclusiveTag> relationType = BuildRelationType<ExclusiveTag>(
+            RelationCardinality.Exclusive,
             RelationSubtype.Tag
         );
 

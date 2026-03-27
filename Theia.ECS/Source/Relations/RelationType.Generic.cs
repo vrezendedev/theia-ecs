@@ -24,21 +24,21 @@ internal sealed class RelationType<TRelation> : RelationType
 #pragma warning disable CS8524
             relation = (cardinality, subtype) switch
             {
-                (RelationCardinality.OneToOne, RelationSubtype.Tag) => new Singular(
+                (RelationCardinality.Exclusive, RelationSubtype.Tag) => new Singular(
                     cardinality,
                     subtype
                 ),
-                (RelationCardinality.OneToOne, RelationSubtype.Data) => new Singular<TRelation>(
+                (RelationCardinality.Exclusive, RelationSubtype.Data) => new Singular<TRelation>(
                     cardinality,
                     subtype
                 ),
-                (RelationCardinality.OneToMany, RelationSubtype.Tag)
-                or (RelationCardinality.ManyToMany, RelationSubtype.Tag) => new Many(
+                (RelationCardinality.Tree, RelationSubtype.Tag)
+                or (RelationCardinality.Multiple, RelationSubtype.Tag) => new Many(
                     cardinality,
                     subtype
                 ),
-                (RelationCardinality.OneToMany, RelationSubtype.Data)
-                or (RelationCardinality.ManyToMany, RelationSubtype.Data) => new Many<TRelation>(
+                (RelationCardinality.Tree, RelationSubtype.Data)
+                or (RelationCardinality.Multiple, RelationSubtype.Data) => new Many<TRelation>(
                     cardinality,
                     subtype
                 ),
@@ -65,9 +65,9 @@ internal sealed class RelationType<TRelation> : RelationType
 #pragma warning disable CS8524
             relationKey = _cardinality switch
             {
-                RelationCardinality.OneToOne => new OneToOneKey(),
-                RelationCardinality.OneToMany => new OneToManyKey(),
-                RelationCardinality.ManyToMany => new ManyToManyKey(),
+                RelationCardinality.Exclusive => new ExclusiveKey(),
+                RelationCardinality.Tree => new TreeKey(),
+                RelationCardinality.Multiple => new MultipleKey(),
             };
 #pragma warning restore CS8524
         }

@@ -3,4 +3,4 @@ using System;
 namespace Theia.ECS.Relations.Attributes;
 
 [AttributeUsage(AttributeTargets.Struct)]
-public sealed class OneToMany : Attribute { }
+public sealed class Tree : Attribute { }

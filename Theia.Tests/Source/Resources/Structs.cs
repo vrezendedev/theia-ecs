@@ -174,40 +174,40 @@ public struct UnmappedComponent
     public int Value;
 }
 
-[OneToOne]
-internal struct OneToOneTag { }
+[Exclusive]
+internal struct ExclusiveTag { }
 
-[OneToMany]
-internal struct OneToManyTag { }
+[Tree]
+internal struct TreeTag { }
 
-[ManyToMany]
-internal struct ManyToManyTag { }
+[Multiple]
+internal struct MultipleTag { }
 
-[OneToOne]
-internal struct OneToOneData
+[Exclusive]
+internal struct ExclusiveData
 {
     public int Value;
 }
 
-[OneToMany]
-internal struct OneToManyData
+[Tree]
+internal struct TreeData
 {
     public int Value;
 }
 
-[ManyToMany]
-internal struct ManyToManyData
+[Multiple]
+internal struct MultipleData
 {
     public int Value;
 }
 
 internal struct NoAttributeRelation { }
 
-[OneToOne]
-[OneToMany]
+[Exclusive]
+[Tree]
 internal struct MultipleCardinalitiesRelation { }
 
-[OneToOne]
+[Exclusive]
 internal struct NonBlittableRelation
 {
     public string ManagedField;

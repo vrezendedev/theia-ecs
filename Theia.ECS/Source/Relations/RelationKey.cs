@@ -9,7 +9,7 @@ internal abstract class RelationKey
     internal abstract void Reset();
 }
 
-internal sealed class OneToOneKey : RelationKey
+internal sealed class ExclusiveKey : RelationKey
 {
     internal int _primaryKey;
 
@@ -19,7 +19,7 @@ internal sealed class OneToOneKey : RelationKey
     }
 }
 
-internal sealed class OneToManyKey : RelationKey
+internal sealed class TreeKey : RelationKey
 {
     internal int _primaryKey;
 
@@ -34,7 +34,7 @@ internal sealed class OneToManyKey : RelationKey
     }
 }
 
-internal sealed class ManyToManyKey : RelationKey
+internal sealed class MultipleKey : RelationKey
 {
     internal int _primaryKey;
     internal int[]? _compositeKeys;

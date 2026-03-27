@@ -10,9 +10,9 @@ namespace Theia.ECS.Relations;
 
 internal enum RelationCardinality
 {
-    OneToOne,
-    OneToMany,
-    ManyToMany,
+    Exclusive,
+    Tree,
+    Multiple,
 }
 
 internal enum RelationSubtype
@@ -52,26 +52,26 @@ internal static class RelationsMeta
 
     internal static bool ContainsRelationsAttributes<T>()
         where T : struct =>
-        typeof(T).GetCustomAttribute<OneToOne>() is not null
-        || typeof(T).GetCustomAttribute<OneToMany>() is not null
-        || typeof(T).GetCustomAttribute<ManyToMany>() is not null;
+        typeof(T).GetCustomAttribute<Exclusive>() is not null
+        || typeof(T).GetCustomAttribute<Tree>() is not null
+        || typeof(T).GetCustomAttribute<Multiple>() is not null;
 
     internal static bool IsTag<TRelation>()
         where TRelation : struct => typeof(TRelation).GetFields(BlittableMeta.Flags).Length == 0;
 
     internal static RelationCardinality ValidateRelation<TRelation>()
     {
-        OneToOne? oneToOne = typeof(TRelation).GetCustomAttribute<OneToOne>();
-        OneToMany? oneToMany = typeof(TRelation).GetCustomAttribute<OneToMany>();
-        ManyToMany? manyToMany = typeof(TRelation).GetCustomAttribute<ManyToMany>();
+        Exclusive? Exclusive = typeof(TRelation).GetCustomAttribute<Exclusive>();
+        Tree? Tree = typeof(TRelation).GetCustomAttribute<Tree>();
+        Multiple? Multiple = typeof(TRelation).GetCustomAttribute<Multiple>();
 
-        bool hasOneToOne = oneToOne is not null;
-        bool hasOneToMany = oneToMany is not null;
-        bool hasManyToMany = manyToMany is not null;
+        bool hasExclusive = Exclusive is not null;
+        bool hasTree = Tree is not null;
+        bool hasMultiple = Multiple is not null;
 
-        int relationAttributesCount = hasOneToOne ? 1 : 0;
-        relationAttributesCount += hasOneToMany ? 1 : 0;
-        relationAttributesCount += hasManyToMany ? 1 : 0;
+        int relationAttributesCount = hasExclusive ? 1 : 0;
+        relationAttributesCount += hasTree ? 1 : 0;
+        relationAttributesCount += hasMultiple ? 1 : 0;
 
         if (relationAttributesCount == 0)
             ThrowCardinalityNotSpecified<TRelation>();
@@ -79,9 +79,9 @@ internal static class RelationsMeta
         if (relationAttributesCount > 1)
             ThrowMultipleCardinalities<TRelation>();
 
-        return hasOneToOne ? RelationCardinality.OneToOne
-            : hasOneToMany ? RelationCardinality.OneToMany
-            : RelationCardinality.ManyToMany;
+        return hasExclusive ? RelationCardinality.Exclusive
+            : hasTree ? RelationCardinality.Tree
+            : RelationCardinality.Multiple;
     }
 
     [DoesNotReturn]
