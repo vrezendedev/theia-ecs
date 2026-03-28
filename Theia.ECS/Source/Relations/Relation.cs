@@ -1,5 +1,7 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using Theia.ECS.Entities;
 
 namespace Theia.ECS.Relations;
 
@@ -7,6 +9,8 @@ internal abstract class Relation
 {
     internal readonly RelationCardinality _cardinality;
     internal readonly RelationSubtype _subtype;
+
+    protected Entity _owner;
 
     internal Lock _relationLock = new();
     protected Lock _updateLock = new();
@@ -17,6 +21,12 @@ internal abstract class Relation
 
     protected void DecrementUpdateCount() => Interlocked.Decrement(ref _updateCount);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Entity GetOwner() => _owner;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void SetOwner(Entity owner) => _owner = owner;
+
     internal Relation(RelationCardinality cardinality, RelationSubtype subtype)
     {
         _cardinality = cardinality;
@@ -25,8 +35,11 @@ internal abstract class Relation
 
     internal virtual void Reset()
     {
+        _owner = default;
         _updateCount = 0;
     }
+
+    internal abstract void Update(UpdateRelation update);
 
     protected void ThrowIfUpdating()
     {

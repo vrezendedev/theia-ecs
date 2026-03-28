@@ -18,7 +18,7 @@ internal enum RelationCardinality
 internal enum RelationSubtype
 {
     Tag,
-    Data,
+    Evaluated,
 }
 
 internal static class RelationsMeta
@@ -111,7 +111,7 @@ internal static class RelationMeta<TRelation>
 
         RelationSubtype subtype = RelationsMeta.IsTag<TRelation>()
             ? RelationSubtype.Tag
-            : RelationSubtype.Data;
+            : RelationSubtype.Evaluated;
 
         s_id = RelationsMeta.RegisterRelation<TRelation>(cardinality, subtype);
     }

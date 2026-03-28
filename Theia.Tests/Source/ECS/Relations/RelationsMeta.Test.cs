@@ -166,7 +166,7 @@ public sealed class RelationsMetaTests
     {
         RelationType<ExclusiveData> relationType = BuildRelationType<ExclusiveData>(
             RelationCardinality.Exclusive,
-            RelationSubtype.Data
+            RelationSubtype.Evaluated
         );
 
         Relation relation = relationType.CreateRelation();
@@ -179,7 +179,7 @@ public sealed class RelationsMetaTests
     {
         RelationType<TreeData> relationType = BuildRelationType<TreeData>(
             RelationCardinality.Tree,
-            RelationSubtype.Data
+            RelationSubtype.Evaluated
         );
 
         Relation relation = relationType.CreateRelation();
@@ -192,7 +192,7 @@ public sealed class RelationsMetaTests
     {
         RelationType<MultipleData> relationType = BuildRelationType<MultipleData>(
             RelationCardinality.Multiple,
-            RelationSubtype.Data
+            RelationSubtype.Evaluated
         );
 
         Relation relation = relationType.CreateRelation();

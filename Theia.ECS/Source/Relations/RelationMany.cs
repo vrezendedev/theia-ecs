@@ -66,7 +66,7 @@ internal class Many : Relation
         return entities.AsSpan(0, _count);
     }
 
-    internal void Update(UpdateRelation update)
+    internal override void Update(UpdateRelation update)
     {
         IncrementUpdateCount();
 

@@ -38,8 +38,11 @@ internal sealed class TypeRegistry<T>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Set(int index, in T typeMeta)
     {
-        _typeMetaMap[index] = typeMeta;
-        _typeId[typeMeta.Get()] = index;
+        lock (_lock)
+        {
+            _typeMetaMap[index] = typeMeta;
+            _typeId[typeMeta.Get()] = index;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

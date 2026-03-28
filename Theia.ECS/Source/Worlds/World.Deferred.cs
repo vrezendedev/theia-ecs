@@ -124,6 +124,34 @@ public sealed partial class World
     private void DeferredRemoveHandler(EntityComponentDeferred entityComponentDeferred) =>
         AttemptRemove(entityComponentDeferred._entity, entityComponentDeferred._componentId);
 
+    public void DeferredAddRelation<TRelation>(Entity relationOwner, Entity target)
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DeferredAddEvaluatedRelation<TRelation>(
+        Entity relationOwner,
+        Entity target,
+        TRelation data = default
+    )
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DeferredRemoveRelation<TRelation>(Entity relationOwner)
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DeferredRemoveRelation<TRelation>(Entity relationOwner, Entity target)
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
     public void FlushDeferred()
     {
         ThrowIfQueriesExecuting();

@@ -5,19 +5,17 @@ namespace Theia.ECS.Relations;
 
 internal class Singular : Relation
 {
-    protected Entity _a;
-    protected Entity _b;
+    protected Entity _target;
 
     internal Singular(RelationCardinality cardinality, RelationSubtype subtype)
         : base(cardinality, subtype) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void Relate(Entity a, Entity b)
+    internal void Relate(Entity a)
     {
         ThrowIfUpdating();
 
-        _a = a;
-        _b = b;
+        _target = a;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,18 +27,15 @@ internal class Singular : Relation
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Entity To(Entity e) =>
-        e == _a ? _b
-        : e == _b ? _a
-        : default;
+    internal Entity To() => _target;
 
-    internal void To(Entity e, UpdateRelation updateRelation)
+    internal override void Update(UpdateRelation updateRelation)
     {
         IncrementUpdateCount();
 
         lock (_updateLock)
         {
-            updateRelation(To(e));
+            updateRelation(_target);
             DecrementUpdateCount();
         }
     }
@@ -50,8 +45,7 @@ internal class Singular : Relation
     {
         base.Reset();
 
-        _a = default;
-        _b = default;
+        _target = default;
     }
 }
 
@@ -72,13 +66,13 @@ internal sealed class Singular<TRelation> : Singular
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Set(in TRelation data) => _data = data;
 
-    internal void Update(Entity e, UpdateRelation<TRelation> update)
+    internal void Update(UpdateRelation<TRelation> update)
     {
         IncrementUpdateCount();
 
         lock (_updateLock)
         {
-            update(To(e), ref _data);
+            update(_target, ref _data);
             DecrementUpdateCount();
         }
     }

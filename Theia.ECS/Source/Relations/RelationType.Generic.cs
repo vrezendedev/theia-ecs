@@ -28,17 +28,15 @@ internal sealed class RelationType<TRelation> : RelationType
                     cardinality,
                     subtype
                 ),
-                (RelationCardinality.Exclusive, RelationSubtype.Data) => new Singular<TRelation>(
-                    cardinality,
-                    subtype
-                ),
+                (RelationCardinality.Exclusive, RelationSubtype.Evaluated) =>
+                    new Singular<TRelation>(cardinality, subtype),
                 (RelationCardinality.Tree, RelationSubtype.Tag)
                 or (RelationCardinality.Multiple, RelationSubtype.Tag) => new Many(
                     cardinality,
                     subtype
                 ),
-                (RelationCardinality.Tree, RelationSubtype.Data)
-                or (RelationCardinality.Multiple, RelationSubtype.Data) => new Many<TRelation>(
+                (RelationCardinality.Tree, RelationSubtype.Evaluated)
+                or (RelationCardinality.Multiple, RelationSubtype.Evaluated) => new Many<TRelation>(
                     cardinality,
                     subtype
                 ),
