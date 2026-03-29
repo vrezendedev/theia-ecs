@@ -6,43 +6,38 @@ using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
+using Theia.ECS.Extensions;
+using Theia.ECS.Relations;
 
 namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
+    private const int DefaultEntitiesMetaCapacity = 16_384;
     private const int DefaultEntitiesMetaGrowthFactor = 2;
+    private const int DefaultGhoulsInitialCapacityDivisor = 4;
 
     private int _entitiesCount;
     private EntityMeta[] _entitiesMeta;
 
-    private int _ghoulsCount;
     private Queue<int> _ghouls;
 
     private EntityCreated CreateEntity()
     {
-        bool dequeue = _ghoulsCount > 0;
+        Queue<int> ghouls = _ghouls;
 
-        int index = dequeue ? _ghouls.Dequeue() : _entitiesCount;
+        bool dequeue = ghouls.Count > 0;
+
+        int index = dequeue ? ghouls.Dequeue() : _entitiesCount;
 
         if (!dequeue)
         {
-            int currentLength = _entitiesMeta.Length;
+            Array.AttemptResize(ref _entitiesMeta, index, DefaultEntitiesMetaGrowthFactor);
 
-            if (index == currentLength)
-                Array.Resize(ref _entitiesMeta, currentLength * DefaultEntitiesMetaGrowthFactor);
-
-            _entitiesMeta[index] = new EntityMeta(
-                EntityMeta.DefaultEntityMetaVersion,
-                EntityMeta.DefaultInvalidEntityMetaIndexes,
-                EntityMeta.DefaultInvalidEntityMetaIndexes,
-                EntityMeta.DefaultInvalidEntityMetaIndexes
-            );
+            _entitiesMeta[index] = new EntityMeta(EntityMeta.DefaultEntityMetaVersion);
 
             _entitiesCount++;
         }
-        else
-            _ghoulsCount--;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[index];
 
@@ -69,12 +64,8 @@ public sealed partial class World
     {
         UpdateEntitySwappedIfValid(archetype.Remove(entityMeta));
 
-        entityMeta._version++;
-        entityMeta._archetypeIndex = EntityMeta.DefaultInvalidEntityMetaIndexes;
-        entityMeta._storageIndex = EntityMeta.DefaultInvalidEntityMetaIndexes;
-        entityMeta._componentIndex = EntityMeta.DefaultInvalidEntityMetaIndexes;
+        entityMeta.Reset();
 
-        _ghoulsCount++;
         _ghouls.Enqueue(entity._id);
     }
 
@@ -280,6 +271,98 @@ public sealed partial class World
         return archetype.Has(componentId);
     }
 
+    public bool TryAddRelation<TRelation>(Entity relationOwner, Entity target)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryAddEvaluatedRelation<TRelation>(
+        Entity relationOwner,
+        Entity target,
+        TRelation value
+    )
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryRemoveRelation<TRelation>(Entity entityOwner)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool TryRemoveRelation<TRelation>(Entity entityOwner, Entity entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Entity GetRelation<TRelation>(Entity relationOwner)
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public EntityEvaluatedRelation<TRelation> GetEvaluatedRelation<TRelation>(Entity relationOwner)
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public TRelation ReadEvaluatedRelation<TRelation>(Entity relationOwner)
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public ReadOnlySpan<Entity> GetRelations<TRelation>(Entity relationOwner)
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public EntityEvaluatedRelations<TRelation> GetEvaluatedRelations<TRelation>(
+        Entity relationOwner
+    )
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public EntityEvaluatedRelationsReadOnly<TRelation> ReadEvaluatedRelations<TRelation>(
+        Entity relationOwner
+    )
+        where TRelation : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public ReadOnlySpan<Entity> GetLinkedRelations<T>(Entity entity)
+        where T : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool AreRelated<T>(Entity relationOwner, Entity target)
+        where T : struct
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool HasRelation<T>(Entity owner)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateRelation(Entity relationOwner, UpdateRelation update)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateRelation<TRelation>(Entity relationOwner, UpdateRelation<TRelation> update)
+    {
+        throw new NotImplementedException();
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateEntitySwappedIfValid(EntitySwapped swapped)
     {
@@ -299,13 +382,13 @@ public sealed partial class World
     }
 
     [DoesNotReturn]
-    internal static void ThrowEntityNotAlive(Entity entity) =>
+    private static void ThrowEntityNotAlive(Entity entity) =>
         throw new InvalidOperationException(
             $"{entity} is not alive. Component access requires a live entity."
         );
 
     [DoesNotReturn]
-    internal static void ThrowEntityMissingComponent<TComponent>(Entity entity)
+    private static void ThrowEntityMissingComponent<TComponent>(Entity entity)
         where TComponent : struct =>
         throw new InvalidOperationException(
             $"{entity} does not have component '{typeof(TComponent).Name}'. Add the component before attempting to access it."

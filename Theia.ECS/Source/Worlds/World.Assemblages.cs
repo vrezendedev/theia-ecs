@@ -48,7 +48,7 @@ public sealed partial class World
     }
 
     [DoesNotReturn]
-    internal static void ThrowDuplicatedAssemblage() =>
+    private static void ThrowDuplicatedAssemblage() =>
         throw new InvalidOperationException(
             "An Assemblage for the matched Archetype already exists. Assemblages must be unique."
         );

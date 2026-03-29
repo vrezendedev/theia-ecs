@@ -16,7 +16,7 @@ public sealed partial class World
 
         Unique[] uniques = _uniques;
 
-        if ((uint)componentId < (uint)uniques.Length && uniques[componentId] is not null)
+        if (componentId < uniques.Length && uniques[componentId] is not null)
             return (Unique<TComponent>)uniques[componentId];
 
         lock (_uniquesLock)

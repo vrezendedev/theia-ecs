@@ -3,19 +3,6 @@ using Theia.ECS.Entities;
 
 namespace Theia.ECS.Contracts;
 
-public readonly struct EntityRelation<T>
-    where T : struct
-{
-    internal readonly Entity _target;
-    internal readonly T _data;
-
-    public EntityRelation(Entity entity, T data = default)
-    {
-        _target = entity;
-        _data = data;
-    }
-}
-
 public ref struct EntityEvaluatedRelation<T>
     where T : struct
 {

@@ -10,6 +10,7 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
+    private const int DefaultArchetypesCapacity = 16;
     private const int DefaultArchetypesGrowthFactor = 2;
 
     private int _archetypesCount;
@@ -17,11 +18,9 @@ public sealed partial class World
 
     private Archetype CreateArchetype(in Signature signature)
     {
-        int currentLength = _archetypes.Length;
         int index = _archetypesCount;
 
-        if (index == currentLength)
-            Array.Resize(ref _archetypes, currentLength * DefaultArchetypesGrowthFactor);
+        Array.AttemptResize(ref _archetypes, index, DefaultArchetypesGrowthFactor);
 
         Archetype archetype = new Archetype(index, signature);
         _archetypes[index] = archetype;

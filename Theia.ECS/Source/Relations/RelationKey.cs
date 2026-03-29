@@ -1,4 +1,7 @@
 using System;
+using System.Runtime.CompilerServices;
+using Theia.ECS.Entities;
+using Theia.ECS.Extensions;
 
 namespace Theia.ECS.Relations;
 
@@ -6,36 +9,77 @@ internal abstract class RelationKey
 {
     protected const int InvalidKey = -1;
 
-    internal abstract void Reset();
-
-    protected void ResetKeys<T>(ref T[]? keys, T invalid)
-        where T : struct
-    {
-        if (keys is not null)
-            keys.AsSpan().Fill(invalid);
-    }
-}
-
-internal sealed class ExclusiveKey : RelationKey
-{
+    internal int _indexerAddedIndex;
     internal int _primaryKey;
 
-    internal int[]? _foreignKeys; //Points out to the relation itself -> size of relations
+    internal abstract void Reset();
+    internal abstract bool IsAvailable();
+}
+
+internal abstract class MultiLinkRelation : RelationKey
+{
+    private const int DefaultRelationsIndexerCapacity = 4;
+    private const int DefaultRelationsIndexerGrowthFactor = 2;
+
+    internal int _externalLinksWithCount;
+    internal Entity[] _externalLinksWith = new Entity[DefaultRelationsIndexerCapacity];
+
+    protected int AccountExternalLink(Entity entity)
+    {
+        int index = _externalLinksWithCount;
+
+        Array.AttemptResize(ref _externalLinksWith, index, DefaultRelationsIndexerGrowthFactor);
+
+        _externalLinksWith[index] = entity;
+
+        _externalLinksWithCount++;
+
+        return index;
+    }
+
+    internal override void Reset() => _externalLinksWithCount = 0;
+}
+
+internal record struct ExclusiveKeyIndexer
+{
+    internal required int ExternalLinkIndex;
+}
+
+internal sealed class ExclusiveKey : MultiLinkRelation
+{
+    internal ExclusiveKeyIndexer[] _keysIndexer = Array.Empty<ExclusiveKeyIndexer>();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void AddKeyIndexer(Entity entity, int foreignKey)
+    {
+        int externalLinkIndex = AccountExternalLink(entity);
+
+        if (foreignKey >= _keysIndexer.Length)
+            Array.Resize(ref _keysIndexer, foreignKey + 1);
+
+        _keysIndexer[foreignKey].ExternalLinkIndex = externalLinkIndex;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal override bool IsAvailable() => _primaryKey == InvalidKey;
 
     internal override void Reset()
     {
-        _primaryKey = InvalidKey;
+        base.Reset();
 
-        ResetKeys(ref _foreignKeys, InvalidKey);
+        _primaryKey = InvalidKey;
     }
 }
 
 internal sealed class TreeKey : RelationKey
 {
-    internal int _primaryKey;
-
     internal int _foreignKey;
     internal int _compositeKey;
+
+    internal override bool IsAvailable()
+    {
+        throw new NotImplementedException();
+    }
 
     internal override void Reset()
     {
@@ -45,18 +89,21 @@ internal sealed class TreeKey : RelationKey
     }
 }
 
-internal record struct MultipleKeyIndexer(int ForeignKeys, int CompositeKeys);
+internal record struct MultipleKeyIndexer(int ExternalLinkIndex, int CompositeKey);
 
-internal sealed class MultipleKey : RelationKey
+internal sealed class MultipleKey : MultiLinkRelation
 {
-    internal int _primaryKey;
+    internal MultipleKeyIndexer[] _keysIndexer = Array.Empty<MultipleKeyIndexer>();
 
-    internal MultipleKeyIndexer[]? _keys; //Points out to the relation itself -> size of relations
+    internal override bool IsAvailable()
+    {
+        throw new NotImplementedException();
+    }
 
     internal override void Reset()
     {
-        _primaryKey = InvalidKey;
+        base.Reset();
 
-        ResetKeys(ref _keys, new(InvalidKey, InvalidKey));
+        _primaryKey = InvalidKey;
     }
 }

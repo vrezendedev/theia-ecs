@@ -99,6 +99,9 @@ internal class Many : Relation
         base.Reset();
         _count = 0;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool IsEmpty() => _count == 0;
 }
 
 internal sealed class Many<TRelation> : Many

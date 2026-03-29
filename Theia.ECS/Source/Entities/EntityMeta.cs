@@ -6,6 +6,7 @@ internal struct EntityMeta : IEquatable<EntityMeta>
 {
     internal const int DefaultEntityMetaVersion = 1;
     internal const int DefaultInvalidEntityMetaIndexes = -1;
+
     internal int _version;
     internal int _archetypeIndex;
     internal int _storageIndex;
@@ -14,9 +15,9 @@ internal struct EntityMeta : IEquatable<EntityMeta>
 
     internal EntityMeta(
         int version,
-        int archetypeIndex,
-        int storageIndex,
-        int componentIndex,
+        int archetypeIndex = DefaultInvalidEntityMetaIndexes,
+        int storageIndex = DefaultInvalidEntityMetaIndexes,
+        int componentIndex = DefaultInvalidEntityMetaIndexes,
         int relationsIndexerIndex = DefaultInvalidEntityMetaIndexes
     )
     {
@@ -25,6 +26,15 @@ internal struct EntityMeta : IEquatable<EntityMeta>
         _storageIndex = storageIndex;
         _componentIndex = componentIndex;
         _relationsIndexerIndex = relationsIndexerIndex;
+    }
+
+    public void Reset()
+    {
+        _version++;
+        _archetypeIndex = DefaultInvalidEntityMetaIndexes;
+        _storageIndex = DefaultInvalidEntityMetaIndexes;
+        _componentIndex = DefaultInvalidEntityMetaIndexes;
+        _relationsIndexerIndex = DefaultInvalidEntityMetaIndexes;
     }
 
     public bool Equals(EntityMeta other) =>

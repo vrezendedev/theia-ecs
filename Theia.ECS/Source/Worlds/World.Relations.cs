@@ -1,5 +1,7 @@
 using System;
-using Theia.ECS.Contracts;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using Theia.ECS.Entities;
 using Theia.ECS.Relations;
 
@@ -7,116 +9,166 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
-    private RelationsIndexer[] _relationsIndexer;
-    private RelationStorage[] _relationStorage;
+    private const int DefaultRelationsIndexerCapacity = 16;
+    private const int DefaultRelationsIndexerGrowthFactor = 2;
 
-    public bool TryAddRelation<TRelation>(Entity relationOwner, Entity target)
+    private RelationsIndexer[] _relationsIndexers;
+    private Stack<int> _freeRelationSlots;
+    private Lock _relationsIndexersLock = new();
+
+    private RelationStorage[] _relationStorages;
+    private Lock _relationStoragesLock = new();
+
+    private Relation? AttemptAddRelation(int relationId, Entity relationOwner, Entity target)
     {
-        throw new NotImplementedException();
+        if (!IsAlive(relationOwner) || !IsAlive(target))
+            return null;
+
+        RelationStorage relationStorage = GetOrCreateRelationStorage(relationId);
+
+        RelationType relationType = RelationsMeta.GetRelationType(relationId);
+
+        ref EntityMeta ownerMeta = ref _entitiesMeta[relationOwner._id];
+        RelationsIndexer ownerIndexer = GetOrCreateRelationIndexer(ref ownerMeta);
+        RelationKey ownerKey = ownerIndexer.GetOrAddKey(relationId);
+
+        ref EntityMeta targetMeta = ref _entitiesMeta[target._id];
+        RelationsIndexer targetIndexer = GetOrCreateRelationIndexer(ref targetMeta);
+        RelationKey targetKey = targetIndexer.GetOrAddKey(relationId);
+
+#pragma warning disable CS8524
+        return relationType._cardinality switch
+        {
+            RelationCardinality.Exclusive => AddExclusiveRelation(
+                relationStorage,
+                relationOwner,
+                (ExclusiveKey)ownerKey,
+                target,
+                (ExclusiveKey)targetKey
+            ),
+            RelationCardinality.Tree => AddOrUpdateTreeRelation(
+                relationStorage,
+                (TreeKey)ownerKey,
+                (TreeKey)targetKey
+            ),
+            RelationCardinality.Multiple => AddOrUpdateMultipleRelation(
+                relationStorage,
+                (MultipleKey)ownerKey,
+                (MultipleKey)targetKey
+            ),
+        };
+#pragma warning restore CS8524
     }
 
-    public bool TryAddEvaluatedRelation<TRelation>(
-        Entity relationOwner,
+    private Relation? AddExclusiveRelation(
+        RelationStorage relationStorage,
+        Entity owner,
+        ExclusiveKey ownerKey,
         Entity target,
-        TRelation value
+        ExclusiveKey targetKey
     )
-        where TRelation : struct
     {
-        throw new NotImplementedException();
+        if (!ownerKey.IsAvailable())
+            ThrowEntityAlreadyHasExclusiveRelation(owner, relationStorage._relationId);
+
+        int primaryKey = relationStorage.AccountRelation();
+
+        Singular relation = (Singular)relationStorage.GetRelation(primaryKey);
+
+        relation.SetOwner(owner);
+        relation.Relate(target);
+
+        ownerKey._primaryKey = primaryKey;
+        targetKey.AddKeyIndexer(owner, primaryKey);
+
+        return relation;
     }
 
-    public bool TryAddRelations<TRelation>(
-        Entity relationOwner,
-        params ReadOnlySpan<Entity> targets
+    private Relation? AddOrUpdateTreeRelation(
+        RelationStorage relationStorage,
+        TreeKey ownerKey,
+        TreeKey targetKey
     )
-        where TRelation : struct
     {
         throw new NotImplementedException();
     }
 
-    public bool TryAddEvaluatedRelations<TRelation>(
-        Entity relationOwner,
-        params ReadOnlySpan<EntityRelation<TRelation>> targets
+    private Relation? AddOrUpdateMultipleRelation(
+        RelationStorage relationStorage,
+        MultipleKey ownerKey,
+        MultipleKey targetKey
     )
-        where TRelation : struct
     {
         throw new NotImplementedException();
     }
 
-    public bool TryRemoveRelation<TRelation>(Entity entityOwner)
+    private RelationsIndexer GetOrCreateRelationIndexer(ref EntityMeta entityMeta)
     {
-        throw new NotImplementedException();
+        lock (_relationsIndexersLock)
+        {
+            int index = entityMeta._relationsIndexerIndex;
+
+            if (index != EntityMeta.DefaultInvalidEntityMetaIndexes)
+                return _relationsIndexers[index];
+
+            Stack<int> free = _freeRelationSlots;
+
+            int currentLength = _relationsIndexers.Length;
+
+            bool pop = free.Count > 0;
+
+            index = pop ? free.Pop() : currentLength;
+
+            RelationsIndexer relationsIndexer;
+
+            if (!pop)
+            {
+                int targetLength = currentLength * DefaultRelationsIndexerGrowthFactor;
+
+                Array.Resize(ref _relationsIndexers, targetLength);
+
+                for (int i = targetLength - 1; i > currentLength; i--)
+                    free.Push(i);
+            }
+
+            relationsIndexer = _relationsIndexers[index];
+
+            if (relationsIndexer is not null)
+                relationsIndexer.Reset();
+            else
+            {
+                relationsIndexer = new();
+                _relationsIndexers[index] = relationsIndexer;
+            }
+
+            entityMeta._relationsIndexerIndex = index;
+
+            return relationsIndexer;
+        }
     }
 
-    public bool TryRemoveRelation<TRelation>(Entity entityOwner, Entity entity)
+    private RelationStorage GetOrCreateRelationStorage(int relationId)
     {
-        throw new NotImplementedException();
+        RelationStorage[] relationStorages = _relationStorages;
+
+        if (relationId < relationStorages.Length && relationStorages[relationId] is not null)
+            return relationStorages[relationId];
+
+        lock (_relationStoragesLock)
+        {
+            if (relationId >= _relationStorages.Length)
+                Array.Resize(ref _relationStorages, relationId + 1);
+
+            if (_relationStorages[relationId] is null)
+                _relationStorages[relationId] = new RelationStorage(relationId);
+
+            return _relationStorages[relationId];
+        }
     }
 
-    public Entity GetRelation<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public EntityEvaluatedRelation<TRelation> GetEvaluatedRelation<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public TRelation ReadEvaluatedRelation<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public ReadOnlySpan<Entity> GetRelations<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public EntityEvaluatedRelations<TRelation> GetEvaluatedRelations<TRelation>(
-        Entity relationOwner
-    )
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public EntityEvaluatedRelationsReadOnly<TRelation> ReadEvaluatedRelations<TRelation>(
-        Entity relationOwner
-    )
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public ReadOnlySpan<Entity> GetLinkedRelations<T>(Entity entity)
-        where T : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool AreRelated<T>(Entity relationOwner, Entity target)
-        where T : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool HasRelation<T>(Entity owner)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void UpdateRelation(Entity relationOwner, UpdateRelation update)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void UpdateRelation<TRelation>(Entity relationOwner, UpdateRelation<TRelation> update)
-    {
-        throw new NotImplementedException();
-    }
+    [DoesNotReturn]
+    private static void ThrowEntityAlreadyHasExclusiveRelation(Entity entity, int relationId) =>
+        throw new InvalidOperationException(
+            $"Entity {entity} already has an exclusive relation of type '{RelationsMeta.GetRelationType(relationId)._type.Name}'. Remove the existing relation before adding another."
+        );
 }

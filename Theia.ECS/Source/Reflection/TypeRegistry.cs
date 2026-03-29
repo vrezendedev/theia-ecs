@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Theia.ECS.Extensions;
 
 namespace Theia.ECS.Reflection;
 
@@ -22,12 +23,9 @@ internal sealed class TypeRegistry<T>
     {
         lock (_lock)
         {
-            int currentLength = _typeMetaMap.Length;
-
             int index = _count;
 
-            if (index == currentLength)
-                Array.Resize(ref _typeMetaMap, currentLength * DefaultTypeMetaGrowthFactor);
+            Array.AttemptResize(ref _typeMetaMap, index, DefaultTypeMetaGrowthFactor);
 
             _count++;
 

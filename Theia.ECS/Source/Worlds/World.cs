@@ -8,16 +8,12 @@ using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
 using Theia.ECS.Queries;
+using Theia.ECS.Relations;
 
 namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
-    private const int DefaultEntitiesMetaCapacity = 16_384;
-    private const int DefaultGhoulsInitialCapacityDivisor = 4;
-    private const int DefaultArchetypesCapacity = 16;
-    internal const int DefaultDeferredCommandsCapacity = 256;
-
     /// <summary>
     /// The maximum allowed capacity. Any value beyond this would round up to a power of 2
     /// that exceeds <see cref="int.MaxValue"/>, causing an overflow when cast back to <see langword="int"/>.
@@ -29,9 +25,9 @@ public sealed partial class World
 
     internal readonly int _worldId;
 
-    internal int CountEntities() => _entitiesCount - _ghoulsCount;
+    internal int CountEntities() => _entitiesCount - _ghouls.Count;
 
-    internal int CountGhouls() => _ghoulsCount;
+    internal int CountGhouls() => _ghouls.Count;
 
     public World(int capacity = DefaultEntitiesMetaCapacity)
     {
@@ -64,6 +60,14 @@ public sealed partial class World
         _deferredAddStorages = Array.Empty<DeferredStorage>();
         _deferredRemove = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);
         _deferredGhoulify = new Queue<Entity>(DefaultDeferredCommandsCapacity);
+
+        _relationsIndexers = new RelationsIndexer[DefaultRelationsIndexerCapacity];
+        _freeRelationSlots = new(DefaultRelationsIndexerCapacity);
+
+        for (int i = DefaultRelationsIndexerCapacity - 1; i >= 0; i--)
+            _freeRelationSlots.Push(i);
+
+        _relationStorages = Array.Empty<RelationStorage>();
 
         Events = new();
 

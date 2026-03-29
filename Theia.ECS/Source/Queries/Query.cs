@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
+using Theia.ECS.Extensions;
 using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Queries;
@@ -52,15 +53,9 @@ public abstract class NomadQuery : Query
 
     internal void Add(Archetype archetype)
     {
-        int currentLength = _matchedArchetypes.Length;
-
         int index = _matchedArchetypesCount;
 
-        if (index == currentLength)
-            Array.Resize(
-                ref _matchedArchetypes,
-                currentLength * DefaultMatchedArchetypesGrowthFactor
-            );
+        Array.AttemptResize(ref _matchedArchetypes, index, DefaultMatchedArchetypesGrowthFactor);
 
         _matchedArchetypes[index] = archetype;
 

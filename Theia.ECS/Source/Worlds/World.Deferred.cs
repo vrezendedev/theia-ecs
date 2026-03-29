@@ -10,6 +10,8 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
+    internal const int DefaultDeferredCommandsCapacity = 256;
+
     private bool _isFlushingDeferred;
 
     private Queue<Entity> _deferredGhoulify;

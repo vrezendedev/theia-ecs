@@ -109,7 +109,7 @@ internal static class StructEnum<TEnum, TTypeMeta>
 
     internal static TEnum FromStruct(int structId)
     {
-        if ((uint)structId >= (uint)s_structMap.Length)
+        if (structId >= s_structMap.Length)
             return default;
 
         return s_structMap[structId];
