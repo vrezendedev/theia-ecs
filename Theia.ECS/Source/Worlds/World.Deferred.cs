@@ -15,14 +15,14 @@ public sealed partial class World
     private bool _isFlushingDeferred;
 
     private Queue<Entity> _deferredGhoulify;
-    private Lock _deferredGhoulifyLock = new();
+    private readonly Lock _deferredGhoulifyLock = new();
 
     private Queue<EntityComponentDeferred> _deferredAdd;
-    private Lock _deferredAddLock = new();
+    private readonly Lock _deferredAddLock = new();
     private DeferredStorage[] _deferredAddStorages;
 
     private Queue<EntityComponentDeferred> _deferredRemove;
-    private Lock _deferredRemoveLock = new();
+    private readonly Lock _deferredRemoveLock = new();
 
     internal bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
 

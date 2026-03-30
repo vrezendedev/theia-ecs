@@ -13,9 +13,9 @@ internal abstract class RelationType : ITypeMeta
     internal readonly RelationCardinality _cardinality;
     internal readonly RelationSubtype _subtype;
 
-    protected Lock _relationPoolLock = new();
+    protected readonly Lock _relationPoolLock = new();
     protected Queue<Relation> _relationPool;
-    protected Lock _relationKeyPoolLock = new();
+    protected readonly Lock _relationKeyPoolLock = new();
     protected Queue<RelationKey> _relationKeyPool;
 
     internal RelationType(Type type, RelationCardinality cardinality, RelationSubtype subtype)

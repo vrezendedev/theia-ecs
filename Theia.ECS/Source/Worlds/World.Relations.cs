@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
 using Theia.ECS.Relations;
 
@@ -14,10 +15,10 @@ public sealed partial class World
 
     private RelationsIndexer[] _relationsIndexers;
     private Stack<int> _freeRelationSlots;
-    private Lock _relationsIndexersLock = new();
+    private readonly Lock _relationsIndexersLock = new();
 
     private RelationStorage[] _relationStorages;
-    private Lock _relationStoragesLock = new();
+    private readonly Lock _relationStoragesLock = new();
 
     private Relation? AttemptAddRelation(int relationId, Entity relationOwner, Entity target)
     {
@@ -48,8 +49,11 @@ public sealed partial class World
             ),
             RelationCardinality.Tree => AddOrUpdateTreeRelation(
                 relationStorage,
+                relationOwner,
                 (TreeKey)ownerKey,
-                (TreeKey)targetKey
+                target,
+                (TreeKey)targetKey,
+                targetIndexer
             ),
             RelationCardinality.Multiple => AddOrUpdateMultipleRelation(
                 relationStorage,
@@ -68,29 +72,63 @@ public sealed partial class World
         ExclusiveKey targetKey
     )
     {
-        if (!ownerKey.IsAvailable())
-            ThrowEntityAlreadyHasExclusiveRelation(owner, relationStorage._relationId);
+        RelationAccounted accounted = relationStorage.Account();
+        Singular relation = (Singular)accounted._relation;
 
-        int primaryKey = relationStorage.AccountRelation();
+        lock (relation._relationLock)
+        {
+            if (!ownerKey.IsAvailable())
+                ThrowEntityAlreadyHasExclusiveRelation(owner, relationStorage._relationId);
 
-        Singular relation = (Singular)relationStorage.GetRelation(primaryKey);
+            relation.SetOwner(owner);
+            relation.Relate(target);
 
-        relation.SetOwner(owner);
-        relation.Relate(target);
-
-        ownerKey._primaryKey = primaryKey;
-        targetKey.AddKeyIndexer(owner, primaryKey);
+            ownerKey._primaryKey = accounted._primaryKey;
+            targetKey.AddKeyIndexer(owner, accounted._primaryKey);
+        }
 
         return relation;
     }
 
     private Relation? AddOrUpdateTreeRelation(
         RelationStorage relationStorage,
+        Entity owner,
         TreeKey ownerKey,
-        TreeKey targetKey
+        Entity target,
+        TreeKey targetKey,
+        RelationsIndexer targetIndexer
     )
     {
-        throw new NotImplementedException();
+        Many relation;
+
+        lock (relationStorage._storageLock)
+        {
+            if (ownerKey.HasRelation())
+                relation = (Many)relationStorage.Get(ownerKey._primaryKey);
+            else
+            {
+                RelationAccounted accounted = relationStorage.Account();
+
+                relation = (Many)accounted._relation;
+                relation.SetOwner(owner);
+
+                ownerKey._primaryKey = accounted._primaryKey;
+            }
+        }
+
+        lock (targetIndexer._lock)
+        {
+            if (!targetKey.IsAvailable())
+                ThrowEntityAlreadyHasRootRelation(target, relationStorage._relationId);
+
+            lock (relation._relationLock)
+            {
+                int compositeKey = relation.Relate(target);
+                targetKey.AddKeyIndexer(ownerKey._primaryKey, compositeKey);
+            }
+
+            return relation;
+        }
     }
 
     private Relation? AddOrUpdateMultipleRelation(
@@ -171,4 +209,8 @@ public sealed partial class World
         throw new InvalidOperationException(
             $"Entity {entity} already has an exclusive relation of type '{RelationsMeta.GetRelationType(relationId)._type.Name}'. Remove the existing relation before adding another."
         );
+
+    [DoesNotReturn]
+    private static void ThrowEntityAlreadyHasRootRelation(Entity entity, int relationId) =>
+        throw new InvalidOperationException($"");
 }

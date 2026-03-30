@@ -13,7 +13,7 @@ public abstract class Assemblage
 {
     public readonly EntityEvents Events;
 
-    protected Lock _deferredCreateLock = new();
+    protected readonly Lock _deferredCreateLock = new();
 
     internal readonly World _world;
     internal readonly Signature _signature;

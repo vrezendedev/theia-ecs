@@ -14,7 +14,7 @@ internal sealed class RelationsIndexer
     private int[] _relationsAdded;
 
     private RelationKey[] _keys;
-    private readonly Lock _lock = new();
+    internal readonly Lock _lock = new();
 
     internal RelationsIndexer()
     {
@@ -24,13 +24,11 @@ internal sealed class RelationsIndexer
 
     internal RelationKey GetOrAddKey(int relationId)
     {
-        RelationKey[] keys = _keys;
-
-        if (HasKey(relationId))
-            return keys[relationId];
-
         lock (_lock)
         {
+            if (HasKey(relationId))
+                return _keys[relationId];
+
             int addedIndex = _relationsAddedCount;
 
             Array.AttemptResize(ref _relationsAdded, addedIndex, DefaultRelationAddedGrowthFactor);

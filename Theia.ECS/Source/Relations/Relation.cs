@@ -12,8 +12,8 @@ internal abstract class Relation
 
     protected Entity _owner;
 
-    internal Lock _relationLock = new();
-    protected Lock _updateLock = new();
+    internal readonly Lock _relationLock = new();
+    protected readonly Lock _updateLock = new();
 
     protected int _updateCount;
 

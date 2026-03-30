@@ -21,7 +21,7 @@ internal abstract class MultiLinkRelation : RelationKey
     private const int DefaultRelationsIndexerCapacity = 4;
     private const int DefaultRelationsIndexerGrowthFactor = 2;
 
-    internal int _externalLinksWithCount;
+    private int _externalLinksWithCount;
     internal Entity[] _externalLinksWith = new Entity[DefaultRelationsIndexerCapacity];
 
     protected int AccountExternalLink(Entity entity)
@@ -73,12 +73,20 @@ internal sealed class ExclusiveKey : MultiLinkRelation
 
 internal sealed class TreeKey : RelationKey
 {
-    internal int _foreignKey;
-    internal int _compositeKey;
+    internal int _foreignKey { get; private set; }
+    internal int _compositeKey { get; private set; }
 
-    internal override bool IsAvailable()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool HasRelation() => _primaryKey != InvalidKey;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal override bool IsAvailable() =>
+        _foreignKey == InvalidKey && _compositeKey == InvalidKey;
+
+    internal void AddKeyIndexer(int foreignKey, int compositeKey)
     {
-        throw new NotImplementedException();
+        _foreignKey = foreignKey;
+        _compositeKey = compositeKey;
     }
 
     internal override void Reset()
