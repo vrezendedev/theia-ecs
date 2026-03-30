@@ -9,12 +9,10 @@ internal abstract class Relation
 {
     internal readonly RelationCardinality _cardinality;
     internal readonly RelationSubtype _subtype;
-
-    protected Entity _owner;
-
     internal readonly Lock _relationLock = new();
     protected readonly Lock _updateLock = new();
 
+    protected Entity _owner;
     protected int _updateCount;
 
     protected void IncrementUpdateCount() => Interlocked.Increment(ref _updateCount);

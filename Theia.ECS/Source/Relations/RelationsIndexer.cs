@@ -10,11 +10,12 @@ internal sealed class RelationsIndexer
     private const int DefaultRelationAddedCapacity = 4;
     private const int DefaultRelationAddedGrowthFactor = 2;
 
-    private int _relationsAddedCount;
+    internal readonly Lock _lock = new();
+
+    internal int _relationsAddedCount { get; private set; }
     private int[] _relationsAdded;
 
     private RelationKey[] _keys;
-    internal readonly Lock _lock = new();
 
     internal RelationsIndexer()
     {
@@ -24,60 +25,49 @@ internal sealed class RelationsIndexer
 
     internal RelationKey GetOrAddKey(int relationId)
     {
-        lock (_lock)
-        {
-            if (HasKey(relationId))
-                return _keys[relationId];
+        if (HasKey(relationId))
+            return _keys[relationId];
 
-            int addedIndex = _relationsAddedCount;
+        int addedIndex = _relationsAddedCount;
 
-            Array.AttemptResize(ref _relationsAdded, addedIndex, DefaultRelationAddedGrowthFactor);
+        Array.AttemptResize(ref _relationsAdded, addedIndex, DefaultRelationAddedGrowthFactor);
 
-            _relationsAddedCount++;
+        _relationsAddedCount++;
 
-            _relationsAdded[addedIndex] = relationId;
+        _relationsAdded[addedIndex] = relationId;
 
-            RelationKey relationKey = RelationsMeta.GetRelationType(relationId).CreateKey();
+        RelationKey relationKey = RelationsMeta.GetRelationType(relationId).CreateKey();
 
-            relationKey._indexerAddedIndex = addedIndex;
+        relationKey._indexerAddedIndex = addedIndex;
 
-            if (relationId >= _keys.Length)
-                Array.Resize(ref _keys, relationId + 1);
+        if (relationId >= _keys.Length)
+            Array.Resize(ref _keys, relationId + 1);
 
-            _keys[relationId] = relationKey;
+        _keys[relationId] = relationKey;
 
-            return relationKey;
-        }
+        return relationKey;
     }
 
-    internal void DeleteKey(int relationId)
+    internal RelationKey DeleteKey(int relationId)
     {
-        RelationKey key;
+        RelationKey key = _keys[relationId];
 
-        lock (_lock)
+        int relationAddedIndex = key._indexerAddedIndex;
+
+        int last = _relationsAddedCount - 1;
+
+        _relationsAddedCount--;
+
+        if (relationAddedIndex < last)
         {
-            RelationKey[] keys = _keys;
-            int[] relationsAdded = _relationsAdded;
-
-            key = keys[relationId];
-
-            int relationAddedIndex = key._indexerAddedIndex;
-
-            int last = _relationsAddedCount - 1;
-
-            _relationsAddedCount--;
-
-            if (relationAddedIndex < last)
-            {
-                int lastRelationAddedId = relationsAdded[last];
-                relationsAdded[relationAddedIndex] = lastRelationAddedId;
-                keys[lastRelationAddedId]._indexerAddedIndex = relationAddedIndex;
-            }
-
-            keys[relationId] = null!;
+            int lastRelationAddedId = _relationsAdded[last];
+            _relationsAdded[relationAddedIndex] = lastRelationAddedId;
+            _keys[lastRelationAddedId]._indexerAddedIndex = relationAddedIndex;
         }
 
-        RelationsMeta.GetRelationType(relationId).PoolRelationKey(key);
+        _keys[relationId] = null!;
+
+        return key;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -85,11 +75,5 @@ internal sealed class RelationsIndexer
     {
         RelationKey[] keys = _keys;
         return relationId < keys.Length && keys[relationId] is not null;
-    }
-
-    internal void Reset()
-    {
-        while (_relationsAddedCount > 0)
-            DeleteKey(_relationsAdded[_relationsAddedCount - 1]);
     }
 }

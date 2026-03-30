@@ -31,11 +31,19 @@ public sealed partial class World
 
         ref EntityMeta ownerMeta = ref _entitiesMeta[relationOwner._id];
         RelationsIndexer ownerIndexer = GetOrCreateRelationIndexer(ref ownerMeta);
-        RelationKey ownerKey = ownerIndexer.GetOrAddKey(relationId);
+        RelationKey ownerKey;
+        lock (ownerIndexer._lock)
+        {
+            ownerKey = ownerIndexer.GetOrAddKey(relationId);
+        }
 
         ref EntityMeta targetMeta = ref _entitiesMeta[target._id];
         RelationsIndexer targetIndexer = GetOrCreateRelationIndexer(ref targetMeta);
-        RelationKey targetKey = targetIndexer.GetOrAddKey(relationId);
+        RelationKey targetKey;
+        lock (targetIndexer._lock)
+        {
+            targetKey = targetIndexer.GetOrAddKey(relationId);
+        }
 
 #pragma warning disable CS8524
         return relationType._cardinality switch
@@ -72,8 +80,14 @@ public sealed partial class World
         ExclusiveKey targetKey
     )
     {
-        RelationAccounted accounted = relationStorage.Account();
-        Singular relation = (Singular)accounted._relation;
+        RelationAccounted accounted;
+        Singular relation;
+
+        lock (relationStorage._storageLock)
+        {
+            accounted = relationStorage.Account();
+            relation = (Singular)accounted._relation;
+        }
 
         lock (relation._relationLock)
         {
@@ -171,9 +185,7 @@ public sealed partial class World
 
             relationsIndexer = _relationsIndexers[index];
 
-            if (relationsIndexer is not null)
-                relationsIndexer.Reset();
-            else
+            if (relationsIndexer is null)
             {
                 relationsIndexer = new();
                 _relationsIndexers[index] = relationsIndexer;
