@@ -6,100 +6,44 @@ namespace Theia.Tests.ECS.Relations;
 
 public sealed class RelationsMetaTests
 {
-    private static RelationType<TRelation> BuildRelationType<TRelation>(
-        RelationCardinality cardinality,
-        RelationSubtype subtype
-    )
-        where TRelation : struct =>
-        new RelationType<TRelation>(typeof(TRelation), cardinality, subtype);
-
-    [Fact]
-    public void ContainsRelationsAttributes_WithExclusiveAttribute_ReturnsTrue() =>
-        Assert.True(RelationsMeta.ContainsRelationsAttributes<ExclusiveTag>());
-
-    [Fact]
-    public void ContainsRelationsAttributes_WithTreeAttribute_ReturnsTrue() =>
-        Assert.True(RelationsMeta.ContainsRelationsAttributes<TreeTag>());
-
-    [Fact]
-    public void ContainsRelationsAttributes_WithMultipleAttribute_ReturnsTrue() =>
-        Assert.True(RelationsMeta.ContainsRelationsAttributes<MultipleTag>());
-
-    [Fact]
-    public void ContainsRelationsAttributes_WithoutAttribute_ReturnsFalse() =>
-        Assert.False(RelationsMeta.ContainsRelationsAttributes<NoAttributeRelation>());
-
     [Fact]
     public void IsTag_WithStructWithNoFields_ReturnsTrue() =>
-        Assert.True(RelationsMeta.IsTag<ExclusiveTag>());
+        Assert.True(RelationsMeta.IsTag<TaggedRelation>());
 
     [Fact]
     public void IsTag_WithStructWithFields_ReturnsFalse() =>
-        Assert.False(RelationsMeta.IsTag<ExclusiveData>());
-
-    [Fact]
-    public void ValidateRelation_WithExclusiveAttribute_ReturnsExclusiveCardinality()
-    {
-        RelationCardinality cardinality = RelationsMeta.ValidateRelation<ExclusiveTag>();
-        Assert.Equal(RelationCardinality.Exclusive, cardinality);
-    }
-
-    [Fact]
-    public void ValidateRelation_WithTreeAttribute_ReturnsTreeCardinality()
-    {
-        RelationCardinality cardinality = RelationsMeta.ValidateRelation<TreeTag>();
-        Assert.Equal(RelationCardinality.Tree, cardinality);
-    }
-
-    [Fact]
-    public void ValidateRelation_WithMultipleAttribute_ReturnsMultipleCardinality()
-    {
-        RelationCardinality cardinality = RelationsMeta.ValidateRelation<MultipleTag>();
-        Assert.Equal(RelationCardinality.Multiple, cardinality);
-    }
-
-    [Fact]
-    public void ValidateRelation_WithoutCardinalityAttribute_ThrowsInvalidOperationException() =>
-        Assert.Throws<InvalidOperationException>(() =>
-            RelationsMeta.ValidateRelation<NoAttributeRelation>()
-        );
-
-    [Fact]
-    public void ValidateRelation_WithMultipleCardinalityAttributes_ThrowsInvalidOperationException() =>
-        Assert.Throws<InvalidOperationException>(() =>
-            RelationsMeta.ValidateRelation<MultipleCardinalitiesRelation>()
-        );
+        Assert.False(RelationsMeta.IsTag<EvaluatedRelation>());
 
     [Fact]
     public void RelationMeta_AssignsNonNegativeId_ReturnsNonNegative() =>
-        Assert.True(RelationMeta<ExclusiveTag>.s_id >= 0);
+        Assert.True(RelationMeta<TaggedRelation>.s_id >= 0);
 
     [Fact]
     public void RelationMeta_WithSameType_ReturnsSameId()
     {
-        int first = RelationMeta<TreeTag>.s_id;
-        int second = RelationMeta<TreeTag>.s_id;
+        int first = RelationMeta<TaggedRelation>.s_id;
+        int second = RelationMeta<TaggedRelation>.s_id;
         Assert.Equal(first, second);
     }
 
     [Fact]
     public void RelationMeta_WithDifferentTypes_ReturnsDifferentIds() =>
-        Assert.NotEqual(RelationMeta<ExclusiveTag>.s_id, RelationMeta<MultipleTag>.s_id);
+        Assert.NotEqual(RelationMeta<TaggedRelation>.s_id, RelationMeta<EvaluatedRelation>.s_id);
 
     [Fact]
     public void GetRelationId_WithRegisteredType_ReturnsMatchingId()
     {
-        int expected = RelationMeta<ExclusiveData>.s_id;
-        int actual = RelationsMeta.GetRelationId(typeof(ExclusiveData));
+        int expected = RelationMeta<EvaluatedRelation>.s_id;
+        int actual = RelationsMeta.GetRelationId(typeof(EvaluatedRelation));
         Assert.Equal(expected, actual);
     }
 
     [Fact]
     public void GetRelationType_WithValidId_ReturnsCorrectType()
     {
-        int id = RelationMeta<TreeData>.s_id;
+        int id = RelationMeta<EvaluatedRelation>.s_id;
         RelationType meta = RelationsMeta.GetRelationType(id);
-        Assert.Equal(typeof(TreeData), meta.Get());
+        Assert.Equal(typeof(EvaluatedRelation), meta.Get());
     }
 
     [Fact]
@@ -113,115 +57,27 @@ public sealed class RelationsMetaTests
     }
 
     [Fact]
-    public void RelationsMeta_Count_AfterNewRegistration_IncreasesOrStaysSame()
-    {
-        int before = RelationsMeta.Count();
-        _ = RelationMeta<MultipleData>.s_id;
-        int after = RelationsMeta.Count();
-
-        Assert.True(after >= before);
-    }
-
-    [Fact]
-    public void CreateRelation_WithExclusiveTag_ReturnsExclusiveRelation()
-    {
-        RelationType<ExclusiveTag> relationType = BuildRelationType<ExclusiveTag>(
-            RelationCardinality.Exclusive,
-            RelationSubtype.Tag
-        );
-
-        Relation relation = relationType.CreateRelation();
-
-        Assert.IsType<Singular>(relation);
-    }
-
-    [Fact]
-    public void CreateRelation_WithTreeTag_ReturnsTreeRelation()
-    {
-        RelationType<TreeTag> relationType = BuildRelationType<TreeTag>(
-            RelationCardinality.Tree,
-            RelationSubtype.Tag
-        );
-
-        Relation relation = relationType.CreateRelation();
-
-        Assert.IsType<Many>(relation);
-    }
-
-    [Fact]
-    public void CreateRelation_WithMultipleTag_ReturnsMultipleRelation()
-    {
-        RelationType<MultipleTag> relationType = BuildRelationType<MultipleTag>(
-            RelationCardinality.Multiple,
-            RelationSubtype.Tag
-        );
-
-        Relation relation = relationType.CreateRelation();
-
-        Assert.IsType<Many>(relation);
-    }
-
-    [Fact]
-    public void CreateRelation_WithExclusiveData_ReturnsExclusiveStore()
-    {
-        RelationType<ExclusiveData> relationType = BuildRelationType<ExclusiveData>(
-            RelationCardinality.Exclusive,
-            RelationSubtype.Evaluated
-        );
-
-        Relation relation = relationType.CreateRelation();
-
-        Assert.IsType<Singular<ExclusiveData>>(relation);
-    }
-
-    [Fact]
-    public void CreateRelation_WithTreeData_ReturnsTreeStore()
-    {
-        RelationType<TreeData> relationType = BuildRelationType<TreeData>(
-            RelationCardinality.Tree,
-            RelationSubtype.Evaluated
-        );
-
-        Relation relation = relationType.CreateRelation();
-
-        Assert.IsType<Many<TreeData>>(relation);
-    }
-
-    [Fact]
-    public void CreateRelation_WithMultipleData_ReturnsMultipleStore()
-    {
-        RelationType<MultipleData> relationType = BuildRelationType<MultipleData>(
-            RelationCardinality.Multiple,
-            RelationSubtype.Evaluated
-        );
-
-        Relation relation = relationType.CreateRelation();
-
-        Assert.IsType<Many<MultipleData>>(relation);
-    }
-
-    [Fact]
     public void CreateRelation_AfterPooling_ReturnsSameInstance()
     {
-        RelationType<ExclusiveTag> relationType = BuildRelationType<ExclusiveTag>(
-            RelationCardinality.Exclusive,
-            RelationSubtype.Tag
-        );
+        RelationType<TaggedRelation> relationType =
+            (RelationType<TaggedRelation>)
+                RelationsMeta.GetRelationType(RelationMeta<TaggedRelation>.s_id);
 
         Relation created = relationType.CreateRelation();
+
         relationType.PoolRelation(created);
 
         Relation fromPool = relationType.CreateRelation();
+
         Assert.Same(created, fromPool);
     }
 
     [Fact]
     public void CreateRelation_WithEmptyPool_ReturnsNewInstance()
     {
-        RelationType<ExclusiveTag> relationType = BuildRelationType<ExclusiveTag>(
-            RelationCardinality.Exclusive,
-            RelationSubtype.Tag
-        );
+        RelationType<TaggedRelation> relationType =
+            (RelationType<TaggedRelation>)
+                RelationsMeta.GetRelationType(RelationMeta<TaggedRelation>.s_id);
 
         Relation first = relationType.CreateRelation();
         Relation second = relationType.CreateRelation();

@@ -174,43 +174,20 @@ public struct UnmappedComponent
     public int Value;
 }
 
-[Exclusive]
-internal struct ExclusiveTag { }
+[Relationship]
+internal struct TaggedRelation { }
 
-[Tree]
-internal struct TreeTag { }
-
-[Multiple]
-internal struct MultipleTag { }
-
-[Exclusive]
-internal struct ExclusiveData
+[Relationship]
+internal struct EvaluatedRelation
 {
     public int Value;
 }
 
-[Tree]
-internal struct TreeData
-{
-    public int Value;
-}
-
-[Multiple]
-internal struct MultipleData
-{
-    public int Value;
-}
-
-internal struct NoAttributeRelation { }
-
-[Exclusive]
-[Tree]
-internal struct MultipleCardinalitiesRelation { }
-
-[Exclusive]
+[Relationship]
 internal struct NonBlittableRelation
 {
-    public string ManagedField;
+    public string Value;
 }
+
 
 #pragma warning restore CS0649

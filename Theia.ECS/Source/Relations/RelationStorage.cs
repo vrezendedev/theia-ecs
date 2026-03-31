@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using Theia.ECS.Contracts;
 
 namespace Theia.ECS.Relations;
 
@@ -29,12 +26,4 @@ internal sealed class RelationStorage
         for (int i = 0; i < DefaultRelationsCapacity; i++)
             _free.Enqueue(i);
     }
-
-    internal RelationAccounted Account()
-    {
-        throw new NotImplementedException();
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Relation Get(int primaryKey) => _relations[primaryKey];
 }

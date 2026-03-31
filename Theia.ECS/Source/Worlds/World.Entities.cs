@@ -7,7 +7,6 @@ using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
 using Theia.ECS.Extensions;
-using Theia.ECS.Relations;
 
 namespace Theia.ECS.Worlds;
 
@@ -271,98 +270,6 @@ public sealed partial class World
         return archetype.Has(componentId);
     }
 
-    public bool TryAddRelation<TRelation>(Entity relationOwner, Entity target)
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool TryAddEvaluatedRelation<TRelation>(
-        Entity relationOwner,
-        Entity target,
-        TRelation value
-    )
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool TryRemoveRelation<TRelation>(Entity entityOwner)
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool TryRemoveRelation<TRelation>(Entity entityOwner, Entity entity)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Entity GetRelation<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public EntityEvaluatedRelation<TRelation> GetEvaluatedRelation<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public TRelation ReadEvaluatedRelation<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public ReadOnlySpan<Entity> GetRelations<TRelation>(Entity relationOwner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public EntityEvaluatedRelations<TRelation> GetEvaluatedRelations<TRelation>(
-        Entity relationOwner
-    )
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public EntityEvaluatedRelationsReadOnly<TRelation> ReadEvaluatedRelations<TRelation>(
-        Entity relationOwner
-    )
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public ReadOnlySpan<Entity> GetLinkedRelations<T>(Entity entity)
-        where T : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool AreRelated<T>(Entity relationOwner, Entity target)
-        where T : struct
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool HasRelation<T>(Entity owner)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void UpdateRelation(Entity relationOwner, UpdateRelation update)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void UpdateRelation<TRelation>(Entity relationOwner, UpdateRelation<TRelation> update)
-    {
-        throw new NotImplementedException();
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateEntitySwappedIfValid(EntitySwapped swapped)
     {
@@ -384,7 +291,7 @@ public sealed partial class World
     [DoesNotReturn]
     private static void ThrowEntityNotAlive(Entity entity) =>
         throw new InvalidOperationException(
-            $"{entity} is not alive. Component access requires a live entity."
+            $"{entity} is not alive. Access requires an entity to be alive."
         );
 
     [DoesNotReturn]

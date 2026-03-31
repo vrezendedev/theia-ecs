@@ -8,23 +8,22 @@ namespace Theia.ECS.Relations;
 internal abstract class RelationType : ITypeMeta
 {
     private const int DefaultRelationPoolCapacity = 4;
+    private const int DefaultRelationLinkPoolCapacity = 16;
 
     internal readonly Type _type;
-    internal readonly RelationCardinality _cardinality;
     internal readonly RelationSubtype _subtype;
 
     protected readonly Lock _relationPoolLock = new();
     protected Queue<Relation> _relationPool;
-    protected readonly Lock _relationKeyPoolLock = new();
-    protected Queue<RelationKey> _relationKeyPool;
+    protected readonly Lock _relationLinkPoolLock = new();
+    protected Queue<RelationLink> _relationLinkPool;
 
-    internal RelationType(Type type, RelationCardinality cardinality, RelationSubtype subtype)
+    internal RelationType(Type type, RelationSubtype subtype)
     {
         _type = type;
-        _cardinality = cardinality;
         _subtype = subtype;
         _relationPool = new(DefaultRelationPoolCapacity);
-        _relationKeyPool = new(DefaultRelationPoolCapacity);
+        _relationLinkPool = new(DefaultRelationLinkPoolCapacity);
     }
 
     internal void PoolRelation(Relation relation)
@@ -35,11 +34,11 @@ internal abstract class RelationType : ITypeMeta
         }
     }
 
-    internal void PoolRelationKey(RelationKey relationKey)
+    internal void PoolRelationLink(RelationLink relationKey)
     {
-        lock (_relationKeyPoolLock)
+        lock (_relationLinkPoolLock)
         {
-            _relationKeyPool.Enqueue(relationKey);
+            _relationLinkPool.Enqueue(relationKey);
         }
     }
 
@@ -50,5 +49,21 @@ internal abstract class RelationType : ITypeMeta
     public static int GetId(Type type) => RelationsMeta.GetRelationId(type);
 
     internal abstract Relation CreateRelation();
-    internal abstract RelationKey CreateKey();
+
+    internal RelationLink CreateRelationLink()
+    {
+        RelationLink? relationLink;
+
+        lock (_relationLinkPoolLock)
+        {
+            _relationLinkPool.TryDequeue(out relationLink);
+        }
+
+        if (relationLink is null)
+            relationLink = new();
+        else
+            relationLink.Reset();
+
+        return relationLink;
+    }
 }

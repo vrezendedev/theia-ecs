@@ -13,7 +13,7 @@ public sealed class Includes<T> : Attribute
         if (ComponentsMeta.ContainsFields<T>())
             _ = ComponentMeta<T>.s_id;
 
-        if (RelationsMeta.ContainsRelationsAttributes<T>())
+        if (RelationsMeta.HasRelationshipAttribute<T>())
             _ = RelationMeta<T>.s_id;
     }
 }
