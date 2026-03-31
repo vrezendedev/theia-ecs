@@ -25,7 +25,7 @@ internal sealed class TypeRegistry<T>
         {
             int index = _count;
 
-            Array.AttemptResize(ref _typeMetaMap, index, DefaultTypeMetaGrowthFactor);
+            Array.TryResize(ref _typeMetaMap, index, DefaultTypeMetaGrowthFactor);
 
             _count++;
 

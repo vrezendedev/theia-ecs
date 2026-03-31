@@ -11,17 +11,17 @@ internal abstract class RelationType : ITypeMeta
     private const int DefaultRelationLinkPoolCapacity = 16;
 
     internal readonly Type _type;
-    internal readonly RelationSubtype _subtype;
+    internal readonly bool _isTag;
 
     protected readonly Lock _relationPoolLock = new();
     protected Queue<Relation> _relationPool;
     protected readonly Lock _relationLinkPoolLock = new();
     protected Queue<RelationLink> _relationLinkPool;
 
-    internal RelationType(Type type, RelationSubtype subtype)
+    internal RelationType(Type type, bool isTag)
     {
         _type = type;
-        _subtype = subtype;
+        _isTag = isTag;
         _relationPool = new(DefaultRelationPoolCapacity);
         _relationLinkPool = new(DefaultRelationLinkPoolCapacity);
     }

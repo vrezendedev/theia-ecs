@@ -7,8 +7,8 @@ namespace Theia.ECS.Relations;
 
 internal sealed class RelationsIndexer
 {
-    private const int DefaultAddedRelationsIdCapacity = 4;
-    private const int DefaultRelationAddedGrowthFactor = 2;
+    private const int DefaultAddedCapacity = 4;
+    private const int DefaultAddedGrowthFactor = 2;
 
     internal readonly Lock _lock = new();
 
@@ -16,38 +16,70 @@ internal sealed class RelationsIndexer
     private int[] _addedRelationsId;
     private RelationKey[] _keys;
 
+    private int _addedLinksCount;
+    private int[] _addedLinks;
     private RelationLink[] _links;
 
     internal RelationsIndexer()
     {
-        _addedRelationsId = new int[DefaultAddedRelationsIdCapacity];
+        _addedRelationsId = new int[DefaultAddedCapacity];
         _keys = Array.Empty<RelationKey>();
+        _addedLinks = new int[DefaultAddedCapacity];
         _links = Array.Empty<RelationLink>();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool Has<T>(int relationId, in T[] array) =>
-        relationId < array.Length && array[relationId] is not null;
+    internal bool HasKey(int relationId) =>
+        relationId < _keys.Length && _keys[relationId].HasRelation();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool HasLink(int relationId) => Has(relationId, _links);
+    internal bool HasLink(int relationId) =>
+        relationId < _links.Length && _links[relationId] is not null;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool HasKey(int relationId) => Has(relationId, _keys);
-
-    internal RelationLink GetOrAddLink(int relationId)
+    internal RelationLink GetOrRentLink(int relationId)
     {
         if (HasLink(relationId))
             return _links[relationId];
+
+        int addedIndex = _addedLinksCount;
+
+        Array.TryResize(ref _addedLinks, addedIndex, DefaultAddedGrowthFactor);
+
+        _addedLinksCount++;
+        _addedLinks[addedIndex] = relationId;
 
         RelationLink relationLink = RelationsMeta.GetRelationType(relationId).CreateRelationLink();
 
         if (relationId >= _links.Length)
             Array.Resize(ref _links, relationId + 1);
 
+        relationLink.SetIndexerAddedLinkIndex(addedIndex);
+
         _links[relationId] = relationLink;
 
         return relationLink;
+    }
+
+    internal void ReturnLink(int relationId)
+    {
+        RelationLink relationLink = _links[relationId];
+
+        int addedLinkIndex = relationLink.GetIndexerAddedLinkIndex();
+
+        int last = _addedLinksCount - 1;
+
+        _addedLinksCount--;
+
+        if (addedLinkIndex < last)
+        {
+            int lastAddedLinkId = _addedLinks[last];
+            _addedLinks[addedLinkIndex] = lastAddedLinkId;
+            _links[lastAddedLinkId].SetIndexerAddedLinkIndex(addedLinkIndex);
+        }
+
+        _links[relationId] = null!;
+
+        RelationsMeta.GetRelationType(relationId).PoolRelationLink(relationLink);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -58,7 +90,7 @@ internal sealed class RelationsIndexer
     {
         int addedIndex = _addedRelationsIdCount;
 
-        Array.AttemptResize(ref _addedRelationsId, addedIndex, DefaultRelationAddedGrowthFactor);
+        Array.TryResize(ref _addedRelationsId, addedIndex, DefaultAddedGrowthFactor);
 
         _addedRelationsIdCount++;
 

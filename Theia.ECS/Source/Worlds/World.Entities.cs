@@ -31,7 +31,7 @@ public sealed partial class World
 
         if (!dequeue)
         {
-            Array.AttemptResize(ref _entitiesMeta, index, DefaultEntitiesMetaGrowthFactor);
+            Array.TryResize(ref _entitiesMeta, index, DefaultEntitiesMetaGrowthFactor);
 
             _entitiesMeta[index] = new EntityMeta(EntityMeta.DefaultEntityMetaVersion);
 

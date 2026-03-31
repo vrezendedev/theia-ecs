@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading;
+using Theia.ECS.Contracts;
 
 namespace Theia.ECS.Relations;
 
@@ -11,7 +14,6 @@ internal sealed class RelationStorage
     internal readonly Lock _storageLock = new();
     internal readonly int _relationId;
 
-    private int _count;
     private Relation[] _relations;
     private Queue<int> _free;
 
@@ -25,5 +27,40 @@ internal sealed class RelationStorage
 
         for (int i = 0; i < DefaultRelationsCapacity; i++)
             _free.Enqueue(i);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Relation GetRelation(int primaryKey) => _relations[primaryKey];
+
+    internal RelationRented RentRelation()
+    {
+        int index;
+
+        if (_free.Count > 0)
+            index = _free.Dequeue();
+        else
+        {
+            index = _relations.Length;
+
+            Array.Resize(ref _relations, index * DefaultRelationsGrowthFactor);
+
+            for (int i = index + 1; i < _relations.Length; i++)
+                _free.Enqueue(i);
+        }
+
+        _relations[index] = RelationsMeta.GetRelationType(_relationId).CreateRelation();
+
+        return new RelationRented(_relations[index], index);
+    }
+
+    internal void ReturnRelation(int primaryKey)
+    {
+        Relation relation = _relations[primaryKey];
+
+        RelationsMeta.GetRelationType(_relationId).PoolRelation(relation);
+
+        _relations[primaryKey] = null!;
+
+        _free.Enqueue(primaryKey);
     }
 }

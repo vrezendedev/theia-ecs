@@ -36,6 +36,7 @@ internal sealed class RelationLink
 
     internal readonly Lock _lock = new();
 
+    private int _addedLinkIndex;
     private int _externalLinksCount;
     private ExternalLink[] _externalLinks;
     private KeyIndexer[] _keysIndexer;
@@ -50,15 +51,17 @@ internal sealed class RelationLink
     internal ReadOnlySpan<ExternalLink> GetExternalLinks() =>
         _externalLinks.AsSpan(0, _externalLinksCount);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetIndexerAddedLinkIndex() => _addedLinkIndex;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void SetIndexerAddedLinkIndex(int index) => _addedLinkIndex = index;
+
     internal void AddExternalLink(Entity entity, int foreignKey, int compositeKey)
     {
         int externalLinkIndex = _externalLinksCount;
 
-        Array.AttemptResize(
-            ref _externalLinks,
-            externalLinkIndex,
-            DefaultRelationsIndexerGrowthFactor
-        );
+        Array.TryResize(ref _externalLinks, externalLinkIndex, DefaultRelationsIndexerGrowthFactor);
 
         _externalLinks[externalLinkIndex] = new() { Entity = entity, ForeignKey = foreignKey };
 
@@ -106,6 +109,7 @@ internal sealed class RelationLink
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Reset()
     {
+        _addedLinkIndex = InvalidIndex;
         _externalLinksCount = 0;
         _keysIndexer.AsSpan().Fill(KeyIndexer.Invalid);
     }

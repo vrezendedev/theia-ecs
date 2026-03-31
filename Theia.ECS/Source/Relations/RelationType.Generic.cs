@@ -5,8 +5,8 @@ namespace Theia.ECS.Relations;
 internal sealed class RelationType<TRelation> : RelationType
     where TRelation : struct
 {
-    internal RelationType(Type type, RelationSubtype subtype)
-        : base(type, subtype) { }
+    internal RelationType(Type type, bool isTag)
+        : base(type, isTag) { }
 
     internal override Relation CreateRelation()
     {
@@ -18,14 +18,7 @@ internal sealed class RelationType<TRelation> : RelationType
         }
 
         if (relation is null)
-#pragma warning disable CS8524
-            relation = _subtype switch
-            {
-                RelationSubtype.Tag => new TagRelation(),
-                RelationSubtype.Evaluated => new EvaluatedRelation<TRelation>(),
-            };
-#pragma warning restore CS8524
-
+            relation = _isTag ? new Relation() : new EvaluatedRelation<TRelation>();
         else
             relation.Reset();
 

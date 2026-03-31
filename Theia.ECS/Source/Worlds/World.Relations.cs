@@ -12,12 +12,13 @@ public sealed partial class World
     private const int DefaultRelationsIndexerCapacity = 16;
     private const int DefaultRelationsIndexerGrowthFactor = 2;
 
+    private readonly Lock _relationsIndexersLock = new();
+    private readonly Lock _relationStoragesLock = new();
+
     private RelationsIndexer[] _relationsIndexers;
     private Stack<int> _freeRelationSlots;
-    private readonly Lock _relationsIndexersLock = new();
 
     private RelationStorage[] _relationStorages;
-    private readonly Lock _relationStoragesLock = new();
 
     public bool TryAddRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
@@ -101,7 +102,7 @@ public sealed partial class World
         throw new NotImplementedException();
     }
 
-    private RelationsIndexer GetOrCreateRelationIndexer(ref EntityMeta entityMeta)
+    private RelationsIndexer GetOrRentRelationIndexer(ref EntityMeta entityMeta)
     {
         lock (_relationsIndexersLock)
         {
@@ -141,6 +142,14 @@ public sealed partial class World
             entityMeta._relationsIndexerIndex = index;
 
             return relationsIndexer;
+        }
+    }
+
+    private void ReturnRelationIndexer(int relationIndexerIndex)
+    {
+        lock (_relationsIndexersLock)
+        {
+            _freeRelationSlots.Push(relationIndexerIndex);
         }
     }
 

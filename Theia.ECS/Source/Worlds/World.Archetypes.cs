@@ -20,7 +20,7 @@ public sealed partial class World
     {
         int index = _archetypesCount;
 
-        Array.AttemptResize(ref _archetypes, index, DefaultArchetypesGrowthFactor);
+        Array.TryResize(ref _archetypes, index, DefaultArchetypesGrowthFactor);
 
         Archetype archetype = new Archetype(index, signature);
         _archetypes[index] = archetype;

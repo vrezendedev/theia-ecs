@@ -8,24 +8,18 @@ using Theia.ECS.Relations.Attributes;
 
 namespace Theia.ECS.Relations;
 
-internal enum RelationSubtype
-{
-    Tag,
-    Evaluated,
-}
-
 internal static class RelationsMeta
 {
     private static TypeRegistry<RelationType> s_relationRegistry = new();
 
-    internal static int RegisterRelation<TRelation>(RelationSubtype subtype)
+    internal static int RegisterRelation<TRelation>(bool isTag)
         where TRelation : struct
     {
         int relationId = s_relationRegistry.Account();
 
         RelationType<TRelation> relationType = new RelationType<TRelation>(
             typeof(TRelation),
-            subtype
+            isTag
         );
 
         s_relationRegistry.Set(relationId, relationType);
@@ -61,11 +55,7 @@ internal static class RelationMeta<TRelation>
         if (!RelationsMeta.HasRelationshipAttribute<TRelation>())
             ThrowRelationshipAttributeNotAdded();
 
-        RelationSubtype subtype = RelationsMeta.IsTag<TRelation>()
-            ? RelationSubtype.Tag
-            : RelationSubtype.Evaluated;
-
-        s_id = RelationsMeta.RegisterRelation<TRelation>(subtype);
+        s_id = RelationsMeta.RegisterRelation<TRelation>(RelationsMeta.IsTag<TRelation>());
     }
 
     [DoesNotReturn]
