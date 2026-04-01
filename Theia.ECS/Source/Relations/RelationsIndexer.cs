@@ -36,6 +36,15 @@ internal sealed class RelationsIndexer
     internal bool HasLink(int relationId) =>
         relationId < _links.Length && _links[relationId] is not null;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetAddedLinksCount() => _addedLinksCount;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetAddedLinksAt(int index) => _addedLinks[index];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal RelationLink GetRelationLink(int relationId) => _links[relationId];
+
     internal RelationLink GetOrRentLink(int relationId)
     {
         if (HasLink(relationId))
@@ -83,8 +92,10 @@ internal sealed class RelationsIndexer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal ReadOnlySpan<int> GetRelationsAdded() =>
-        _addedRelationsId.AsSpan(0, _addedRelationsIdCount);
+    internal int GetAddedRelationsCount() => _addedRelationsIdCount;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetAddedRelationsAt(int index) => _addedRelationsId[index];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref RelationKey GetRelationKey(int relationId) => ref _keys[relationId];

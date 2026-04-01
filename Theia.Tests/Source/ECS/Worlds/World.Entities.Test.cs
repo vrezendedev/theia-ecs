@@ -192,7 +192,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        Assert.True(world.TryAdd<Velocity>(entity));
+        Assert.True(world.TryAddComponent<Velocity>(entity));
     }
 
     [Fact]
@@ -204,7 +204,7 @@ public sealed class WorldEntityLifecycleTests
 
         world.TryGhoulify(entity);
 
-        Assert.False(world.TryAdd<Velocity>(entity));
+        Assert.False(world.TryAddComponent<Velocity>(entity));
     }
 
     [Fact]
@@ -214,7 +214,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        Assert.False(world.TryAdd<Position>(entity));
+        Assert.False(world.TryAddComponent<Position>(entity));
     }
 
     [Fact]
@@ -224,7 +224,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryAdd(entity, new Velocity { X = 3, Y = 7 });
+        world.TryAddComponent(entity, new Velocity { X = 3, Y = 7 });
 
         ref Velocity velocity = ref world.Get<Velocity>(entity);
 
@@ -239,7 +239,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryAdd<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
 
         Assert.True(world.IsAlive(entity));
     }
@@ -251,7 +251,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position { X = 42, Y = 13 });
 
-        world.TryAdd<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
 
         ref Position position = ref world.Get<Position>(entity);
 
@@ -266,10 +266,10 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryAdd<Velocity>(entity);
-        world.TryAdd<Rotation>(entity);
+        world.TryAddComponent<Velocity>(entity);
+        world.TryAddComponent<Rotation>(entity);
 
-        Assert.True(world.TryAdd<Health>(entity));
+        Assert.True(world.TryAddComponent<Health>(entity));
 
         Assert.True(world.Has<Position>(entity));
         Assert.True(world.Has<Velocity>(entity));
@@ -284,9 +284,9 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryAdd<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
 
-        Assert.True(world.TryRemove<Velocity>(entity));
+        Assert.True(world.TryRemoveComponent<Velocity>(entity));
     }
 
     [Fact]
@@ -296,7 +296,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        Assert.False(world.TryRemove<Velocity>(entity));
+        Assert.False(world.TryRemoveComponent<Velocity>(entity));
     }
 
     [Fact]
@@ -307,7 +307,7 @@ public sealed class WorldEntityLifecycleTests
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
         world.TryGhoulify(entity);
 
-        Assert.False(world.TryRemove<Position>(entity));
+        Assert.False(world.TryRemoveComponent<Position>(entity));
     }
 
     [Fact]
@@ -317,8 +317,8 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryAdd<Velocity>(entity);
-        world.TryRemove<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
+        world.TryRemoveComponent<Velocity>(entity);
 
         Assert.Throws<InvalidOperationException>(() => world.Get<Velocity>(entity));
     }
@@ -330,7 +330,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryRemove<Position>(entity);
+        world.TryRemoveComponent<Position>(entity);
 
         Assert.False(world.IsAlive(entity));
     }
@@ -342,7 +342,7 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        Assert.True(world.TryRemove<Position>(entity));
+        Assert.True(world.TryRemoveComponent<Position>(entity));
     }
 
     [Fact]
@@ -352,8 +352,8 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position { X = 5, Y = 9 });
 
-        world.TryAdd<Velocity>(entity);
-        world.TryRemove<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
+        world.TryRemoveComponent<Velocity>(entity);
 
         ref Position position = ref world.Get<Position>(entity);
 

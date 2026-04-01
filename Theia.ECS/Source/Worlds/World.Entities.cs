@@ -61,6 +61,8 @@ public sealed partial class World
 
     private void Ghoulify(Entity entity, ref EntityMeta entityMeta, in Archetype archetype)
     {
+        ResetRelations(entity);
+
         UpdateEntitySwappedIfValid(archetype.Remove(entityMeta));
 
         entityMeta.Reset();
@@ -90,7 +92,7 @@ public sealed partial class World
         return AttemptGhoulify(entity);
     }
 
-    private EntityReferences AttemptAdd(Entity entity, int componentId)
+    private EntityReferences AttemptAddComponent(Entity entity, int componentId)
     {
         if (!IsAlive(entity))
             return EntityReferences.Invalid;
@@ -127,14 +129,14 @@ public sealed partial class World
         return new EntityReferences(ref entityMeta, currentArchetype, newArchetype);
     }
 
-    public bool TryAdd<TComponent>(Entity entity, in TComponent component = default)
+    public bool TryAddComponent<TComponent>(Entity entity, in TComponent component = default)
         where TComponent : struct
     {
         ThrowIfQueriesExecuting();
 
         int componentId = ComponentMeta<TComponent>.s_id;
 
-        EntityReferences entityReferences = AttemptAdd(entity, componentId);
+        EntityReferences entityReferences = AttemptAddComponent(entity, componentId);
 
         if (entityReferences._valid)
         {
@@ -154,7 +156,7 @@ public sealed partial class World
         return entityReferences._valid;
     }
 
-    private bool AttemptRemove(Entity entity, int componentId)
+    private bool AttemptRemoveComponent(Entity entity, int componentId)
     {
         if (!IsAlive(entity))
             return false;
@@ -213,12 +215,12 @@ public sealed partial class World
         return true;
     }
 
-    public bool TryRemove<TComponent>(Entity entity)
+    public bool TryRemoveComponent<TComponent>(Entity entity)
         where TComponent : struct
     {
         ThrowIfQueriesExecuting();
 
-        return AttemptRemove(entity, ComponentMeta<TComponent>.s_id);
+        return AttemptRemoveComponent(entity, ComponentMeta<TComponent>.s_id);
     }
 
     public ref TComponent Get<TComponent>(Entity entity)

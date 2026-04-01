@@ -20,77 +20,19 @@ public sealed partial class World
 
     private RelationStorage[] _relationStorages;
 
-    private RelationAccounted AddRelation(int relationId, Entity owner, Entity target)
-    {
-        RelationStorage storage = GetOrCreateRelationStorage(relationId);
-        Relation relation;
-
-        ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
-        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref ownerMeta);
-        int primaryKey;
-
-        lock (ownerIndexer._lock)
-        {
-            if (!ownerIndexer.HasKey(relationId))
-            {
-                lock (storage._lock)
-                {
-                    RelationRented relationRented = storage.RentRelation();
-
-                    ownerIndexer.AddKey(relationId, relationRented._primaryKey);
-                    relation = relationRented._relation;
-                    primaryKey = relationRented._primaryKey;
-                    relation.SetOwner(owner);
-                }
-            }
-            else
-            {
-                primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
-                relation = storage.GetRelation(primaryKey);
-            }
-        }
-
-        ref EntityMeta targetMeta = ref _entitiesMeta[target._id];
-        RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
-        RelationLink relationLink;
-
-        lock (targetIndexer._lock)
-        {
-            relationLink = targetIndexer.GetOrRentLink(relationId);
-        }
-
-        return new RelationAccounted(primaryKey, relation, relationLink);
-    }
-
     public bool TryAddRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
-        if (!IsAlive(owner) || !IsAlive(target))
-            return false;
-
         int relationId = RelationMeta<TRelation>.s_id;
 
         ThrowIfExpectedTagRelation(relationId);
 
         RelationAccounted relationAccounted = AddRelation(relationId, owner, target);
 
-        lock (relationAccounted._relation._lock)
-        {
-            if (relationAccounted._relation.GetOwner() != owner)
-                return false;
+        if (!relationAccounted._accounted)
+            return false;
 
-            lock (relationAccounted._relationLink._lock)
-            {
-                int compositeKey = relationAccounted._relation.Relate(target);
-                relationAccounted._relationLink.AddExternalLink(
-                    owner,
-                    relationAccounted._primaryKey,
-                    compositeKey
-                );
-            }
-        }
-
-        return true;
+        return TryLinkRelation(owner, target, relationAccounted);
     }
 
     public bool TryAddEvaluatedRelation<TRelation>(
@@ -100,104 +42,27 @@ public sealed partial class World
     )
         where TRelation : struct
     {
-        if (!IsAlive(owner) || !IsAlive(target))
-            return false;
-
         int relationId = RelationMeta<TRelation>.s_id;
 
         ThrowIfExpectedEvaluatedRelation(relationId);
 
         RelationAccounted relationAccounted = AddRelation(relationId, owner, target);
 
-        lock (relationAccounted._relation._lock)
-        {
-            if (relationAccounted._relation.GetOwner() != owner)
-                return false;
+        if (!relationAccounted._accounted)
+            return false;
 
-            lock (relationAccounted._relationLink._lock)
-            {
-                int compositeKey = relationAccounted._relation.Relate(target);
-
-                relationAccounted._relationLink.AddExternalLink(
-                    owner,
-                    relationAccounted._primaryKey,
-                    compositeKey
-                );
-
-                ((EvaluatedRelation<TRelation>)relationAccounted._relation).Set(
-                    compositeKey,
-                    value
-                );
-            }
-        }
-
-        return true;
+        return TryLinkEvaluatedRelation(owner, target, in value, relationAccounted);
     }
 
     public bool TryRemoveRelation<TRelation>(Entity owner)
-        where TRelation : struct
-    {
-        if (!IsAlive(owner))
-            return false;
+        where TRelation : struct => AttemptRemoveRelation(RelationMeta<TRelation>.s_id, owner);
 
-        ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
-
-        if (ownerMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
-            return false;
-
-        int relationId = RelationMeta<TRelation>.s_id;
-
-        RelationStorage storage = GetOrCreateRelationStorage(relationId);
-
-        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref ownerMeta);
-
-        int primaryKey;
-        ReadOnlySpan<Entity> targets;
-
-        lock (ownerIndexer._lock)
-        {
-            if (!ownerIndexer.HasKey(relationId))
-                return false;
-
-            primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
-
-            Relation relation = storage.GetRelation(primaryKey);
-            targets = relation.To();
-
-            ownerIndexer.RemoveRelationKey(relationId);
-        }
-
-        for (int i = 0; i < targets.Length; i++)
-        {
-            ref EntityMeta targetMeta = ref _entitiesMeta[targets[i]._id];
-            RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
-            RelationLink relationLink;
-
-            lock (targetIndexer._lock)
-            {
-                relationLink = targetIndexer.GetOrRentLink(relationId);
-            }
-
-            lock (relationLink._lock)
-            {
-                relationLink.RemovalExternalLink(primaryKey);
-            }
-        }
-
-        lock (storage._lock)
-        {
-            storage.ReturnRelation(primaryKey);
-        }
-
-        return true;
-    }
-
-    public bool TryRemoveRelation<TRelation>(Entity owner, Entity entity)
-    {
-        throw new NotImplementedException();
-    }
+    public bool TryRemoveRelation<TRelation>(Entity owner, Entity target)
+        where TRelation : struct =>
+        AttemptRemoveRelation(RelationMeta<TRelation>.s_id, owner, target);
 
     public bool HasRelation<TRelation>(Entity owner)
+        where TRelation : struct
     {
         throw new NotImplementedException();
     }
@@ -233,6 +98,7 @@ public sealed partial class World
     }
 
     public bool HasExternalLinks<TRelation>(Entity entity)
+        where TRelation : struct
     {
         throw new NotImplementedException();
     }
@@ -249,8 +115,273 @@ public sealed partial class World
     }
 
     public void UpdateRelation<TRelation>(Entity owner, UpdateRelation<TRelation> update)
+        where TRelation : struct
     {
         throw new NotImplementedException();
+    }
+
+    private RelationAccounted AddRelation(int relationId, Entity owner, Entity target)
+    {
+        if (!IsAlive(owner) || !IsAlive(target))
+            return RelationAccounted.Reproved;
+
+        RelationStorage relationStorage = GetOrCreateRelationStorage(relationId);
+        Relation relation;
+
+        ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
+        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref ownerMeta);
+        int primaryKey;
+
+        lock (ownerIndexer._lock)
+        {
+            if (!ownerIndexer.HasKey(relationId))
+            {
+                lock (relationStorage._lock)
+                {
+                    RelationRented relationRented = relationStorage.RentRelation();
+
+                    ownerIndexer.AddKey(relationId, relationRented._primaryKey);
+                    relation = relationRented._relation;
+                    primaryKey = relationRented._primaryKey;
+                    relation.SetOwner(owner);
+                }
+            }
+            else
+            {
+                primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
+                relation = relationStorage.GetRelation(primaryKey);
+            }
+        }
+
+        ref EntityMeta targetMeta = ref _entitiesMeta[target._id];
+        RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
+        RelationLink targetRelationLink;
+
+        lock (targetIndexer._lock)
+        {
+            targetRelationLink = targetIndexer.GetOrRentLink(relationId);
+        }
+
+        return new RelationAccounted(true, primaryKey, relation, targetRelationLink);
+    }
+
+    private bool TryLinkRelation(Entity owner, Entity target, RelationAccounted relationAccounted)
+    {
+        lock (relationAccounted._relation._lock)
+        {
+            if (relationAccounted._relation.GetOwner() != owner)
+                return false;
+
+            lock (relationAccounted._targetRelationLink._lock)
+            {
+                int compositeKey = relationAccounted._relation.Relate(target);
+                relationAccounted._targetRelationLink.AddExternalLink(
+                    owner,
+                    relationAccounted._primaryKey,
+                    compositeKey
+                );
+
+                return true;
+            }
+        }
+    }
+
+    private bool TryLinkEvaluatedRelation<TRelation>(
+        Entity owner,
+        Entity target,
+        in TRelation value,
+        RelationAccounted relationAccounted
+    )
+        where TRelation : struct
+    {
+        lock (relationAccounted._relation._lock)
+        {
+            if (relationAccounted._relation.GetOwner() != owner)
+                return false;
+
+            lock (relationAccounted._targetRelationLink._lock)
+            {
+                int compositeKey = relationAccounted._relation.Relate(target);
+
+                relationAccounted._targetRelationLink.AddExternalLink(
+                    owner,
+                    relationAccounted._primaryKey,
+                    compositeKey
+                );
+
+                ((EvaluatedRelation<TRelation>)relationAccounted._relation).Set(
+                    compositeKey,
+                    value
+                );
+
+                return true;
+            }
+        }
+    }
+
+    private bool AttemptRemoveRelation(int relationId, Entity owner)
+    {
+        if (!IsAlive(owner))
+            return false;
+
+        ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
+
+        if (ownerMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
+            return false;
+
+        RelationStorage relationStorage = GetOrCreateRelationStorage(relationId);
+
+        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref ownerMeta);
+
+        int primaryKey;
+        ReadOnlySpan<Entity> targets;
+
+        lock (ownerIndexer._lock)
+        {
+            if (!ownerIndexer.HasKey(relationId))
+                return false;
+
+            primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
+
+            Relation relation = relationStorage.GetRelation(primaryKey);
+            targets = relation.To();
+
+            ownerIndexer.RemoveRelationKey(relationId);
+        }
+
+        for (int i = 0; i < targets.Length; i++)
+        {
+            ref EntityMeta targetMeta = ref _entitiesMeta[targets[i]._id];
+            RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
+            RelationLink targetRelationLink;
+
+            lock (targetIndexer._lock)
+            {
+                targetRelationLink = targetIndexer.GetOrRentLink(relationId);
+            }
+
+            lock (targetRelationLink._lock)
+            {
+                if (!targetRelationLink.HasExternalLink(primaryKey))
+                    continue;
+
+                targetRelationLink.RemovalExternalLink(primaryKey);
+            }
+        }
+
+        lock (relationStorage._lock)
+        {
+            relationStorage.ReturnRelation(primaryKey);
+        }
+
+        return true;
+    }
+
+    private bool AttemptRemoveRelation(int relationId, Entity owner, Entity target)
+    {
+        if (!IsAlive(owner) || !IsAlive(target))
+            return false;
+
+        ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
+        ref EntityMeta targetMeta = ref _entitiesMeta[owner._id];
+
+        if (
+            ownerMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes
+            || targetMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes
+        )
+            return false;
+
+        RelationStorage relationStorage = GetOrCreateRelationStorage(relationId);
+        Relation relation;
+
+        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref ownerMeta);
+
+        RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
+        RelationLink targetRelationLink;
+
+        int primaryKey;
+        int compositeKey;
+
+        lock (ownerIndexer._lock)
+        {
+            if (!ownerIndexer.HasKey(relationId))
+                return false;
+
+            primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
+
+            relation = relationStorage.GetRelation(primaryKey);
+        }
+
+        lock (targetIndexer)
+        {
+            if (!targetIndexer.HasLink(relationId))
+                return false;
+
+            targetRelationLink = targetIndexer.GetOrRentLink(relationId);
+        }
+
+        lock (targetRelationLink._lock)
+        {
+            if (!targetRelationLink.HasExternalLink(primaryKey))
+                return false;
+
+            compositeKey = targetRelationLink.GetCompositeKey(primaryKey);
+            targetRelationLink.RemovalExternalLink(primaryKey);
+        }
+
+        lock (relation._lock)
+        {
+            EntitySwapped entitySwapped = relation.Disrelate(compositeKey);
+
+            if (entitySwapped._entityID != EntitySwapped.InvalidEntitySwappedIndexes)
+            {
+                ref EntityMeta swappedMeta = ref _entitiesMeta[entitySwapped._entityID];
+                RelationsIndexer swappedIndexer = GetOrRentRelationIndexer(ref targetMeta);
+
+                lock (swappedIndexer)
+                {
+                    targetRelationLink = targetIndexer.GetOrRentLink(relationId);
+                }
+
+                lock (targetRelationLink._lock)
+                {
+                    targetRelationLink.UpdateCompositeKey(primaryKey, compositeKey);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private void ResetRelations(Entity owner)
+    {
+        ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
+
+        if (ownerMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
+            return;
+
+        RelationsIndexer ownerIndexer = _relationsIndexers[ownerMeta._relationsIndexerIndex];
+
+        while (ownerIndexer.GetAddedLinksCount() > 0)
+        {
+            int relationId = ownerIndexer.GetAddedLinksAt(0);
+
+            RelationLink link = ownerIndexer.GetRelationLink(relationId);
+
+            while (link.GetExternalLinksCount() > 0)
+            {
+                ExternalLink externalLink = link.GetExternalLinkAt(0);
+                AttemptRemoveRelation(relationId, externalLink.Entity, owner);
+            }
+
+            ownerIndexer.ReturnLink(relationId);
+        }
+
+        while (ownerIndexer.GetAddedRelationsCount() > 0)
+        {
+            int relationId = ownerIndexer.GetAddedRelationsAt(0);
+            AttemptRemoveRelation(relationId, owner);
+        }
     }
 
     private RelationsIndexer GetOrRentRelationIndexer(ref EntityMeta entityMeta)

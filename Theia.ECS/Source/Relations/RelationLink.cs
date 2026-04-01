@@ -48,14 +48,35 @@ internal sealed class RelationLink
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetExternalLinksCount() => _externalLinksCount;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ReadOnlySpan<ExternalLink> GetExternalLinks() =>
         _externalLinks.AsSpan(0, _externalLinksCount);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ExternalLink GetExternalLinkAt(int index) => _externalLinks[index];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int GetIndexerAddedLinkIndex() => _addedLinkIndex;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void SetIndexerAddedLinkIndex(int index) => _addedLinkIndex = index;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool HasExternalLink(int foreignKey) =>
+        foreignKey < _keysIndexer.Length
+        && _keysIndexer[foreignKey].ExternalLinkIndex != InvalidIndex;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetCompositeKey(int foreignKey) => _keysIndexer[foreignKey].CompositeKey;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void UpdateCompositeKey(int foreignKey, int compositeKey)
+    {
+        KeyIndexer keyIndexer = _keysIndexer[foreignKey];
+        _keysIndexer[foreignKey] = keyIndexer with { CompositeKey = compositeKey };
+    }
 
     internal void AddExternalLink(Entity entity, int foreignKey, int compositeKey)
     {

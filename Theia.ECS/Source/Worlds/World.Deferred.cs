@@ -83,7 +83,7 @@ public sealed partial class World
 
         DeferredStorage storage = _deferredAddStorages[componentId];
 
-        EntityReferences entityReferences = AttemptAdd(entity, componentId);
+        EntityReferences entityReferences = AttemptAddComponent(entity, componentId);
 
         if (entityReferences._valid)
         {
@@ -124,7 +124,10 @@ public sealed partial class World
     }
 
     private void DeferredRemoveHandler(EntityComponentDeferred entityComponentDeferred) =>
-        AttemptRemove(entityComponentDeferred._entity, entityComponentDeferred._componentId);
+        AttemptRemoveComponent(
+            entityComponentDeferred._entity,
+            entityComponentDeferred._componentId
+        );
 
     public void FlushDeferred()
     {

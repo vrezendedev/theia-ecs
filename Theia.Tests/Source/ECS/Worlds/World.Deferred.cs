@@ -104,7 +104,7 @@ public sealed class WorldDeferredTests
 
         world.FlushDeferred();
 
-        Assert.True(world.TryRemove<Velocity>(entity));
+        Assert.True(world.TryRemoveComponent<Velocity>(entity));
     }
 
     [Fact]
@@ -154,7 +154,7 @@ public sealed class WorldDeferredTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryAdd<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
 
         world.DeferredRemove<Velocity>(entity);
 
@@ -168,7 +168,7 @@ public sealed class WorldDeferredTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.TryAdd<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
 
         world.DeferredRemove<Velocity>(entity);
 
@@ -300,7 +300,7 @@ public sealed class WorldDeferredTests
             entities =>
             {
                 foreach (Entity entity in entities)
-                    world.TryAdd<Velocity>(entity);
+                    world.TryAddComponent<Velocity>(entity);
             }
         );
 

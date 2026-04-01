@@ -248,7 +248,7 @@ public sealed class WorldQueriesTest
 
         Entity entityA = positionOnly.Create(new Position { X = 1 });
 
-        Assert.True(world.TryAdd<Velocity>(entityA));
+        Assert.True(world.TryAddComponent<Velocity>(entityA));
 
         Entity entityB = positionOnly.Create(new Position { X = 2 });
 
@@ -270,7 +270,7 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position { X = 3 });
 
-        world.TryAdd<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
 
         int callCount = 0;
 
@@ -341,7 +341,7 @@ public sealed class WorldQueriesTest
         Entity entity = assemblage.Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() =>
-            query.ForEach((ref Position _) => world.TryAdd<Velocity>(entity))
+            query.ForEach((ref Position _) => world.TryAddComponent<Velocity>(entity))
         );
     }
 
@@ -357,7 +357,7 @@ public sealed class WorldQueriesTest
         Entity entity = assemblage.Create(new Position());
 
         Assert.Throws<InvalidOperationException>(() =>
-            query.ForEach((ref Position _) => world.TryAdd<Velocity>(entity))
+            query.ForEach((ref Position _) => world.TryAddComponent<Velocity>(entity))
         );
     }
 
@@ -532,7 +532,7 @@ public sealed class WorldQueriesTest
 
         Entity entityA = positionOnly.Create(new Position { X = 1 });
 
-        Assert.True(world.TryAdd<Velocity>(entityA));
+        Assert.True(world.TryAddComponent<Velocity>(entityA));
 
         Entity entityB = positionOnly.Create(new Position { X = 2 });
 
@@ -752,7 +752,7 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        world.TryAdd<Velocity>(entity);
+        world.TryAddComponent<Velocity>(entity);
 
         query.ForEachEntity((Entity e, ref Position _) => world.DeferredRemove<Velocity>(e));
 

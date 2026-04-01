@@ -211,7 +211,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (_) => fired = true;
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.True(fired);
     }
@@ -229,7 +229,7 @@ public sealed class EntityEventsTests
 
         assemblage.Events.OnComponentAdded += (_) => fired = true;
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.True(fired);
     }
@@ -247,7 +247,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => modifiedEntity = data.Entity;
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.Equal(entity, modifiedEntity);
     }
@@ -265,7 +265,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => type = data.Type;
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.Equal(typeof(ComponentB), type);
     }
@@ -285,7 +285,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (_) => fired = true;
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.False(fired);
     }
@@ -303,7 +303,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (_) => fired = true;
 
-        world.TryAdd<ComponentA>(entity);
+        world.TryAddComponent<ComponentA>(entity);
 
         Assert.False(fired);
     }
@@ -321,7 +321,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => has = data.Has<ComponentB>();
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.True(has);
     }
@@ -339,7 +339,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => had = data.Had<ComponentA>();
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.True(had);
     }
@@ -357,7 +357,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => had = data.Had<ComponentB>();
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.False(had);
     }
@@ -375,7 +375,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => is_ = data.Is(assemblage);
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.False(is_);
     }
@@ -393,7 +393,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => was = data.Was(assemblage);
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Assert.True(was);
     }
@@ -407,13 +407,13 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         bool fired = false;
 
         world.Events.OnComponentRemoved += (_) => fired = true;
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         Assert.True(fired);
     }
@@ -427,13 +427,13 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Entity modifiedEntity = default;
 
         world.Events.OnComponentRemoved += (data) => modifiedEntity = data.Entity;
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         Assert.Equal(entity, modifiedEntity);
     }
@@ -447,13 +447,13 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         Type? type = null;
 
         world.Events.OnComponentRemoved += (data) => type = data.Type;
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         Assert.Equal(typeof(ComponentB), type);
     }
@@ -473,7 +473,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentRemoved += (_) => fired = true;
 
-        world.TryRemove<ComponentA>(entity);
+        world.TryRemoveComponent<ComponentA>(entity);
 
         Assert.False(fired);
     }
@@ -491,7 +491,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentRemoved += (_) => fired = true;
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         Assert.False(fired);
     }
@@ -505,13 +505,13 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         bool had = false;
 
         world.Events.OnComponentRemoved += (data) => had = data.Had<ComponentB>();
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         Assert.True(had);
     }
@@ -525,13 +525,13 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         bool has = false;
 
         world.Events.OnComponentRemoved += (data) => has = data.Has<ComponentB>();
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         Assert.False(has);
     }
@@ -545,13 +545,13 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
         bool has = false;
 
         world.Events.OnComponentRemoved += (data) => has = data.Has<ComponentA>();
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         Assert.True(has);
     }
@@ -569,7 +569,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => result = data.As<MatchesEnum>();
 
-        world.TryAdd<MatchesComponentA>(entity);
+        world.TryAddComponent<MatchesComponentA>(entity);
 
         Assert.Equal(MatchesEnum.ComponentA, result);
     }
@@ -587,7 +587,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => result = data.As<IncludesEnum>();
 
-        world.TryAdd<IncludesComponentA>(entity);
+        world.TryAddComponent<IncludesComponentA>(entity);
 
         Assert.Equal(IncludesEnum.Group, result);
     }
@@ -605,7 +605,7 @@ public sealed class EntityEventsTests
 
         world.Events.OnComponentAdded += (data) => result = data.As<MatchesEnum>();
 
-        world.TryAdd<UnmappedComponent>(entity);
+        world.TryAddComponent<UnmappedComponent>(entity);
 
         Assert.Equal(default, result);
     }
@@ -619,13 +619,13 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<MatchesComponentA>(entity);
+        world.TryAddComponent<MatchesComponentA>(entity);
 
         MatchesEnum result = default;
 
         world.Events.OnComponentRemoved += (data) => result = data.As<MatchesEnum>();
 
-        world.TryRemove<MatchesComponentA>(entity);
+        world.TryRemoveComponent<MatchesComponentA>(entity);
 
         Assert.Equal(MatchesEnum.ComponentA, result);
     }
@@ -648,9 +648,9 @@ public sealed class EntityEventsTests
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
-        world.TryAdd<ComponentB>(entity);
+        world.TryAddComponent<ComponentB>(entity);
 
-        world.TryRemove<ComponentB>(entity);
+        world.TryRemoveComponent<ComponentB>(entity);
 
         world.TryGhoulify(entity);
 
