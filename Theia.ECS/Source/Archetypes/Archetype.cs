@@ -83,8 +83,8 @@ internal sealed class Archetype
 
     private int[] GetStorageMapping(int maxId, ReadOnlySpan<int> signatureIds)
     {
-        Span<int> ids = stackalloc int[maxId + 1];
-        ids.Fill(DefaultInvalidStorageMappingIndexes);
+        int[] ids = new int[maxId + 1];
+        ids.AsSpan().Fill(DefaultInvalidStorageMappingIndexes);
 
         int index = 0;
 
@@ -94,7 +94,7 @@ internal sealed class Archetype
             index++;
         }
 
-        return ids.ToArray();
+        return ids;
     }
 
     internal EntityAccounted Add(Entity entity)

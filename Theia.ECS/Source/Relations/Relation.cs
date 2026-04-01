@@ -10,7 +10,7 @@ internal class Relation
 {
     protected const int DefaultRelationGrowthFactor = 2;
 
-    internal readonly Lock _relationLock = new();
+    internal readonly Lock _lock = new();
     protected readonly Lock _updateLock = new();
 
     protected int _updateCount;

@@ -29,11 +29,11 @@ internal readonly struct Signature : IEquatable<Signature>
         _maxId = signatureMeta._maxId;
         _maskLength = signatureMeta._maskLength;
 
-        Span<ulong> mask = stackalloc ulong[_maskLength];
+        ulong[] mask = new ulong[_maskLength];
 
         Signature.SetSignatureMask(componentIds, mask);
 
-        _mask = mask.ToArray();
+        _mask = mask;
     }
 
     internal Signature(
@@ -79,11 +79,11 @@ internal readonly struct Signature : IEquatable<Signature>
         _maxId = maxId;
         _maskLength = Signature.GetMaskLength(maxId);
 
-        Span<ulong> mask = stackalloc ulong[_maskLength];
+        ulong[] mask = new ulong[_maskLength];
 
         Signature.SetSignatureMask(componentIds, mask);
 
-        _mask = mask.ToArray();
+        _mask = mask;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

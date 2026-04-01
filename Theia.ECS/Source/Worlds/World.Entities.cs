@@ -108,7 +108,9 @@ public sealed partial class World
         {
             Signature currentSignature = currentArchetype._signature;
 
-            Span<int> ids = stackalloc int[currentSignature._length + 1];
+            const int MaxStackSize = 256;
+            int length = currentSignature._length + 1;
+            Span<int> ids = length <= MaxStackSize ? stackalloc int[length] : new int[length];
             currentSignature.GetComponents().CopyTo(ids);
             ids[^1] = componentId;
 

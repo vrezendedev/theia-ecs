@@ -11,7 +11,7 @@ internal sealed class RelationStorage
     private const int DefaultRelationsCapacity = 8;
     private const int DefaultRelationsGrowthFactor = 2;
 
-    internal readonly Lock _storageLock = new();
+    internal readonly Lock _lock = new();
     internal readonly int _relationId;
 
     private Relation[] _relations;
@@ -30,7 +30,11 @@ internal sealed class RelationStorage
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal Relation GetRelation(int primaryKey) => _relations[primaryKey];
+    internal Relation GetRelation(int primaryKey)
+    {
+        Relation[] relations = _relations;
+        return relations[primaryKey];
+    }
 
     internal RelationRented RentRelation()
     {

@@ -47,7 +47,10 @@ public sealed partial class World
     {
         int componentLength = componentIds.Length;
         SignatureMeta signatureMeta = Signature.GetSignatureMeta(componentIds);
-        Span<ulong> mask = stackalloc ulong[signatureMeta._maskLength];
+
+        const int MaxStackSize = 256;
+        int length = signatureMeta._maskLength;
+        Span<ulong> mask = length <= MaxStackSize ? stackalloc ulong[length] : new ulong[length];
         Signature.SetSignatureMask(componentIds, mask);
 
         Archetype? targetArchetype = FindEqualArchetype(componentLength, mask);

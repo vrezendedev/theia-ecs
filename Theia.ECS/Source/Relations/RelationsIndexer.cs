@@ -86,7 +86,10 @@ internal sealed class RelationsIndexer
     internal ReadOnlySpan<int> GetRelationsAdded() =>
         _addedRelationsId.AsSpan(0, _addedRelationsIdCount);
 
-    internal void AccountPrimary(int relationId, int primaryKey)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ref RelationKey GetRelationKey(int relationId) => ref _keys[relationId];
+
+    internal void AddKey(int relationId, int primaryKey)
     {
         int addedIndex = _addedRelationsIdCount;
 
@@ -110,7 +113,7 @@ internal sealed class RelationsIndexer
         _keys[relationId] = relationKey;
     }
 
-    internal void RemovePrimary(int relationId)
+    internal void RemoveRelationKey(int relationId)
     {
         ref RelationKey relationKey = ref _keys[relationId];
 
