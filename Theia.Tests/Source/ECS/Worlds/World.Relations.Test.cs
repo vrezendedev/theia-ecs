@@ -25,6 +25,18 @@ public sealed class WorldRelationTests
     }
 
     [Fact]
+    public void TryAddRelation_WithSameEntity_ReturnsFalse()
+    {
+        World world = new();
+
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        Entity owner = assemblage.Create(new Position());
+
+        Assert.False(world.TryAddRelation<Friend>(owner, owner));
+    }
+
+    [Fact]
     public void TryAddRelation_WithDeadOwner_ReturnsFalse()
     {
         World world = new();
@@ -323,6 +335,18 @@ public sealed class WorldRelationTests
     }
 
     [Fact]
+    public void IsRelatedTo_WithSameEntity_ReturnsFalse()
+    {
+        World world = new();
+
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        Entity owner = assemblage.Create(new Position());
+
+        Assert.False(world.IsRelatedTo<Friend>(owner, owner));
+    }
+
+    [Fact]
     public void IsRelatedTo_WithNoRelation_ReturnsFalse()
     {
         World world = new();
@@ -549,6 +573,18 @@ public sealed class WorldRelationTests
         world.TryAddRelation<Friend>(owner, target);
 
         Assert.True(world.TryRemoveRelation<Friend>(owner, target));
+    }
+
+    [Fact]
+    public void TryRemoveRelation_ByOwnerAndTarget_WithSameEntity_ReturnsFalse()
+    {
+        World world = new();
+
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        Entity owner = assemblage.Create(new Position());
+
+        Assert.False(world.TryRemoveRelation<Friend>(owner, owner));
     }
 
     [Fact]

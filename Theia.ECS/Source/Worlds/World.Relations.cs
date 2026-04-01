@@ -68,7 +68,7 @@ public sealed partial class World
     public bool IsRelatedTo<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
-        if (!IsAlive(owner) || !IsAlive(target))
+        if (!IsAlive(owner) || !IsAlive(target) || (owner == target))
             return false;
 
         ref EntityMeta entityMeta = ref _entitiesMeta[owner._id];
@@ -195,6 +195,9 @@ public sealed partial class World
 
         ThrowIfExpectedEvaluatedRelation(relationdId);
 
+        if (owner == target)
+            ThrowTargetEqualsOwner();
+
         RelationKeyed relationKeyed = GetEntityRelation(relationdId, owner);
         int compositeKey = GetEntityCompositeKey(relationdId, relationKeyed._primaryKey, target);
 
@@ -244,7 +247,7 @@ public sealed partial class World
 
     private RelationAccounted AddRelation(int relationId, Entity owner, Entity target)
     {
-        if (!IsAlive(owner) || !IsAlive(target))
+        if (!IsAlive(owner) || !IsAlive(target) || (owner == target))
             return RelationAccounted.Reproved;
 
         RelationStorage relationStorage = GetOrCreateRelationStorage(relationId);
@@ -418,7 +421,7 @@ public sealed partial class World
 
     private bool AttemptRemoveRelation(int relationId, Entity owner, Entity target)
     {
-        if (!IsAlive(owner) || !IsAlive(target))
+        if (!IsAlive(owner) || !IsAlive(target) || (owner == target))
             return false;
 
         ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
@@ -682,4 +685,8 @@ public sealed partial class World
         throw new InvalidOperationException(
             $"{entity} does not have relation '{RelationsMeta.GetRelationType(relationId)._type.Name}' external links."
         );
+
+    [DoesNotReturn]
+    private static void ThrowTargetEqualsOwner() =>
+        throw new InvalidOperationException($"Target must be different from Owner.");
 }
