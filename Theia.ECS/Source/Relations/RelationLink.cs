@@ -115,6 +115,7 @@ internal sealed class RelationLink
         if (externalLinkIndex < lastExternalLink)
         {
             ExternalLink swappedExternalLink = _externalLinks[lastExternalLink];
+
             KeyIndexer swappedKeyIndexer = _keysIndexer[swappedExternalLink.ForeignKey];
 
             _keysIndexer[swappedExternalLink.ForeignKey] = swappedKeyIndexer with

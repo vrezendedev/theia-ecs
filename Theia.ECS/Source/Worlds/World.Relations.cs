@@ -382,12 +382,15 @@ public sealed partial class World
                 targetRelationLink = targetIndexer.GetOrRentLink(relationId);
             }
 
-            lock (targetRelationLink._lock)
+            lock (relationStorage._lock)
             {
-                if (!targetRelationLink.HasExternalLink(primaryKey))
-                    continue;
+                lock (targetRelationLink._lock)
+                {
+                    if (!targetRelationLink.HasExternalLink(primaryKey))
+                        continue;
 
-                targetRelationLink.RemoveExternalLink(primaryKey);
+                    targetRelationLink.RemoveExternalLink(primaryKey);
+                }
             }
         }
 
@@ -443,13 +446,16 @@ public sealed partial class World
             targetRelationLink = targetIndexer.GetOrRentLink(relationId);
         }
 
-        lock (targetRelationLink._lock)
+        lock (relation._lock)
         {
-            if (!targetRelationLink.HasExternalLink(primaryKey))
-                return false;
+            lock (targetRelationLink._lock)
+            {
+                if (!targetRelationLink.HasExternalLink(primaryKey))
+                    return false;
 
-            compositeKey = targetRelationLink.GetCompositeKey(primaryKey);
-            targetRelationLink.RemoveExternalLink(primaryKey);
+                compositeKey = targetRelationLink.GetCompositeKey(primaryKey);
+                targetRelationLink.RemoveExternalLink(primaryKey);
+            }
         }
 
         lock (relation._lock)
@@ -459,7 +465,7 @@ public sealed partial class World
             if (entitySwapped._entityID != EntitySwapped.InvalidEntitySwappedIndexes)
             {
                 ref EntityMeta swappedMeta = ref _entitiesMeta[entitySwapped._entityID];
-                RelationsIndexer swappedIndexer = GetOrRentRelationIndexer(ref targetMeta);
+                RelationsIndexer swappedIndexer = GetOrRentRelationIndexer(ref swappedMeta);
                 RelationLink swappedRelationLink;
 
                 lock (swappedIndexer._lock)

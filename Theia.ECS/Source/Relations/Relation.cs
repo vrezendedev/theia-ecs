@@ -88,17 +88,22 @@ internal class Relation
 
         lock (_updateLock)
         {
-            int count = _relatedToCount;
-
-            if (count > 0)
+            try
             {
-                ReadOnlySpan<Entity> entities = To();
+                int count = _relatedToCount;
 
-                for (int i = 0; i < count; i++)
-                    update(entities[i]);
+                if (count > 0)
+                {
+                    ReadOnlySpan<Entity> entities = To();
+
+                    for (int i = 0; i < count; i++)
+                        update(entities[i]);
+                }
             }
-
-            DecrementUpdateCount();
+            finally
+            {
+                DecrementUpdateCount();
+            }
         }
     }
 
