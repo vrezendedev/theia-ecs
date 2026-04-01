@@ -189,5 +189,14 @@ internal struct NonBlittableRelation
     public string Value;
 }
 
+[Relationship]
+internal struct Friend { }
+
+[Relationship]
+internal struct Damage
+{
+    public float Value;
+}
+
 
 #pragma warning restore CS0649

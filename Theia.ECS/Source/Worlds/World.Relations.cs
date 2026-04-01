@@ -296,6 +296,13 @@ public sealed partial class World
 
             lock (relationAccounted._targetRelationLink._lock)
             {
+                if (
+                    relationAccounted._targetRelationLink.HasExternalLink(
+                        relationAccounted._primaryKey
+                    )
+                )
+                    return false;
+
                 int compositeKey = relationAccounted._relation.Relate(target);
                 relationAccounted._targetRelationLink.AddExternalLink(
                     owner,
@@ -323,6 +330,13 @@ public sealed partial class World
 
             lock (relationAccounted._targetRelationLink._lock)
             {
+                if (
+                    relationAccounted._targetRelationLink.HasExternalLink(
+                        relationAccounted._primaryKey
+                    )
+                )
+                    return false;
+
                 int compositeKey = relationAccounted._relation.Relate(target);
 
                 relationAccounted._targetRelationLink.AddExternalLink(
