@@ -86,7 +86,7 @@ public sealed partial class World
 
         int primaryKey;
 
-        lock (ownerIndexer)
+        lock (ownerIndexer._lock)
         {
             if (!ownerIndexer.HasKey(relationId))
                 return false;
@@ -96,7 +96,7 @@ public sealed partial class World
 
         RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
 
-        lock (targetIndexer)
+        lock (targetIndexer._lock)
         {
             if (!targetIndexer.HasLink(relationId))
                 return false;
@@ -122,7 +122,7 @@ public sealed partial class World
 
         RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref entityMeta);
 
-        lock (ownerIndexer)
+        lock (ownerIndexer._lock)
         {
             if (!ownerIndexer.HasKey(relationId))
                 return 0;
@@ -154,7 +154,7 @@ public sealed partial class World
         RelationsIndexer relationsIndexer = GetOrRentRelationIndexer(ref entityMeta);
         RelationLink relationLink;
 
-        lock (relationsIndexer)
+        lock (relationsIndexer._lock)
         {
             if (!relationsIndexer.HasLink(relationId))
                 return 0;
@@ -231,7 +231,7 @@ public sealed partial class World
 
         RelationsIndexer relationsIndexer = GetOrRentRelationIndexer(ref entityMeta);
 
-        lock (relationsIndexer)
+        lock (relationsIndexer._lock)
         {
             if (!relationsIndexer.HasLink(relationId))
                 ThrowEntityMissingRelationLink(relationId, entity);
@@ -405,7 +405,7 @@ public sealed partial class World
             return false;
 
         ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
-        ref EntityMeta targetMeta = ref _entitiesMeta[owner._id];
+        ref EntityMeta targetMeta = ref _entitiesMeta[target._id];
 
         if (
             ownerMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes
@@ -435,7 +435,7 @@ public sealed partial class World
             relation = relationStorage.GetRelation(primaryKey);
         }
 
-        lock (targetIndexer)
+        lock (targetIndexer._lock)
         {
             if (!targetIndexer.HasLink(relationId))
                 return false;
@@ -460,15 +460,16 @@ public sealed partial class World
             {
                 ref EntityMeta swappedMeta = ref _entitiesMeta[entitySwapped._entityID];
                 RelationsIndexer swappedIndexer = GetOrRentRelationIndexer(ref targetMeta);
+                RelationLink swappedRelationLink;
 
-                lock (swappedIndexer)
+                lock (swappedIndexer._lock)
                 {
-                    targetRelationLink = targetIndexer.GetOrRentLink(relationId);
+                    swappedRelationLink = swappedIndexer.GetOrRentLink(relationId);
                 }
 
-                lock (targetRelationLink._lock)
+                lock (swappedRelationLink._lock)
                 {
-                    targetRelationLink.UpdateCompositeKey(primaryKey, compositeKey);
+                    swappedRelationLink.UpdateCompositeKey(primaryKey, compositeKey);
                 }
             }
         }
@@ -490,7 +491,7 @@ public sealed partial class World
 
         RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref entityMeta);
 
-        lock (ownerIndexer)
+        lock (ownerIndexer._lock)
         {
             if (!ownerIndexer.HasKey(relationId))
                 ThrowEntityMissingRelation(relationId, owner);
@@ -514,7 +515,7 @@ public sealed partial class World
 
         RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref entityMeta);
 
-        lock (targetIndexer)
+        lock (targetIndexer._lock)
         {
             if (!targetIndexer.HasLink(relationId))
                 ThrowEntityMissingRelationLink(relationId, target);
@@ -558,6 +559,8 @@ public sealed partial class World
         }
 
         ReturnRelationIndexer(relationIndexerIndex);
+
+        ownerMeta._relationsIndexerIndex = EntityMeta.DefaultInvalidEntityMetaIndexes;
     }
 
     private RelationsIndexer GetOrRentRelationIndexer(ref EntityMeta entityMeta)
