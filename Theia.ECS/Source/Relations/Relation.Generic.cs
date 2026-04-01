@@ -25,7 +25,7 @@ internal sealed class EvaluatedRelation<TRelation> : Relation
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Set(int index, in TRelation data) => _data[index] = data;
 
-    internal void Update(UpdateRelation<TRelation> update)
+    internal void Query(QueryRelation<TRelation> update)
     {
         IncrementUpdateCount();
 

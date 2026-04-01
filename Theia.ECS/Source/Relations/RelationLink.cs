@@ -43,6 +43,7 @@ internal sealed class RelationLink
 
     internal RelationLink()
     {
+        _addedLinkIndex = InvalidIndex;
         _keysIndexer = Array.Empty<KeyIndexer>();
         _externalLinks = new ExternalLink[DefaultRelationsIndexerCapacity];
     }
@@ -103,7 +104,7 @@ internal sealed class RelationLink
         };
     }
 
-    internal void RemovalExternalLink(int foreignKey)
+    internal void RemoveExternalLink(int foreignKey)
     {
         int externalLinkIndex = _keysIndexer[foreignKey].ExternalLinkIndex;
 

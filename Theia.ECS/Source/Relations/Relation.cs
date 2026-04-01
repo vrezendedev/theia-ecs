@@ -73,13 +73,16 @@ internal class Relation
     internal Entity To(int compositeKey) => _relatedTo[compositeKey];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetRelatedToCount() => _relatedToCount;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ReadOnlySpan<Entity> To()
     {
         Entity[] entities = _relatedTo;
         return entities.AsSpan(0, _relatedToCount);
     }
 
-    internal void Update(UpdateRelation update)
+    internal void Query(QueryRelation update)
     {
         IncrementUpdateCount();
 
@@ -103,7 +106,7 @@ internal class Relation
     internal void Reset()
     {
         _owner = default;
-        _updateCount = 0;
+        Interlocked.Exchange(ref _updateCount, 0);
         _relatedToCount = 0;
     }
 

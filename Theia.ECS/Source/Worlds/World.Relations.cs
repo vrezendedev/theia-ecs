@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
@@ -62,62 +63,183 @@ public sealed partial class World
         AttemptRemoveRelation(RelationMeta<TRelation>.s_id, owner, target);
 
     public bool HasRelation<TRelation>(Entity owner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
+        where TRelation : struct => CountRelations<TRelation>(owner) > 0;
 
-    public bool AreRelated<TRelation>(Entity owner, Entity target)
+    public bool IsRelatedTo<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
-        throw new NotImplementedException();
+        if (!IsAlive(owner) || !IsAlive(target))
+            return false;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[owner._id];
+        ref EntityMeta targetMeta = ref _entitiesMeta[target._id];
+
+        if (
+            entityMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes
+            || targetMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes
+        )
+            return false;
+
+        int relationId = RelationMeta<TRelation>.s_id;
+
+        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref entityMeta);
+
+        int primaryKey;
+
+        lock (ownerIndexer)
+        {
+            if (!ownerIndexer.HasKey(relationId))
+                return false;
+
+            primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
+        }
+
+        RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
+
+        lock (targetIndexer)
+        {
+            if (!targetIndexer.HasLink(relationId))
+                return false;
+
+            RelationLink relationLink = targetIndexer.GetOrRentLink(relationId);
+
+            return relationLink.HasExternalLink(primaryKey);
+        }
     }
 
     public int CountRelations<TRelation>(Entity owner)
         where TRelation : struct
     {
-        throw new NotImplementedException();
+        if (!IsAlive(owner))
+            return -1;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[owner._id];
+
+        if (entityMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
+            return 0;
+
+        int relationId = RelationMeta<TRelation>.s_id;
+
+        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref entityMeta);
+
+        lock (ownerIndexer)
+        {
+            if (!ownerIndexer.HasKey(relationId))
+                return 0;
+
+            int primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
+
+            Relation relation = GetOrCreateRelationStorage(relationId).GetRelation(primaryKey);
+
+            return relation.GetRelatedToCount();
+        }
+    }
+
+    public bool HasExternalLinks<TRelation>(Entity entity)
+        where TRelation : struct => CountExternalLinks<TRelation>(entity) > 0;
+
+    public int CountExternalLinks<TRelation>(Entity entity)
+        where TRelation : struct
+    {
+        if (!IsAlive(entity))
+            return -1;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+
+        if (entityMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
+            return 0;
+
+        int relationId = RelationMeta<TRelation>.s_id;
+
+        RelationsIndexer relationsIndexer = GetOrRentRelationIndexer(ref entityMeta);
+        RelationLink relationLink;
+
+        lock (relationsIndexer)
+        {
+            if (!relationsIndexer.HasLink(relationId))
+                return 0;
+
+            relationLink = relationsIndexer.GetRelationLink(relationId);
+        }
+
+        lock (relationLink._lock)
+        {
+            return relationLink.GetExternalLinksCount();
+        }
+    }
+
+    public void QueryRelation<TRelation>(Entity owner, QueryRelation update)
+        where TRelation : struct =>
+        GetEntityRelation(RelationMeta<TRelation>.s_id, owner)._relation.Query(update);
+
+    public void QueryEvaluatedRelation<TRelation>(Entity owner, QueryRelation<TRelation> update)
+        where TRelation : struct
+    {
+        int relationdId = RelationMeta<TRelation>.s_id;
+
+        ThrowIfExpectedEvaluatedRelation(relationdId);
+
+        ((EvaluatedRelation<TRelation>)GetEntityRelation(relationdId, owner)._relation).Query(
+            update
+        );
     }
 
     public ReadOnlySpan<Entity> GetRelations<TRelation>(Entity owner)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
-    }
+        where TRelation : struct =>
+        GetEntityRelation(RelationMeta<TRelation>.s_id, owner)._relation.To();
 
     public ref TRelation GetEvaluatedRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
-        throw new NotImplementedException();
+        int relationdId = RelationMeta<TRelation>.s_id;
+
+        ThrowIfExpectedEvaluatedRelation(relationdId);
+
+        RelationKeyed relationKeyed = GetEntityRelation(relationdId, owner);
+        int compositeKey = GetEntityCompositeKey(relationdId, relationKeyed._primaryKey, target);
+
+        return ref ((EvaluatedRelation<TRelation>)relationKeyed._relation).Get(compositeKey);
     }
 
     public EntityEvaluatedRelations<TRelation> GetEvaluatedRelations<TRelation>(Entity owner)
         where TRelation : struct
     {
-        throw new NotImplementedException();
-    }
+        int relationdId = RelationMeta<TRelation>.s_id;
 
-    public bool HasExternalLinks<TRelation>(Entity entity)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
+        ThrowIfExpectedEvaluatedRelation(relationdId);
+
+        RelationKeyed relationKeyed = GetEntityRelation(relationdId, owner);
+
+        return new EntityEvaluatedRelations<TRelation>(
+            relationKeyed._relation.To(),
+            ((EvaluatedRelation<TRelation>)relationKeyed._relation).Get()
+        );
     }
 
     public ReadOnlySpan<ExternalLink> GetExternalLinks<TRelation>(Entity entity)
         where TRelation : struct
     {
-        throw new NotImplementedException();
-    }
+        if (!IsAlive(entity))
+            ThrowEntityNotAlive(entity);
 
-    public void UpdateRelation(Entity owner, UpdateRelation update)
-    {
-        throw new NotImplementedException();
-    }
+        int relationId = RelationMeta<TRelation>.s_id;
 
-    public void UpdateRelation<TRelation>(Entity owner, UpdateRelation<TRelation> update)
-        where TRelation : struct
-    {
-        throw new NotImplementedException();
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+
+        if (entityMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
+            ThrowEntityMissingRelationLink(relationId, entity);
+
+        RelationsIndexer relationsIndexer = GetOrRentRelationIndexer(ref entityMeta);
+
+        lock (relationsIndexer)
+        {
+            if (!relationsIndexer.HasLink(relationId))
+                ThrowEntityMissingRelationLink(relationId, entity);
+
+            RelationLink relationLink = relationsIndexer.GetOrRentLink(relationId);
+
+            return relationLink.GetExternalLinks();
+        }
     }
 
     private RelationAccounted AddRelation(int relationId, Entity owner, Entity target)
@@ -138,11 +260,11 @@ public sealed partial class World
             {
                 lock (relationStorage._lock)
                 {
-                    RelationRented relationRented = relationStorage.RentRelation();
+                    RelationKeyed relationKeyed = relationStorage.RentRelation();
 
-                    ownerIndexer.AddKey(relationId, relationRented._primaryKey);
-                    relation = relationRented._relation;
-                    primaryKey = relationRented._primaryKey;
+                    ownerIndexer.AddKey(relationId, relationKeyed._primaryKey);
+                    relation = relationKeyed._relation;
+                    primaryKey = relationKeyed._primaryKey;
                     relation.SetOwner(owner);
                 }
             }
@@ -265,7 +387,7 @@ public sealed partial class World
                 if (!targetRelationLink.HasExternalLink(primaryKey))
                     continue;
 
-                targetRelationLink.RemovalExternalLink(primaryKey);
+                targetRelationLink.RemoveExternalLink(primaryKey);
             }
         }
 
@@ -292,6 +414,7 @@ public sealed partial class World
             return false;
 
         RelationStorage relationStorage = GetOrCreateRelationStorage(relationId);
+
         Relation relation;
 
         RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref ownerMeta);
@@ -326,7 +449,7 @@ public sealed partial class World
                 return false;
 
             compositeKey = targetRelationLink.GetCompositeKey(primaryKey);
-            targetRelationLink.RemovalExternalLink(primaryKey);
+            targetRelationLink.RemoveExternalLink(primaryKey);
         }
 
         lock (relation._lock)
@@ -353,6 +476,55 @@ public sealed partial class World
         return true;
     }
 
+    private RelationKeyed GetEntityRelation(int relationId, Entity owner)
+    {
+        if (!IsAlive(owner))
+            ThrowEntityNotAlive(owner);
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[owner._id];
+
+        if (entityMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
+            ThrowEntityMissingRelation(relationId, owner);
+
+        RelationStorage relationStorage = GetOrCreateRelationStorage(relationId);
+
+        RelationsIndexer ownerIndexer = GetOrRentRelationIndexer(ref entityMeta);
+
+        lock (ownerIndexer)
+        {
+            if (!ownerIndexer.HasKey(relationId))
+                ThrowEntityMissingRelation(relationId, owner);
+
+            int primaryKey = ownerIndexer.GetRelationKey(relationId).GetPrimaryKey();
+            Relation relation = relationStorage.GetRelation(primaryKey);
+
+            return new RelationKeyed(relation, primaryKey);
+        }
+    }
+
+    private int GetEntityCompositeKey(int relationId, int primaryKey, Entity target)
+    {
+        if (!IsAlive(target))
+            ThrowEntityNotAlive(target);
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[target._id];
+
+        if (entityMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
+            ThrowEntityMissingRelationLink(relationId, target);
+
+        RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref entityMeta);
+
+        lock (targetIndexer)
+        {
+            if (!targetIndexer.HasLink(relationId))
+                ThrowEntityMissingRelationLink(relationId, target);
+
+            RelationLink relationLink = targetIndexer.GetOrRentLink(relationId);
+
+            return relationLink.GetCompositeKey(primaryKey);
+        }
+    }
+
     private void ResetRelations(Entity owner)
     {
         ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];
@@ -360,7 +532,9 @@ public sealed partial class World
         if (ownerMeta._relationsIndexerIndex == EntityMeta.DefaultInvalidEntityMetaIndexes)
             return;
 
-        RelationsIndexer ownerIndexer = _relationsIndexers[ownerMeta._relationsIndexerIndex];
+        int relationIndexerIndex = ownerMeta._relationsIndexerIndex;
+
+        RelationsIndexer ownerIndexer = _relationsIndexers[relationIndexerIndex];
 
         while (ownerIndexer.GetAddedLinksCount() > 0)
         {
@@ -382,6 +556,8 @@ public sealed partial class World
             int relationId = ownerIndexer.GetAddedRelationsAt(0);
             AttemptRemoveRelation(relationId, owner);
         }
+
+        ReturnRelationIndexer(relationIndexerIndex);
     }
 
     private RelationsIndexer GetOrRentRelationIndexer(ref EntityMeta entityMeta)
@@ -471,4 +647,16 @@ public sealed partial class World
                 $"Relation '{relationType._type.Name}' is a tag relation. Use TryAddRelation to add it instead."
             );
     }
+
+    [DoesNotReturn]
+    private static void ThrowEntityMissingRelation(int relationId, Entity entity) =>
+        throw new InvalidOperationException(
+            $"{entity} does not have relation '{RelationsMeta.GetRelationType(relationId)._type.Name}'. Add the relation before attempting to access it."
+        );
+
+    [DoesNotReturn]
+    private static void ThrowEntityMissingRelationLink(int relationId, Entity entity) =>
+        throw new InvalidOperationException(
+            $"{entity} does not have relation '{RelationsMeta.GetRelationType(relationId)._type.Name}' external links."
+        );
 }

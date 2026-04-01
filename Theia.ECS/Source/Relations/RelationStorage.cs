@@ -36,7 +36,7 @@ internal sealed class RelationStorage
         return relations[primaryKey];
     }
 
-    internal RelationRented RentRelation()
+    internal RelationKeyed RentRelation()
     {
         int index;
 
@@ -54,7 +54,7 @@ internal sealed class RelationStorage
 
         _relations[index] = RelationsMeta.GetRelationType(_relationId).CreateRelation();
 
-        return new RelationRented(_relations[index], index);
+        return new RelationKeyed(_relations[index], index);
     }
 
     internal void ReturnRelation(int primaryKey)
