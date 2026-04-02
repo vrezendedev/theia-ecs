@@ -652,4 +652,138 @@ public sealed class WorldRelationConcurrencyTests
             Assert.Equal(1, world.CountExternalLinks<Friend>(targets[i]));
         }
     }
+
+    [Fact]
+    public async Task ConcurrentAddAndRemove_NOwners_SameTarget_FinalCountIsCorrect()
+    {
+        World world = new();
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        int half = ThreadCount / 2;
+
+        Entity target = assemblage.Create(new Position());
+
+        Entity[] removeOwners = Enumerable
+            .Range(0, half)
+            .Select(_ => assemblage.Create(new Position()))
+            .ToArray();
+
+        foreach (Entity o in removeOwners)
+            world.TryAddRelation<Friend>(o, target);
+
+        Entity[] addOwners = Enumerable
+            .Range(0, half)
+            .Select(_ => assemblage.Create(new Position()))
+            .ToArray();
+
+        bool[] addResults = new bool[half];
+        bool[] removeResults = new bool[half];
+
+        Barrier barrier = new(ThreadCount);
+
+        Task[] tasks = Enumerable
+            .Range(0, half)
+            .Select(i =>
+                Task.Run(() =>
+                {
+                    barrier.SignalAndWait();
+                    addResults[i] = world.TryAddRelation<Friend>(addOwners[i], target);
+                })
+            )
+            .Concat(
+                Enumerable
+                    .Range(0, half)
+                    .Select(i =>
+                        Task.Run(() =>
+                        {
+                            barrier.SignalAndWait();
+                            removeResults[i] = world.TryRemoveRelation<Friend>(
+                                removeOwners[i],
+                                target
+                            );
+                        })
+                    )
+            )
+            .ToArray();
+
+        await Task.WhenAll(tasks).WaitAsync(TestTimeoutSpan);
+
+        Assert.All(addResults, r => Assert.True(r));
+        Assert.All(removeResults, r => Assert.True(r));
+
+        Assert.Equal(half, world.CountExternalLinks<Friend>(target));
+
+        foreach (Entity owner in addOwners)
+            Assert.True(world.IsRelatedTo<Friend>(owner, target));
+
+        foreach (Entity owner in removeOwners)
+            Assert.False(world.IsRelatedTo<Friend>(owner, target));
+    }
+
+    [Fact]
+    public async Task ConcurrentAddAndRemove_SameOwner_NTargets_FinalCountIsCorrect()
+    {
+        World world = new();
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        int half = ThreadCount / 2;
+
+        Entity owner = assemblage.Create(new Position());
+
+        Entity[] removeTargets = Enumerable
+            .Range(0, half)
+            .Select(_ => assemblage.Create(new Position()))
+            .ToArray();
+
+        foreach (Entity t in removeTargets)
+            world.TryAddRelation<Friend>(owner, t);
+
+        Entity[] addTargets = Enumerable
+            .Range(0, half)
+            .Select(_ => assemblage.Create(new Position()))
+            .ToArray();
+
+        bool[] addResults = new bool[half];
+        bool[] removeResults = new bool[half];
+
+        Barrier barrier = new(ThreadCount);
+
+        Task[] tasks = Enumerable
+            .Range(0, half)
+            .Select(i =>
+                Task.Run(() =>
+                {
+                    barrier.SignalAndWait();
+                    addResults[i] = world.TryAddRelation<Friend>(owner, addTargets[i]);
+                })
+            )
+            .Concat(
+                Enumerable
+                    .Range(0, half)
+                    .Select(i =>
+                        Task.Run(() =>
+                        {
+                            barrier.SignalAndWait();
+                            removeResults[i] = world.TryRemoveRelation<Friend>(
+                                owner,
+                                removeTargets[i]
+                            );
+                        })
+                    )
+            )
+            .ToArray();
+
+        await Task.WhenAll(tasks).WaitAsync(TestTimeoutSpan);
+
+        Assert.All(addResults, r => Assert.True(r));
+        Assert.All(removeResults, r => Assert.True(r));
+
+        Assert.Equal(half, world.CountRelations<Friend>(owner));
+
+        foreach (Entity target in addTargets)
+            Assert.True(world.IsRelatedTo<Friend>(owner, target));
+
+        foreach (Entity target in removeTargets)
+            Assert.False(world.IsRelatedTo<Friend>(owner, target));
+    }
 }
