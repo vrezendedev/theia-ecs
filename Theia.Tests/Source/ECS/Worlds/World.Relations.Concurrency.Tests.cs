@@ -657,6 +657,7 @@ public sealed class WorldRelationConcurrencyTests
     public async Task ConcurrentAddAndRemove_NOwners_SameTarget_FinalCountIsCorrect()
     {
         World world = new();
+
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
         int half = ThreadCount / 2;
@@ -724,6 +725,7 @@ public sealed class WorldRelationConcurrencyTests
     public async Task ConcurrentAddAndRemove_SameOwner_NTargets_FinalCountIsCorrect()
     {
         World world = new();
+
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
         int half = ThreadCount / 2;
