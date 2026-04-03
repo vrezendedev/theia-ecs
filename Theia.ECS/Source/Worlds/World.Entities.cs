@@ -80,7 +80,7 @@ public sealed partial class World
 
         Ghoulify(entity, ref entityMeta, in archetype);
 
-        InvokeOnEntityGhoulified(new EntityGhoulified(entity, in archetype));
+        InvokeOnGhoulified(new EntityGhoulified(entity, in archetype));
 
         return true;
     }

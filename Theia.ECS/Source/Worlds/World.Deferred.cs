@@ -5,6 +5,7 @@ using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
+using Theia.ECS.Relations;
 
 namespace Theia.ECS.Worlds;
 
@@ -17,12 +18,19 @@ public sealed partial class World
     private Queue<Entity> _deferredGhoulify;
     private readonly Lock _deferredGhoulifyLock = new();
 
-    private Queue<EntityComponentDeferred> _deferredAdd;
-    private readonly Lock _deferredAddLock = new();
-    private DeferredStorage[] _deferredAddStorages;
+    private Queue<EntityComponentDeferred> _deferredAddComponent;
+    private readonly Lock _deferredAddComponentLock = new();
+    private ComponentDeferredStorage[] _deferredAddComponentStorages;
 
-    private Queue<EntityComponentDeferred> _deferredRemove;
-    private readonly Lock _deferredRemoveLock = new();
+    private Queue<EntityComponentDeferred> _deferredRemoveComponent;
+    private readonly Lock _deferredRemoveComponentLock = new();
+
+    private Queue<AddRelationDeferred> _deferredAddRelation;
+    private readonly Lock _deferredAddRelationLock = new();
+    private RelationDeferredStorage[] _deferredAddRelationStorages;
+
+    private Queue<RemoveRelationDeferred> _deferredRemoveRelation;
+    private readonly Lock _deferredRemoveRelationLock = new();
 
     internal bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
 
@@ -38,50 +46,78 @@ public sealed partial class World
 
     private void DeferredGhoulifyHandler(Entity entity) => AttemptGhoulify(entity);
 
-    private DeferredStorage<TComponent> GetOrAddDeferredStorage<TComponent>(int componentId)
+    private ComponentDeferredStorage<TComponent> GetOrCreateDeferredAddComponentStorage<TComponent>(
+        int componentId
+    )
         where TComponent : struct
     {
-        DeferredStorage deferredStorage;
+        ComponentDeferredStorage deferredStorage;
 
-        if (componentId > _deferredAddStorages.Length - 1)
-            Array.Resize(ref _deferredAddStorages, componentId + 1);
+        if (componentId > _deferredAddComponentStorages.Length - 1)
+            Array.Resize(ref _deferredAddComponentStorages, componentId + 1);
 
-        deferredStorage = _deferredAddStorages[componentId];
+        deferredStorage = _deferredAddComponentStorages[componentId];
 
         if (deferredStorage is null)
         {
-            deferredStorage = new DeferredStorage<TComponent>(DefaultDeferredCommandsCapacity);
-            _deferredAddStorages[componentId] = deferredStorage;
+            deferredStorage = new ComponentDeferredStorage<TComponent>(
+                DefaultDeferredCommandsCapacity
+            );
+            _deferredAddComponentStorages[componentId] = deferredStorage;
         }
 
-        return (DeferredStorage<TComponent>)deferredStorage;
+        return (ComponentDeferredStorage<TComponent>)deferredStorage;
     }
 
-    public void DeferredAdd<TComponent>(Entity entity, in TComponent component = default)
+    private RelationDeferredStorage<TRelation> GetOrCreateDeferredAddRelationStorage<TRelation>(
+        int relationId
+    )
+        where TRelation : struct
+    {
+        RelationDeferredStorage deferredStorage;
+
+        if (relationId > _deferredAddRelationStorages.Length - 1)
+            Array.Resize(ref _deferredAddRelationStorages, relationId + 1);
+
+        deferredStorage = _deferredAddRelationStorages[relationId];
+
+        if (deferredStorage is null)
+        {
+            deferredStorage = new RelationDeferredStorage<TRelation>(
+                DefaultDeferredCommandsCapacity
+            );
+            _deferredAddRelationStorages[relationId] = deferredStorage;
+        }
+
+        return (RelationDeferredStorage<TRelation>)deferredStorage;
+    }
+
+    public void DeferredAddComponent<TComponent>(Entity entity, in TComponent component = default)
         where TComponent : struct
     {
         ThrowIfFlushingDeferred();
 
         int componentId = ComponentMeta<TComponent>.s_id;
 
-        lock (_deferredAddLock)
+        lock (_deferredAddComponentLock)
         {
-            _deferredAdd.Enqueue(
+            _deferredAddComponent.Enqueue(
                 new EntityComponentDeferred() { _entity = entity, _componentId = componentId }
             );
 
-            DeferredStorage<TComponent> storage = GetOrAddDeferredStorage<TComponent>(componentId);
+            ComponentDeferredStorage<TComponent> storage =
+                GetOrCreateDeferredAddComponentStorage<TComponent>(componentId);
 
             storage.EnqueueDeferred(component);
         }
     }
 
-    private void DeferredAddHandler(EntityComponentDeferred entityComponentDeferred)
+    private void DeferredAddComponentHandler(EntityComponentDeferred entityComponentDeferred)
     {
         Entity entity = entityComponentDeferred._entity;
         int componentId = entityComponentDeferred._componentId;
 
-        DeferredStorage storage = _deferredAddStorages[componentId];
+        ComponentDeferredStorage storage = _deferredAddComponentStorages[componentId];
 
         EntityReferences entityReferences = AttemptAddComponent(entity, componentId);
 
@@ -106,14 +142,14 @@ public sealed partial class World
             storage.DiscardNext();
     }
 
-    public void DeferredRemove<TComponent>(Entity entity)
+    public void DeferredRemoveComponent<TComponent>(Entity entity)
         where TComponent : struct
     {
         ThrowIfFlushingDeferred();
 
-        lock (_deferredRemoveLock)
+        lock (_deferredRemoveComponentLock)
         {
-            _deferredRemove.Enqueue(
+            _deferredRemoveComponent.Enqueue(
                 new EntityComponentDeferred()
                 {
                     _entity = entity,
@@ -123,11 +159,167 @@ public sealed partial class World
         }
     }
 
-    private void DeferredRemoveHandler(EntityComponentDeferred entityComponentDeferred) =>
+    private void DeferredRemoveComponentHandler(EntityComponentDeferred entityComponentDeferred) =>
         AttemptRemoveComponent(
             entityComponentDeferred._entity,
             entityComponentDeferred._componentId
         );
+
+    internal AddRelationDeferred GetAddRelationDeferred<TRelation>(
+        Entity owner,
+        TRelation relation = default
+    )
+        where TRelation : struct
+    {
+        int relationId = RelationMeta<TRelation>.s_id;
+
+        RelationType relationType = RelationsMeta.GetRelationType(relationId);
+
+        int evaluatedRelationId = TryStorageDeferredEvaluatedRelation(relationType, relation);
+
+        return new AddRelationDeferred()
+        {
+            _owner = owner,
+            _target = default,
+            _relationId = relationId,
+            _relationStorageIndex = evaluatedRelationId,
+            _isTag = relationType._isTag,
+        };
+    }
+
+    internal AddRelationDeferred GetAddRelationDeferredTargeted<TRelation>(
+        int relationId,
+        RelationType relationType,
+        Entity owner,
+        Entity target,
+        TRelation relation = default
+    )
+        where TRelation : struct
+    {
+        int evaluatedRelationId = TryStorageDeferredEvaluatedRelation(relationType, relation);
+
+        return new AddRelationDeferred()
+        {
+            _owner = owner,
+            _target = target,
+            _relationId = relationId,
+            _relationStorageIndex = evaluatedRelationId,
+            _isTag = relationType._isTag,
+        };
+    }
+
+    private int TryStorageDeferredEvaluatedRelation<TRelation>(
+        RelationType relationType,
+        TRelation relation
+    )
+        where TRelation : struct
+    {
+        if (relationType._isTag)
+            return AddRelationDeferred.InvalidRelationStorageIndex;
+
+        //@TO-DO
+        //Lock here!
+        //Account from storage...
+        //Get storage index!
+
+        return 0;
+    }
+
+    public void DeferredAddRelation<TRelation>(Entity owner, Entity target)
+        where TRelation : struct
+    {
+        ThrowIfFlushingDeferred();
+
+        int relationId = RelationMeta<TRelation>.s_id;
+        RelationType relationType = RelationsMeta.GetRelationType(relationId);
+
+        ThrowIfExpectedTagRelation(relationType);
+
+        lock (_deferredAddRelationLock)
+        {
+            _deferredAddRelation.Enqueue(
+                GetAddRelationDeferredTargeted<TRelation>(relationId, relationType, owner, target)
+            );
+        }
+    }
+
+    public void DeferredAddEvaluatedRelation<TRelation>(
+        Entity owner,
+        Entity target,
+        TRelation relation
+    )
+        where TRelation : struct
+    {
+        ThrowIfFlushingDeferred();
+
+        int relationId = RelationMeta<TRelation>.s_id;
+        RelationType relationType = RelationsMeta.GetRelationType(relationId);
+
+        ThrowIfExpectedEvaluatedRelation(relationType);
+
+        lock (_deferredAddRelationLock)
+        {
+            _deferredAddRelation.Enqueue(
+                GetAddRelationDeferredTargeted(relationId, relationType, owner, target, relation)
+            );
+        }
+    }
+
+    internal void DeferredAddRelationHandler(AddRelationDeferred deferredRelation)
+    {
+        Entity owner = deferredRelation._owner;
+        Entity target = deferredRelation._target;
+
+        RelationAccounted relationAccounted = AttemptAccountRelation(
+            deferredRelation._relationId,
+            owner,
+            target
+        );
+
+        if (!relationAccounted._accounted)
+            return;
+
+        RelationLinked relationLinked = TryRelate(owner, target, relationAccounted);
+
+        if (relationLinked._linked && !deferredRelation._isTag)
+        {
+            RelationDeferredStorage storage = _deferredAddRelationStorages[
+                deferredRelation._relationId
+            ];
+
+            storage.SetWith(
+                deferredRelation._relationStorageIndex,
+                relationLinked._relation,
+                relationLinked._compositeKey
+            );
+        }
+    }
+
+    public void DeferredRemoveRelation<TRelation>(Entity owner, Entity target)
+        where TRelation : struct
+    {
+        ThrowIfFlushingDeferred();
+
+        lock (_deferredRemoveRelationLock)
+        {
+            _deferredRemoveRelation.Enqueue(
+                new RemoveRelationDeferred()
+                {
+                    _owner = owner,
+                    _target = target,
+                    _relationId = RelationMeta<TRelation>.s_id,
+                }
+            );
+        }
+    }
+
+    internal void DeferredRemoveRelationHandler(RemoveRelationDeferred deferredRelation)
+    {
+        Entity owner = deferredRelation._owner;
+        Entity target = deferredRelation._target;
+
+        AttemptRemoveRelation(deferredRelation._relationId, owner, target);
+    }
 
     public void FlushDeferred()
     {
@@ -138,11 +330,14 @@ public sealed partial class World
         while (_deferredGhoulify.Count > 0)
             DeferredGhoulifyHandler(_deferredGhoulify.Dequeue());
 
-        while (_deferredAdd.Count > 0)
-            DeferredAddHandler(_deferredAdd.Dequeue());
+        while (_deferredAddComponent.Count > 0)
+            DeferredAddComponentHandler(_deferredAddComponent.Dequeue());
 
-        while (_deferredRemove.Count > 0)
-            DeferredRemoveHandler(_deferredRemove.Dequeue());
+        while (_deferredRemoveComponent.Count > 0)
+            DeferredRemoveComponentHandler(_deferredRemoveComponent.Dequeue());
+
+        while (_deferredRemoveRelation.Count > 0)
+            DeferredRemoveRelationHandler(_deferredRemoveRelation.Dequeue());
 
         Assemblage[] assemblages = _assemblages;
 
@@ -156,7 +351,7 @@ public sealed partial class World
     {
         if (IsFlushingDeferred())
             throw new InvalidOperationException(
-                "Cannot perform structural changes or entity modifications during a deferred flush. Enqueue the operation as a deferred command or wait until the flush completes."
+                "Cannot enqueue deferred commands during a deferred flush. Use the non-deferred equivalent instead."
             );
     }
 }

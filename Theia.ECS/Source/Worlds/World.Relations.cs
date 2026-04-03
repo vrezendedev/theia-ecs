@@ -25,15 +25,16 @@ public sealed partial class World
         where TRelation : struct
     {
         int relationId = RelationMeta<TRelation>.s_id;
+        RelationType relationType = RelationsMeta.GetRelationType(relationId);
 
-        ThrowIfExpectedTagRelation(relationId);
+        ThrowIfExpectedTagRelation(relationType);
 
-        RelationAccounted relationAccounted = AddRelation(relationId, owner, target);
+        RelationAccounted relationAccounted = AttemptAccountRelation(relationId, owner, target);
 
         if (!relationAccounted._accounted)
             return false;
 
-        return TryLinkRelation(owner, target, relationAccounted);
+        return TryRelate(owner, target, relationAccounted)._linked;
     }
 
     public bool TryAddEvaluatedRelation<TRelation>(
@@ -44,15 +45,16 @@ public sealed partial class World
         where TRelation : struct
     {
         int relationId = RelationMeta<TRelation>.s_id;
+        RelationType relationType = RelationsMeta.GetRelationType(relationId);
 
-        ThrowIfExpectedEvaluatedRelation(relationId);
+        ThrowIfExpectedEvaluatedRelation(relationType);
 
-        RelationAccounted relationAccounted = AddRelation(relationId, owner, target);
+        RelationAccounted relationAccounted = AttemptAccountRelation(relationId, owner, target);
 
         if (!relationAccounted._accounted)
             return false;
 
-        return TryLinkEvaluatedRelation(owner, target, in value, relationAccounted);
+        return TryRelateEvaluated(owner, target, in value, relationAccounted);
     }
 
     public bool TryRemoveRelation<TRelation>(Entity owner)
@@ -176,8 +178,9 @@ public sealed partial class World
         where TRelation : struct
     {
         int relationdId = RelationMeta<TRelation>.s_id;
+        RelationType relationType = RelationsMeta.GetRelationType(relationdId);
 
-        ThrowIfExpectedEvaluatedRelation(relationdId);
+        ThrowIfExpectedEvaluatedRelation(relationType);
 
         ((EvaluatedRelation<TRelation>)GetEntityRelation(relationdId, owner)._relation).Query(
             update
@@ -192,8 +195,9 @@ public sealed partial class World
         where TRelation : struct
     {
         int relationdId = RelationMeta<TRelation>.s_id;
+        RelationType relationType = RelationsMeta.GetRelationType(relationdId);
 
-        ThrowIfExpectedEvaluatedRelation(relationdId);
+        ThrowIfExpectedEvaluatedRelation(relationType);
 
         if (owner == target)
             ThrowTargetEqualsOwner();
@@ -208,8 +212,9 @@ public sealed partial class World
         where TRelation : struct
     {
         int relationdId = RelationMeta<TRelation>.s_id;
+        RelationType relationType = RelationsMeta.GetRelationType(relationdId);
 
-        ThrowIfExpectedEvaluatedRelation(relationdId);
+        ThrowIfExpectedEvaluatedRelation(relationType);
 
         RelationKeyed relationKeyed = GetEntityRelation(relationdId, owner);
 
@@ -245,7 +250,7 @@ public sealed partial class World
         }
     }
 
-    private RelationAccounted AddRelation(int relationId, Entity owner, Entity target)
+    private RelationAccounted AttemptAccountRelation(int relationId, Entity owner, Entity target)
     {
         if (!IsAlive(owner) || !IsAlive(target) || (owner == target))
             return RelationAccounted.Reproved;
@@ -290,12 +295,16 @@ public sealed partial class World
         return new RelationAccounted(true, primaryKey, relation, targetRelationLink);
     }
 
-    private bool TryLinkRelation(Entity owner, Entity target, RelationAccounted relationAccounted)
+    private RelationLinked TryRelate(
+        Entity owner,
+        Entity target,
+        RelationAccounted relationAccounted
+    )
     {
         lock (relationAccounted._relation._lock)
         {
             if (relationAccounted._relation.GetOwner() != owner)
-                return false;
+                return RelationLinked.Reproved;
 
             lock (relationAccounted._targetRelationLink._lock)
             {
@@ -304,21 +313,27 @@ public sealed partial class World
                         relationAccounted._primaryKey
                     )
                 )
-                    return false;
+                    return RelationLinked.Reproved;
 
                 int compositeKey = relationAccounted._relation.Relate(target);
+
                 relationAccounted._targetRelationLink.AddExternalLink(
                     owner,
                     relationAccounted._primaryKey,
                     compositeKey
                 );
 
-                return true;
+                return new RelationLinked(
+                    true,
+                    relationAccounted._relation,
+                    relationAccounted._primaryKey,
+                    compositeKey
+                );
             }
         }
     }
 
-    private bool TryLinkEvaluatedRelation<TRelation>(
+    private bool TryRelateEvaluated<TRelation>(
         Entity owner,
         Entity target,
         in TRelation value,
@@ -654,23 +669,19 @@ public sealed partial class World
         }
     }
 
-    private static void ThrowIfExpectedTagRelation(int relationId)
+    private static void ThrowIfExpectedTagRelation(RelationType relationType)
     {
-        RelationType relationType = RelationsMeta.GetRelationType(relationId);
-
         if (!relationType._isTag)
             throw new InvalidOperationException(
-                $"Relation '{relationType._type.Name}' is an evaluated relation. Use TryAddEvaluatedRelation to add it instead."
+                $"Relation '{relationType._type.Name}' is an evaluated relation. Expected a tag relation."
             );
     }
 
-    private static void ThrowIfExpectedEvaluatedRelation(int relationId)
+    private static void ThrowIfExpectedEvaluatedRelation(RelationType relationType)
     {
-        RelationType relationType = RelationsMeta.GetRelationType(relationId);
-
         if (relationType._isTag)
             throw new InvalidOperationException(
-                $"Relation '{relationType._type.Name}' is a tag relation. Use TryAddRelation to add it instead."
+                $"Relation '{relationType._type.Name}' is a tag relation. Expected an evaluated relation."
             );
     }
 

@@ -89,7 +89,7 @@ public sealed class WorldDeferredTests
         World world = new();
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.DeferredAdd<Velocity>(entity);
+        world.DeferredAddComponent<Velocity>(entity);
 
         Assert.Throws<InvalidOperationException>(() => world.Get<Velocity>(entity));
     }
@@ -100,7 +100,7 @@ public sealed class WorldDeferredTests
         World world = new();
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.DeferredAdd<Velocity>(entity);
+        world.DeferredAddComponent<Velocity>(entity);
 
         world.FlushDeferred();
 
@@ -113,7 +113,7 @@ public sealed class WorldDeferredTests
         World world = new();
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.DeferredAdd(entity, new Velocity { X = 4, Y = 8 });
+        world.DeferredAddComponent(entity, new Velocity { X = 4, Y = 8 });
         world.FlushDeferred();
 
         ref Velocity velocity = ref world.Get<Velocity>(entity);
@@ -129,7 +129,7 @@ public sealed class WorldDeferredTests
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
         world.TryGhoulify(entity);
 
-        world.DeferredAdd<Velocity>(entity);
+        world.DeferredAddComponent<Velocity>(entity);
         world.FlushDeferred();
     }
 
@@ -140,7 +140,7 @@ public sealed class WorldDeferredTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.DeferredAdd(entity, new Position { X = 99 });
+        world.DeferredAddComponent(entity, new Position { X = 99 });
 
         world.FlushDeferred();
 
@@ -156,7 +156,7 @@ public sealed class WorldDeferredTests
 
         world.TryAddComponent<Velocity>(entity);
 
-        world.DeferredRemove<Velocity>(entity);
+        world.DeferredRemoveComponent<Velocity>(entity);
 
         Assert.Equal(0, world.Get<Velocity>(entity).X);
     }
@@ -170,7 +170,7 @@ public sealed class WorldDeferredTests
 
         world.TryAddComponent<Velocity>(entity);
 
-        world.DeferredRemove<Velocity>(entity);
+        world.DeferredRemoveComponent<Velocity>(entity);
 
         world.FlushDeferred();
 
@@ -184,7 +184,7 @@ public sealed class WorldDeferredTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.DeferredRemove<Position>(entity);
+        world.DeferredRemoveComponent<Position>(entity);
 
         world.FlushDeferred();
 
@@ -200,7 +200,7 @@ public sealed class WorldDeferredTests
 
         world.TryGhoulify(entity);
 
-        world.DeferredRemove<Position>(entity);
+        world.DeferredRemoveComponent<Position>(entity);
 
         world.FlushDeferred();
     }
@@ -224,8 +224,8 @@ public sealed class WorldDeferredTests
         Entity entityB = assemblage.Create(new Position());
 
         world.DeferredGhoulify(entityA);
-        world.DeferredAdd(entityB, new Velocity { X = 5 });
-        world.DeferredRemove<Position>(entityB);
+        world.DeferredAddComponent(entityB, new Velocity { X = 5 });
+        world.DeferredRemoveComponent<Position>(entityB);
 
         world.FlushDeferred();
 
@@ -240,7 +240,7 @@ public sealed class WorldDeferredTests
         World world = new();
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        world.DeferredAdd<Velocity>(entity);
+        world.DeferredAddComponent<Velocity>(entity);
         world.FlushDeferred();
 
         int countAfterFirstFlush = world.CountEntities();
@@ -278,7 +278,7 @@ public sealed class WorldDeferredTests
         Entity[] entities = await CreateEntitiesAndRunConcurrently(
             assemblage,
             (entities, offset, i) =>
-                world.DeferredAdd(entities[offset + i], new Velocity { X = offset + i })
+                world.DeferredAddComponent(entities[offset + i], new Velocity { X = offset + i })
         );
 
         world.FlushDeferred();
@@ -296,7 +296,7 @@ public sealed class WorldDeferredTests
 
         Entity[] entities = await CreateEntitiesAndRunConcurrently(
             assemblage,
-            (entities, offset, i) => world.DeferredRemove<Velocity>(entities[offset + i]),
+            (entities, offset, i) => world.DeferredRemoveComponent<Velocity>(entities[offset + i]),
             entities =>
             {
                 foreach (Entity entity in entities)

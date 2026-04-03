@@ -6,7 +6,7 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Components;
 
-public sealed class DeferredStorageTests
+public sealed class ComponentDeferredStorageTests
 {
     private readonly Signature _signature = new Signature(
         [ComponentMeta<Position>.s_id, ComponentMeta<Velocity>.s_id]
@@ -30,7 +30,7 @@ public sealed class DeferredStorageTests
     [Fact]
     public void EnqueueDeferred_SingleValue_DoesNotThrow()
     {
-        DeferredStorage<Position> storage = new DeferredStorage<Position>(4);
+        ComponentDeferredStorage<Position> storage = new ComponentDeferredStorage<Position>(4);
 
         storage.EnqueueDeferred(new Position { X = 1, Y = 2 });
     }
@@ -38,7 +38,7 @@ public sealed class DeferredStorageTests
     [Fact]
     public void EnqueueDeferred_MultipleValues_DoesNotThrow()
     {
-        DeferredStorage<Position> storage = new DeferredStorage<Position>(4);
+        ComponentDeferredStorage<Position> storage = new ComponentDeferredStorage<Position>(4);
 
         storage.EnqueueDeferred(new Position { X = 1 });
         storage.EnqueueDeferred(new Position { X = 2 });
@@ -50,7 +50,7 @@ public sealed class DeferredStorageTests
     {
         (Archetype archetype, EntityMeta meta) = CreateEntityInArchetype();
 
-        DeferredStorage<Position> storage = new DeferredStorage<Position>(4);
+        ComponentDeferredStorage<Position> storage = new ComponentDeferredStorage<Position>(4);
 
         storage.EnqueueDeferred(new Position { X = 5, Y = 10 });
 
@@ -76,7 +76,7 @@ public sealed class DeferredStorageTests
             accountedTwo._componentIndex
         );
 
-        DeferredStorage<Position> storage = new DeferredStorage<Position>(4);
+        ComponentDeferredStorage<Position> storage = new ComponentDeferredStorage<Position>(4);
 
         storage.EnqueueDeferred(new Position { X = 1 });
         storage.EnqueueDeferred(new Position { X = 2 });
@@ -101,7 +101,7 @@ public sealed class DeferredStorageTests
             accountedTwo._componentIndex
         );
 
-        DeferredStorage<Position> storage = new DeferredStorage<Position>(4);
+        ComponentDeferredStorage<Position> storage = new ComponentDeferredStorage<Position>(4);
 
         storage.EnqueueDeferred(new Position { X = 10, Y = 20 });
         storage.EnqueueDeferred(new Position { X = 30, Y = 40 });
@@ -120,7 +120,7 @@ public sealed class DeferredStorageTests
     {
         (Archetype archetype, EntityMeta meta) = CreateEntityInArchetype();
 
-        DeferredStorage<Position> storage = new DeferredStorage<Position>(4);
+        ComponentDeferredStorage<Position> storage = new ComponentDeferredStorage<Position>(4);
 
         storage.EnqueueDeferred(new Position { X = 99 });
         storage.EnqueueDeferred(new Position { X = 42 });
@@ -136,7 +136,7 @@ public sealed class DeferredStorageTests
     {
         (Archetype archetype, EntityMeta meta) = CreateEntityInArchetype();
 
-        DeferredStorage<Position> storage = new DeferredStorage<Position>(4);
+        ComponentDeferredStorage<Position> storage = new ComponentDeferredStorage<Position>(4);
 
         storage.EnqueueDeferred(new Position { X = 1 });
         storage.EnqueueDeferred(new Position { X = 2 });

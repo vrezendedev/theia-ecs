@@ -6,32 +6,32 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
-    public readonly EntityEvents Events;
+    public readonly EntityEvents EntityEvents;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void InvokeOnEntityGhoulified(EntityGhoulified entityGhoulified)
+    private void InvokeOnGhoulified(EntityGhoulified entityGhoulified)
     {
-        Events.InvokeOnEntityGhoulified(entityGhoulified);
+        EntityEvents.InvokeOnGhoulified(entityGhoulified);
         entityGhoulified
             ._belongedTo.GetMatchedAssemblage()
-            ?.Events.InvokeOnEntityGhoulified(entityGhoulified);
+            ?.EntityEvents.InvokeOnGhoulified(entityGhoulified);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void InvokeOnComponentAdded(EntityModified entityModified)
     {
-        Events.InvokeOnComponentAdded(entityModified);
+        EntityEvents.InvokeOnComponentAdded(entityModified);
         entityModified
             ._belongedTo.GetMatchedAssemblage()
-            ?.Events.InvokeOnComponentAdded(entityModified);
+            ?.EntityEvents.InvokeOnComponentAdded(entityModified);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void InvokeOnComponentRemoved(EntityModified entityModified)
     {
-        Events.InvokeOnComponentRemoved(entityModified);
+        EntityEvents.InvokeOnComponentRemoved(entityModified);
         entityModified
             ._belongedTo.GetMatchedAssemblage()
-            ?.Events.InvokeOnComponentRemoved(entityModified);
+            ?.EntityEvents.InvokeOnComponentRemoved(entityModified);
     }
 }

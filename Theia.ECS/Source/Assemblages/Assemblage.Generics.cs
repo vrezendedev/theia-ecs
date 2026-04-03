@@ -52,9 +52,43 @@ public class Assemblage<ComponentT1> : Assemblage
         }
     }
 
+    public void DeferredCreate<TRelation>(
+        in ComponentT1 componentT1,
+        DeferredRelationOnCreate<TRelation> deferredRelationOnCreate
+    )
+        where TRelation : struct
+    {
+        _world.ThrowIfFlushingDeferred();
+
+        lock (_deferredCreateLock)
+        {
+            _deferredCreate.Enqueue(
+                new EntityCreateDeferred<ComponentT1>()
+                {
+                    _componentT1 = componentT1,
+                    _relationDeferred = _world.GetAddRelationDeferred(
+                        deferredRelationOnCreate.Owner,
+                        deferredRelationOnCreate.Relation
+                    ),
+                }
+            );
+        }
+    }
+
     internal override void DeferredCreate()
     {
         while (_deferredCreate.Count > 0)
-            CreateAndSet(_deferredCreate.Dequeue()._componentT1);
+        {
+            EntityCreateDeferred<ComponentT1> deferredCreate = _deferredCreate.Dequeue();
+
+            EntityCreated entityCreated = CreateAndSet(deferredCreate._componentT1);
+
+            _world.DeferredAddRelationHandler(
+                deferredCreate._relationDeferred with
+                {
+                    _target = entityCreated._entity,
+                }
+            );
+        }
     }
 }

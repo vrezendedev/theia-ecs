@@ -11,7 +11,7 @@ namespace Theia.ECS.Assemblages;
 
 public abstract class Assemblage
 {
-    public readonly EntityEvents Events;
+    public readonly EntityEvents EntityEvents;
 
     protected readonly Lock _deferredCreateLock = new();
 
@@ -26,7 +26,7 @@ public abstract class Assemblage
         ReadOnlySpan<int> componentStorageMapping
     )
     {
-        Events = new();
+        EntityEvents = new();
         _world = world;
         _signature = archetype._signature;
         _archetype = archetype;
@@ -39,8 +39,8 @@ public abstract class Assemblage
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void InvokeOnEntityCreated(EntityAssembled entityAssembled)
     {
-        _world.Events.InvokeOnEntityCreated(entityAssembled);
-        Events.InvokeOnEntityCreated(entityAssembled);
+        _world.EntityEvents.InvokeOnCreated(entityAssembled);
+        EntityEvents.InvokeOnCreated(entityAssembled);
     }
 
     internal abstract void DeferredCreate();

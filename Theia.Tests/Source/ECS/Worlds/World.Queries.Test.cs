@@ -698,7 +698,7 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredAdd<Velocity>(e));
+        query.ForEachEntity((Entity e, ref Position _) => world.DeferredAddComponent<Velocity>(e));
 
         world.FlushDeferred();
 
@@ -716,7 +716,7 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredAdd<Velocity>(e));
+        query.ForEachEntity((Entity e, ref Position _) => world.DeferredAddComponent<Velocity>(e));
 
         world.FlushDeferred();
 
@@ -734,7 +734,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredRemove<Position>(e));
+        query.ForEachEntity(
+            (Entity e, ref Position _) => world.DeferredRemoveComponent<Position>(e)
+        );
 
         world.FlushDeferred();
 
@@ -754,7 +756,9 @@ public sealed class WorldQueriesTest
 
         world.TryAddComponent<Velocity>(entity);
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredRemove<Velocity>(e));
+        query.ForEachEntity(
+            (Entity e, ref Position _) => world.DeferredRemoveComponent<Velocity>(e)
+        );
 
         world.FlushDeferred();
 

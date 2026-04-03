@@ -6,18 +6,18 @@ namespace Theia.ECS.Events;
 
 public sealed class EntityEvents
 {
-    public event Action<EntityAssembled>? OnEntityCreated;
-    public event Action<EntityGhoulified>? OnEntityGhoulified;
+    public event Action<EntityAssembled>? OnCreated;
+    public event Action<EntityGhoulified>? OnGhoulified;
     public event Action<EntityModified>? OnComponentAdded;
     public event Action<EntityModified>? OnComponentRemoved;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void InvokeOnEntityCreated(EntityAssembled entityAssembled) =>
-        OnEntityCreated?.Invoke(entityAssembled);
+    internal void InvokeOnCreated(EntityAssembled entityAssembled) =>
+        OnCreated?.Invoke(entityAssembled);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal void InvokeOnEntityGhoulified(EntityGhoulified entityGhoulified) =>
-        OnEntityGhoulified?.Invoke(entityGhoulified);
+    internal void InvokeOnGhoulified(EntityGhoulified entityGhoulified) =>
+        OnGhoulified?.Invoke(entityGhoulified);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void InvokeOnComponentAdded(EntityModified entityModified) =>
@@ -29,8 +29,8 @@ public sealed class EntityEvents
 
     public void Reset()
     {
-        OnEntityCreated = null;
-        OnEntityGhoulified = null;
+        OnCreated = null;
+        OnGhoulified = null;
         OnComponentAdded = null;
         OnComponentRemoved = null;
     }

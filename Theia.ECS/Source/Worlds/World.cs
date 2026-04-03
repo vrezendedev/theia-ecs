@@ -56,20 +56,27 @@ public sealed partial class World
 
         _nomadQueries = Array.Empty<NomadQuery>();
 
-        _deferredAdd = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);
-        _deferredAddStorages = Array.Empty<DeferredStorage>();
-        _deferredRemove = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);
+        _deferredAddComponent = new Queue<EntityComponentDeferred>(DefaultDeferredCommandsCapacity);
+        _deferredAddComponentStorages = Array.Empty<ComponentDeferredStorage>();
+        _deferredRemoveComponent = new Queue<EntityComponentDeferred>(
+            DefaultDeferredCommandsCapacity
+        );
         _deferredGhoulify = new Queue<Entity>(DefaultDeferredCommandsCapacity);
 
+        _relationStorages = Array.Empty<RelationStorage>();
         _relationsIndexers = new RelationsIndexer[DefaultRelationsIndexerCapacity];
         _freeRelationSlots = new(DefaultRelationsIndexerCapacity);
 
         for (int i = DefaultRelationsIndexerCapacity - 1; i >= 0; i--)
             _freeRelationSlots.Push(i);
 
-        _relationStorages = Array.Empty<RelationStorage>();
+        _deferredAddRelation = new Queue<AddRelationDeferred>(DefaultDeferredCommandsCapacity);
+        _deferredAddRelationStorages = Array.Empty<RelationDeferredStorage>();
+        _deferredRemoveRelation = new Queue<RemoveRelationDeferred>(
+            DefaultDeferredCommandsCapacity
+        );
 
-        Events = new();
+        EntityEvents = new();
 
         lock (s_lock)
         {
