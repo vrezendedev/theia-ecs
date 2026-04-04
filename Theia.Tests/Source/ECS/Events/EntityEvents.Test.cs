@@ -9,7 +9,7 @@ namespace Theia.Tests.ECS.Events;
 public sealed class EntityEventsTests
 {
     [Fact]
-    public void OnEntityCreated_WorldEvent_FiresWhenEntityCreated()
+    public void OnCreated_WorldEvent_FiresWhenEntityCreated()
     {
         World world = new();
 
@@ -25,7 +25,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityCreated_AssemblageEvent_FiresWhenEntityCreated()
+    public void OnCreated_AssemblageEvent_FiresWhenEntityCreated()
     {
         World world = new();
 
@@ -41,7 +41,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityCreated_WorldEvent_EntityDataIsCorrect()
+    public void OnCreated_WorldEvent_EntityDataIsCorrect()
     {
         World world = new();
 
@@ -57,7 +57,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityCreated_WorldEvent_HasComponentReturnsTrue()
+    public void OnCreated_WorldEvent_HasComponentReturnsTrue()
     {
         World world = new();
 
@@ -73,7 +73,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityCreated_WorldEvent_IsAssemblageReturnsTrue()
+    public void OnCreated_WorldEvent_IsAssemblageReturnsTrue()
     {
         World world = new();
 
@@ -89,7 +89,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityGhoulified_WorldEvent_FiresWhenEntityGhoulified()
+    public void OnGhoulified_WorldEvent_FiresWhenEntityGhoulified()
     {
         World world = new();
 
@@ -107,7 +107,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityGhoulified_AssemblageEvent_FiresWhenEntityBelongedToAssemblage()
+    public void OnGhoulified_AssemblageEvent_FiresWhenEntityBelongedToAssemblage()
     {
         World world = new();
 
@@ -125,7 +125,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityGhoulified_WorldEvent_EntityDataIsCorrect()
+    public void OnGhoulified_WorldEvent_EntityDataIsCorrect()
     {
         World world = new();
 
@@ -143,7 +143,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityGhoulified_WorldEvent_HadComponentReturnsTrue()
+    public void OnGhoulified_WorldEvent_HadComponentReturnsTrue()
     {
         World world = new();
 
@@ -161,7 +161,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityGhoulified_WorldEvent_DoesNotFireWhenEntityNotAlive()
+    public void OnGhoulified_WorldEvent_DoesNotFireWhenEntityNotAlive()
     {
         World world = new();
 
@@ -181,7 +181,7 @@ public sealed class EntityEventsTests
     }
 
     [Fact]
-    public void OnEntityGhoulified_WorldEvent_WasAssemblageReturnsTrue()
+    public void OnGhoulified_WorldEvent_WasAssemblageReturnsTrue()
     {
         World world = new();
 

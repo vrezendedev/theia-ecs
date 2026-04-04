@@ -32,7 +32,7 @@ public sealed partial class World
     private Queue<RemoveRelationDeferred> _deferredRemoveRelation;
     private readonly Lock _deferredRemoveRelationLock = new();
 
-    internal bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
+    public bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
 
     public void DeferredGhoulify(Entity entity)
     {
@@ -175,7 +175,11 @@ public sealed partial class World
 
         RelationType relationType = RelationsMeta.GetRelationType(relationId);
 
-        int evaluatedRelationId = TryStorageDeferredEvaluatedRelation(relationType, relation);
+        int evaluatedRelationId = TryStorageDeferredEvaluatedRelation(
+            relationId,
+            relationType,
+            relation
+        );
 
         return new AddRelationDeferred()
         {
@@ -196,7 +200,11 @@ public sealed partial class World
     )
         where TRelation : struct
     {
-        int evaluatedRelationId = TryStorageDeferredEvaluatedRelation(relationType, relation);
+        int evaluatedRelationId = TryStorageDeferredEvaluatedRelation(
+            relationId,
+            relationType,
+            relation
+        );
 
         return new AddRelationDeferred()
         {
@@ -209,6 +217,7 @@ public sealed partial class World
     }
 
     private int TryStorageDeferredEvaluatedRelation<TRelation>(
+        int relationId,
         RelationType relationType,
         TRelation relation
     )
@@ -217,12 +226,10 @@ public sealed partial class World
         if (relationType._isTag)
             return AddRelationDeferred.InvalidRelationStorageIndex;
 
-        //@TO-DO
-        //Lock here!
-        //Account from storage...
-        //Get storage index!
+        RelationDeferredStorage<TRelation> storage =
+            GetOrCreateDeferredAddRelationStorage<TRelation>(relationId);
 
-        return 0;
+        return storage.AccountDeferred(relation);
     }
 
     public void DeferredAddRelation<TRelation>(Entity owner, Entity target)
@@ -313,7 +320,7 @@ public sealed partial class World
         }
     }
 
-    internal void DeferredRemoveRelationHandler(RemoveRelationDeferred deferredRelation)
+    private void DeferredRemoveRelationHandler(RemoveRelationDeferred deferredRelation)
     {
         Entity owner = deferredRelation._owner;
         Entity target = deferredRelation._target;
@@ -325,7 +332,7 @@ public sealed partial class World
     {
         ThrowIfQueriesExecuting();
 
-        _isFlushingDeferred = true;
+        Volatile.Write(ref _isFlushingDeferred, true);
 
         while (_deferredGhoulify.Count > 0)
             DeferredGhoulifyHandler(_deferredGhoulify.Dequeue());
@@ -336,6 +343,9 @@ public sealed partial class World
         while (_deferredRemoveComponent.Count > 0)
             DeferredRemoveComponentHandler(_deferredRemoveComponent.Dequeue());
 
+        while (_deferredAddRelation.Count > 0)
+            DeferredAddRelationHandler(_deferredAddRelation.Dequeue());
+
         while (_deferredRemoveRelation.Count > 0)
             DeferredRemoveRelationHandler(_deferredRemoveRelation.Dequeue());
 
@@ -344,7 +354,7 @@ public sealed partial class World
         for (int i = 0; i < assemblages.Length; i++)
             assemblages[i].DeferredCreate();
 
-        _isFlushingDeferred = false;
+        Volatile.Write(ref _isFlushingDeferred, false);
     }
 
     internal void ThrowIfFlushingDeferred()

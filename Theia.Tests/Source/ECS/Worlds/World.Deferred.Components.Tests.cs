@@ -7,7 +7,7 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Worlds;
 
-public sealed class WorldDeferredTests
+public sealed class WorldDeferredComponentsTests
 {
     private static async Task<Entity[]> CreateEntitiesAndRunConcurrently(
         Assemblage<Position> assemblage,

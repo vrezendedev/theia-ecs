@@ -46,9 +46,11 @@ internal sealed class RelationStorage
         {
             index = _relations.Length;
 
-            Array.Resize(ref _relations, index * DefaultRelationsGrowthFactor);
+            int targetLength = index * DefaultRelationsGrowthFactor;
 
-            for (int i = index + 1; i < _relations.Length; i++)
+            Array.Resize(ref _relations, targetLength);
+
+            for (int i = index + 1; i < targetLength; i++)
                 _free.Enqueue(i);
         }
 

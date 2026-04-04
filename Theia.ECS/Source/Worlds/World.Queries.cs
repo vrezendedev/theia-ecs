@@ -19,7 +19,7 @@ public sealed partial class World
     internal void DecrementQueriesBeingExecuted() =>
         Interlocked.Decrement(ref _queriesBeingExecuted);
 
-    internal bool AreThereAnyQueriesBeingExecuted() => Volatile.Read(ref _queriesBeingExecuted) > 0;
+    public bool AreThereAnyQueriesBeingExecuted() => Volatile.Read(ref _queriesBeingExecuted) > 0;
 
     private void AddNomadQuery(NomadQuery nomadQuery)
     {

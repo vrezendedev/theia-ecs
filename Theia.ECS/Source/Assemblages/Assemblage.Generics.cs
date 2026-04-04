@@ -83,6 +83,12 @@ public class Assemblage<ComponentT1> : Assemblage
 
             EntityCreated entityCreated = CreateAndSet(deferredCreate._componentT1);
 
+            if (
+                deferredCreate._relationDeferred._relationId
+                == AddRelationDeferred.InvalidRelationId
+            )
+                continue;
+
             _world.DeferredAddRelationHandler(
                 deferredCreate._relationDeferred with
                 {
