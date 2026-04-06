@@ -69,3 +69,30 @@ public enum ByteKeyEnum : byte
 {
     A,
 }
+
+public enum MatchesRelationEnum
+{
+    None,
+
+    [Matches<Friend>]
+    Friend,
+}
+
+public enum MatchesMultipleRelationEnum
+{
+    None,
+
+    [Matches<Friend>]
+    Friend,
+
+    [Matches<Damage>]
+    Damage,
+}
+
+public enum IncludesRelationOnlyEnum
+{
+    None,
+
+    [Includes<Friend>]
+    Group,
+}

@@ -702,4 +702,86 @@ public sealed class RelationsEventsTests
 
         Assert.Equal(0, firedCount);
     }
+
+    [Fact]
+    public void OnAnyRelationAdded_WorldEvent_AsReturnsCorrectMatchesEnumValue()
+    {
+        World world = new();
+
+        Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
+
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
+        Entity target = assemblage.Create(new ComponentA { A = 1 });
+
+        MatchesRelationEnum result = default;
+
+        world.RelationsEvents.OnAnyRelationAdded += (data) =>
+            result = data.As<MatchesRelationEnum>();
+
+        world.TryAddTagRelation<Friend>(entity, target);
+
+        Assert.Equal(MatchesRelationEnum.Friend, result);
+    }
+
+    [Fact]
+    public void OnAnyRelationAdded_WorldEvent_AsReturnsCorrectIncludesEnumValue()
+    {
+        World world = new();
+
+        Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
+
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
+        Entity target = assemblage.Create(new ComponentA { A = 1 });
+
+        IncludesRelationOnlyEnum result = default;
+
+        world.RelationsEvents.OnAnyRelationAdded += (data) =>
+            result = data.As<IncludesRelationOnlyEnum>();
+
+        world.TryAddTagRelation<Friend>(entity, target);
+
+        Assert.Equal(IncludesRelationOnlyEnum.Group, result);
+    }
+
+    [Fact]
+    public void OnAnyRelationAdded_WorldEvent_AsReturnsDefaultForUnmappedComponent()
+    {
+        World world = new();
+
+        Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
+
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
+        Entity target = assemblage.Create(new ComponentA { A = 1 });
+
+        MatchesRelationEnum result = default;
+
+        world.RelationsEvents.OnAnyRelationAdded += (data) =>
+            result = data.As<MatchesRelationEnum>();
+
+        world.TryAddEvaluatedRelation<Damage>(entity, target);
+
+        Assert.Equal(default, result);
+    }
+
+    [Fact]
+    public void OnAnyRelationRemoved_WorldEvent_AsReturnsCorrectMatchesEnumValue()
+    {
+        World world = new();
+
+        Assemblage<ComponentA> assemblage = world.CreateAssemblage<ComponentA>();
+
+        Entity entity = assemblage.Create(new ComponentA { A = 1 });
+        Entity target = assemblage.Create(new ComponentA { A = 1 });
+
+        world.TryAddEvaluatedRelation<Damage>(entity, target);
+
+        MatchesMultipleRelationEnum result = default;
+
+        world.RelationsEvents.OnAnyRelationRemoved += (data) =>
+            result = data.As<MatchesMultipleRelationEnum>();
+
+        world.TryRemoveRelation<Damage>(entity);
+
+        Assert.Equal(MatchesMultipleRelationEnum.Damage, result);
+    }
 }
