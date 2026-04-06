@@ -19,13 +19,13 @@ public sealed partial class World
         _assemblages[index] = assemblage;
     }
 
-    public Assemblage<TComponent> CreateAssemblage<TComponent>()
-        where TComponent : struct
+    public Assemblage<ComponentT1> CreateAssemblage<ComponentT1>()
+        where ComponentT1 : struct
     {
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
 
-        int componentId = ComponentMeta<TComponent>.s_id;
+        int componentId = ComponentMeta<ComponentT1>.s_id;
 
         Archetype archetype = FindOrCreateArchetype(stackalloc int[1] { componentId });
 
@@ -33,7 +33,7 @@ public sealed partial class World
 
         componentStorageMapping[0] = archetype.GetStorageIndex(componentId);
 
-        Assemblage<TComponent> assemblage = new Assemblage<TComponent>(
+        Assemblage<ComponentT1> assemblage = new Assemblage<ComponentT1>(
             this,
             in archetype,
             componentStorageMapping
