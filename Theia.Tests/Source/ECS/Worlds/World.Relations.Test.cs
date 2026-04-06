@@ -12,7 +12,7 @@ namespace Theia.Tests.ECS.Worlds;
 public sealed class WorldRelationTests
 {
     [Fact]
-    public void TryAddRelation_WithAliveEntities_ReturnsTrue()
+    public void TryAddTagRelation_WithAliveEntities_ReturnsTrue()
     {
         World world = new();
 
@@ -21,11 +21,11 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        Assert.True(world.TryAddRelation<Friend>(owner, target));
+        Assert.True(world.TryAddTagRelation<Friend>(owner, target));
     }
 
     [Fact]
-    public void TryAddRelation_WithSameEntity_ReturnsFalse()
+    public void TryAddTagRelation_WithSameEntity_ReturnsFalse()
     {
         World world = new();
 
@@ -33,11 +33,11 @@ public sealed class WorldRelationTests
 
         Entity owner = assemblage.Create(new Position());
 
-        Assert.False(world.TryAddRelation<Friend>(owner, owner));
+        Assert.False(world.TryAddTagRelation<Friend>(owner, owner));
     }
 
     [Fact]
-    public void TryAddRelation_WithDeadOwner_ReturnsFalse()
+    public void TryAddTagRelation_WithDeadOwner_ReturnsFalse()
     {
         World world = new();
 
@@ -48,11 +48,11 @@ public sealed class WorldRelationTests
 
         world.TryGhoulify(owner);
 
-        Assert.False(world.TryAddRelation<Friend>(owner, target));
+        Assert.False(world.TryAddTagRelation<Friend>(owner, target));
     }
 
     [Fact]
-    public void TryAddRelation_WithDeadTarget_ReturnsFalse()
+    public void TryAddTagRelation_WithDeadTarget_ReturnsFalse()
     {
         World world = new();
 
@@ -63,11 +63,11 @@ public sealed class WorldRelationTests
 
         world.TryGhoulify(target);
 
-        Assert.False(world.TryAddRelation<Friend>(owner, target));
+        Assert.False(world.TryAddTagRelation<Friend>(owner, target));
     }
 
     [Fact]
-    public void TryAddRelation_WithDefaultOwner_ReturnsFalse()
+    public void TryAddTagRelation_WithDefaultOwner_ReturnsFalse()
     {
         World world = new();
 
@@ -75,11 +75,11 @@ public sealed class WorldRelationTests
 
         Entity target = assemblage.Create(new Position());
 
-        Assert.False(world.TryAddRelation<Friend>(default, target));
+        Assert.False(world.TryAddTagRelation<Friend>(default, target));
     }
 
     [Fact]
-    public void TryAddRelation_WithDefaultTarget_ReturnsFalse()
+    public void TryAddTagRelation_WithDefaultTarget_ReturnsFalse()
     {
         World world = new();
 
@@ -87,11 +87,11 @@ public sealed class WorldRelationTests
 
         Entity owner = assemblage.Create(new Position());
 
-        Assert.False(world.TryAddRelation<Friend>(owner, default));
+        Assert.False(world.TryAddTagRelation<Friend>(owner, default));
     }
 
     [Fact]
-    public void TryAddRelation_IncreasesCountRelations()
+    public void TryAddTagRelation_IncreasesCountRelations()
     {
         World world = new();
 
@@ -102,13 +102,13 @@ public sealed class WorldRelationTests
 
         int before = world.CountRelations<Friend>(owner);
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.Equal(before + 1, world.CountRelations<Friend>(owner));
     }
 
     [Fact]
-    public void TryAddRelation_TargetGainsExternalLink()
+    public void TryAddTagRelation_TargetGainsExternalLink()
     {
         World world = new();
 
@@ -117,13 +117,13 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.True(world.HasExternalLinks<Friend>(target));
     }
 
     [Fact]
-    public void TryAddRelation_MultipleTargets_AllCountedCorrectly()
+    public void TryAddTagRelation_MultipleTargets_AllCountedCorrectly()
     {
         World world = new();
 
@@ -135,15 +135,15 @@ public sealed class WorldRelationTests
         Entity targetB = assemblage.Create(new Position());
         Entity targetC = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
-        world.TryAddRelation<Friend>(owner, targetC);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetC);
 
         Assert.Equal(3, world.CountRelations<Friend>(owner));
     }
 
     [Fact]
-    public void TryAddRelation_MultipleOwners_TargetCountsAllLinks()
+    public void TryAddTagRelation_MultipleOwners_TargetCountsAllLinks()
     {
         World world = new();
 
@@ -153,14 +153,14 @@ public sealed class WorldRelationTests
         Entity ownerB = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(ownerA, target);
-        world.TryAddRelation<Friend>(ownerB, target);
+        world.TryAddTagRelation<Friend>(ownerA, target);
+        world.TryAddTagRelation<Friend>(ownerB, target);
 
         Assert.Equal(2, world.CountExternalLinks<Friend>(target));
     }
 
     [Fact]
-    public void TryAddRelation_WithEvaluatedRelationType_Throws()
+    public void TryAddTagRelation_WithEvaluatedRelationType_Throws()
     {
         World world = new();
 
@@ -169,7 +169,9 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        Assert.Throws<InvalidOperationException>(() => world.TryAddRelation<Damage>(owner, target));
+        Assert.Throws<InvalidOperationException>(() =>
+            world.TryAddTagRelation<Damage>(owner, target)
+        );
     }
 
     [Fact]
@@ -264,7 +266,7 @@ public sealed class WorldRelationTests
     }
 
     [Fact]
-    public void TryAddRelation_WithRelatedEntity_ReturnsFalse()
+    public void TryAddTagRelation_WithRelatedEntity_ReturnsFalse()
     {
         World world = new();
 
@@ -288,7 +290,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.True(world.HasRelation<Friend>(owner));
     }
@@ -329,7 +331,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.True(world.IsRelatedTo<Friend>(owner, target));
     }
@@ -370,7 +372,7 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetA);
 
         Assert.False(world.IsRelatedTo<Friend>(owner, targetB));
     }
@@ -385,7 +387,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         world.TryGhoulify(owner);
 
@@ -402,7 +404,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.True(world.IsRelatedTo<Friend>(owner, target));
 
@@ -473,7 +475,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.True(world.TryRemoveRelation<Friend>(owner));
     }
@@ -515,8 +517,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.TryRemoveRelation<Friend>(owner);
 
@@ -534,8 +536,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.TryRemoveRelation<Friend>(owner);
 
@@ -553,7 +555,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         world.TryRemoveRelation<Friend>(owner);
 
@@ -570,7 +572,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.True(world.TryRemoveRelation<Friend>(owner, target));
     }
@@ -610,7 +612,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
         world.TryGhoulify(owner);
 
         Assert.False(world.TryRemoveRelation<Friend>(owner, target));
@@ -627,8 +629,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.TryRemoveRelation<Friend>(owner, targetA);
 
@@ -645,7 +647,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
         world.TryRemoveRelation<Friend>(owner, target);
 
         Assert.False(world.IsRelatedTo<Friend>(owner, target));
@@ -663,8 +665,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.TryRemoveRelation<Friend>(owner, targetA);
 
@@ -681,7 +683,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         world.TryRemoveRelation<Friend>(owner, target);
 
@@ -699,8 +701,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.TryRemoveRelation<Friend>(owner, targetA);
 
@@ -720,8 +722,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         ReadOnlySpan<Entity> relations = world.GetRelations<Friend>(owner);
 
@@ -738,7 +740,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
         world.TryGhoulify(owner);
 
         Assert.Throws<InvalidOperationException>(() => world.GetRelations<Friend>(owner));
@@ -860,9 +862,9 @@ public sealed class WorldRelationTests
         Entity targetB = assemblage.Create(new Position());
         Entity targetC = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
-        world.TryAddRelation<Friend>(owner, targetC);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetC);
 
         List<Entity> visited = new();
 
@@ -881,7 +883,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
         world.TryRemoveRelation<Friend>(owner, target);
 
         int callCount = 0;
@@ -900,7 +902,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
         world.TryGhoulify(owner);
 
         Assert.Throws<InvalidOperationException>(() =>
@@ -919,10 +921,10 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetA);
 
         Assert.Throws<InvalidOperationException>(() =>
-            world.QueryRelation<Friend>(owner, _ => world.TryAddRelation<Friend>(owner, targetB))
+            world.QueryRelation<Friend>(owner, _ => world.TryAddTagRelation<Friend>(owner, targetB))
         );
     }
 
@@ -974,7 +976,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         Assert.Throws<InvalidOperationException>(() =>
             world.QueryEvaluatedRelation(owner, (Entity _, ref Friend _) => { })
@@ -993,8 +995,8 @@ public sealed class WorldRelationTests
 
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(ownerA, target);
-        world.TryAddRelation<Friend>(ownerB, target);
+        world.TryAddTagRelation<Friend>(ownerA, target);
+        world.TryAddTagRelation<Friend>(ownerB, target);
 
         ReadOnlySpan<ExternalLink> links = world.GetExternalLinks<Friend>(target);
 
@@ -1038,8 +1040,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.TryGhoulify(owner);
 
@@ -1058,8 +1060,8 @@ public sealed class WorldRelationTests
         Entity ownerB = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(ownerA, target);
-        world.TryAddRelation<Friend>(ownerB, target);
+        world.TryAddTagRelation<Friend>(ownerA, target);
+        world.TryAddTagRelation<Friend>(ownerB, target);
 
         world.TryGhoulify(ownerA);
 
@@ -1078,7 +1080,7 @@ public sealed class WorldRelationTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         world.TryGhoulify(target);
 
@@ -1096,8 +1098,8 @@ public sealed class WorldRelationTests
         Entity ownerB = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(ownerA, target);
-        world.TryAddRelation<Friend>(ownerB, target);
+        world.TryAddTagRelation<Friend>(ownerA, target);
+        world.TryAddTagRelation<Friend>(ownerB, target);
 
         world.TryGhoulify(target);
 
@@ -1116,8 +1118,8 @@ public sealed class WorldRelationTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.TryGhoulify(targetA);
 

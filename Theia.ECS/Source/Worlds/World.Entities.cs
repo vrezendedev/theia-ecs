@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
+using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
@@ -80,7 +81,7 @@ public sealed partial class World
 
         Ghoulify(entity, ref entityMeta, in archetype);
 
-        InvokeOnGhoulified(new EntityGhoulified(entity, in archetype));
+        InvokeOnGhoulified(new EntityGhoulified(this, entity, in archetype));
 
         return true;
     }
@@ -144,6 +145,7 @@ public sealed partial class World
 
             InvokeOnComponentAdded(
                 new EntityModified(
+                    this,
                     entity,
                     ComponentsMeta.GetComponentType(componentId)._type,
                     entityReferences._previousArchetype!,
@@ -204,6 +206,7 @@ public sealed partial class World
 
         InvokeOnComponentRemoved(
             new EntityModified(
+                this,
                 entity,
                 ComponentsMeta.GetComponentType(componentId)._type,
                 currentArchetype,
@@ -259,6 +262,20 @@ public sealed partial class World
         archetype.Set(in entityMeta, component);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Is(Entity entity, Assemblage assemblage)
+    {
+        if (!IsAlive(entity))
+            return false;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity._id];
+
+        Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
+
+        return assemblage == archetype.GetMatchedAssemblage();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Has<TComponent>(Entity entity)
         where TComponent : struct
     {

@@ -239,7 +239,7 @@ public sealed class WorldDeferredRelationsTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         world.DeferredRemoveRelation<Friend>(owner, target);
 
@@ -260,7 +260,7 @@ public sealed class WorldDeferredRelationsTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         world.DeferredRemoveRelation<Friend>(owner, target);
 
@@ -298,7 +298,7 @@ public sealed class WorldDeferredRelationsTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         world.DeferredRemoveRelation<Friend>(owner, target);
 
@@ -320,8 +320,8 @@ public sealed class WorldDeferredRelationsTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         world.DeferredRemoveRelation<Friend>(owner, targetA);
 
@@ -398,7 +398,7 @@ public sealed class WorldDeferredRelationsTests
         Entity targetB = assemblage.Create(new Position());
         Entity targetC = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetA);
 
         world.DeferredRemoveRelation<Friend>(owner, targetA);
         world.DeferredAddRelation<Friend>(owner, targetB);
@@ -439,7 +439,7 @@ public sealed class WorldDeferredRelationsTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         assemblage.EntityEvents.OnCreated += _ =>
             world.DeferredRemoveRelation<Friend>(owner, target);

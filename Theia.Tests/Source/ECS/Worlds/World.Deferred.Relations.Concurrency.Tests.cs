@@ -160,7 +160,7 @@ public sealed class WorldDeferredRelationsConcurrencyTests
             .ToArray();
 
         foreach (Entity t in targets)
-            world.TryAddRelation<Friend>(owner, t);
+            world.TryAddTagRelation<Friend>(owner, t);
 
         await RunConcurrent(
             ThreadCount,
@@ -189,7 +189,7 @@ public sealed class WorldDeferredRelationsConcurrencyTests
             .ToArray();
 
         foreach (Entity o in owners)
-            world.TryAddRelation<Friend>(o, target);
+            world.TryAddTagRelation<Friend>(o, target);
 
         await RunConcurrent(
             ThreadCount,
@@ -221,7 +221,7 @@ public sealed class WorldDeferredRelationsConcurrencyTests
             .ToArray();
 
         foreach (Entity t in removeTargets)
-            world.TryAddRelation<Friend>(owner, t);
+            world.TryAddTagRelation<Friend>(owner, t);
 
         Entity[] addTargets = Enumerable
             .Range(0, half)
@@ -358,7 +358,7 @@ public sealed class WorldDeferredRelationsConcurrencyTests
             .ToArray();
 
         foreach (Entity t in removeTargets)
-            world.TryAddRelation<Friend>(removeOwner, t);
+            world.TryAddTagRelation<Friend>(removeOwner, t);
 
         int creatorsStarted = 0;
 

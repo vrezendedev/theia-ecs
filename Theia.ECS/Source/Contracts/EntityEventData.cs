@@ -4,6 +4,7 @@ using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Entities;
 using Theia.ECS.Enums;
+using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Contracts;
 
@@ -31,11 +32,13 @@ internal interface IEntityTransformed
 
 public readonly ref struct EntityAssembled : IEntitySet
 {
+    public readonly World World;
     public readonly Entity Entity;
     internal readonly Archetype _belongsTo;
 
-    internal EntityAssembled(Entity entity, in Archetype belongsTo)
+    internal EntityAssembled(World world, Entity entity, in Archetype belongsTo)
     {
+        World = world;
         Entity = entity;
         _belongsTo = belongsTo;
     }
@@ -49,6 +52,7 @@ public readonly ref struct EntityAssembled : IEntitySet
 
 public readonly ref struct EntityModified : IComponentSetChanged, IEntitySet, IEntityTransformed
 {
+    public readonly World World;
     public readonly Entity Entity;
     public readonly Type Type;
     internal readonly Archetype _belongedTo;
@@ -56,6 +60,7 @@ public readonly ref struct EntityModified : IComponentSetChanged, IEntitySet, IE
     internal readonly int _componentId;
 
     internal EntityModified(
+        World world,
         Entity entity,
         in Type type,
         in Archetype belongedTo,
@@ -63,6 +68,7 @@ public readonly ref struct EntityModified : IComponentSetChanged, IEntitySet, IE
         int componentId
     )
     {
+        World = world;
         Entity = entity;
         Type = type;
         _belongedTo = belongedTo;
@@ -88,11 +94,13 @@ public readonly ref struct EntityModified : IComponentSetChanged, IEntitySet, IE
 
 public readonly ref struct EntityGhoulified : IEntityTransformed
 {
+    public readonly World World;
     public readonly Entity Entity;
     internal readonly Archetype _belongedTo;
 
-    internal EntityGhoulified(Entity entity, in Archetype belongedTo)
+    internal EntityGhoulified(World world, Entity entity, in Archetype belongedTo)
     {
+        World = world;
         Entity = entity;
         _belongedTo = belongedTo;
     }

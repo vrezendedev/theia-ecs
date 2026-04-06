@@ -11,7 +11,7 @@ namespace Theia.ECS.Assemblages;
 
 public abstract class Assemblage
 {
-    public readonly EntityEvents EntityEvents;
+    public readonly EntitiesEvents EntityEvents;
 
     protected readonly Lock _deferredCreateLock = new();
 
@@ -39,7 +39,7 @@ public abstract class Assemblage
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void InvokeOnEntityCreated(EntityAssembled entityAssembled)
     {
-        _world.EntityEvents.InvokeOnCreated(entityAssembled);
+        _world.EntitiesEvents.InvokeOnCreated(entityAssembled);
         EntityEvents.InvokeOnCreated(entityAssembled);
     }
 

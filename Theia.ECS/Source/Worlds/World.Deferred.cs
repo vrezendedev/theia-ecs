@@ -130,6 +130,7 @@ public sealed partial class World
 
             InvokeOnComponentAdded(
                 new EntityModified(
+                    this,
                     entity,
                     in ComponentsMeta.GetComponentType(componentId)._type,
                     in entityReferences._previousArchetype!,
@@ -300,6 +301,18 @@ public sealed partial class World
                 relationLinked._compositeKey
             );
         }
+
+        RelationType relationType = RelationsMeta.GetRelationType(deferredRelation._relationId);
+
+        RelationsEvents.InvokeOnRelationAdded(
+            new RelationModified(
+                this,
+                owner,
+                target,
+                relationType._type,
+                deferredRelation._relationId
+            )
+        );
     }
 
     public void DeferredRemoveRelation<TRelation>(Entity owner, Entity target)

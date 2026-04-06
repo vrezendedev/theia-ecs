@@ -76,7 +76,8 @@ public sealed partial class World
             DefaultDeferredCommandsCapacity
         );
 
-        EntityEvents = new();
+        EntitiesEvents = new();
+        RelationsEvents = new();
 
         lock (s_lock)
         {

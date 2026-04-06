@@ -5,7 +5,7 @@ using Theia.ECS.Contracts;
 
 namespace Theia.ECS.Events;
 
-public sealed class EntityEvents
+public sealed class EntitiesEvents
 {
     public event Action<EntityAssembled>? OnCreated;
     public event Action<EntityModified>? OnAnyComponentAdded;
@@ -16,12 +16,12 @@ public sealed class EntityEvents
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SubscribeOnComponentAdded<TComponent>(Action<EntityModified> onComponentAdded)
         where TComponent : struct =>
-        GetOrCreateComponentEvents<TComponent>().OnComponentAdded += onComponentAdded;
+        GetOrCreateComponentEvents<TComponent>()._onComponentAdded += onComponentAdded;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SubscribeOnComponentRemoved<TComponent>(Action<EntityModified> onComponentRemoved)
         where TComponent : struct =>
-        GetOrCreateComponentEvents<TComponent>().OnComponentRemoved += onComponentRemoved;
+        GetOrCreateComponentEvents<TComponent>()._onComponentRemoved += onComponentRemoved;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void InvokeOnCreated(EntityAssembled entityAssembled) =>
@@ -80,20 +80,20 @@ public sealed class EntityEvents
 
 internal sealed class ComponentEvents
 {
-    internal event Action<EntityModified>? OnComponentAdded;
-    internal event Action<EntityModified>? OnComponentRemoved;
+    internal event Action<EntityModified>? _onComponentAdded;
+    internal event Action<EntityModified>? _onComponentRemoved;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void InvokeOnComponentAdded(EntityModified entityModified) =>
-        OnComponentAdded?.Invoke(entityModified);
+        _onComponentAdded?.Invoke(entityModified);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void InvokeOnComponentRemoved(EntityModified entityModified) =>
-        OnComponentRemoved?.Invoke(entityModified);
+        _onComponentRemoved?.Invoke(entityModified);
 
-    public void Reset()
+    internal void Reset()
     {
-        OnComponentAdded = null;
-        OnComponentRemoved = null;
+        _onComponentAdded = null;
+        _onComponentRemoved = null;
     }
 }

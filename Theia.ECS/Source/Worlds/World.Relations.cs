@@ -21,7 +21,7 @@ public sealed partial class World
 
     private RelationStorage[] _relationStorages;
 
-    public bool TryAddRelation<TRelation>(Entity owner, Entity target)
+    public bool TryAddTagRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
         int relationId = RelationMeta<TRelation>.s_id;
@@ -34,7 +34,14 @@ public sealed partial class World
         if (!relationAccounted._accounted)
             return false;
 
-        return TryRelate(owner, target, relationAccounted)._linked;
+        RelationLinked relationLinked = TryRelate(owner, target, relationAccounted);
+
+        if (relationLinked._linked)
+            RelationsEvents.InvokeOnRelationAdded(
+                new RelationModified(this, owner, target, relationType._type, relationId)
+            );
+
+        return relationLinked._linked;
     }
 
     public bool TryAddEvaluatedRelation<TRelation>(
@@ -54,7 +61,14 @@ public sealed partial class World
         if (!relationAccounted._accounted)
             return false;
 
-        return TryRelateEvaluated(owner, target, in value, relationAccounted);
+        bool linked = TryRelateEvaluated(owner, target, in value, relationAccounted);
+
+        if (linked)
+            RelationsEvents.InvokeOnRelationAdded(
+                new RelationModified(this, owner, target, relationType._type, relationId)
+            );
+
+        return linked;
     }
 
     public bool TryRemoveRelation<TRelation>(Entity owner)
@@ -403,9 +417,12 @@ public sealed partial class World
             ownerIndexer.RemoveRelationKey(relationId);
         }
 
+        Type type = RelationsMeta.GetRelationType(relationId)._type;
+
         for (int i = 0; i < targets.Length; i++)
         {
-            ref EntityMeta targetMeta = ref _entitiesMeta[targets[i]._id];
+            Entity target = targets[i];
+            ref EntityMeta targetMeta = ref _entitiesMeta[target._id];
             RelationsIndexer targetIndexer = GetOrRentRelationIndexer(ref targetMeta);
             RelationLink targetRelationLink;
 
@@ -424,6 +441,10 @@ public sealed partial class World
                     targetRelationLink.RemoveExternalLink(primaryKey);
                 }
             }
+
+            RelationsEvents.InvokeOnRelationRemoved(
+                new RelationModified(this, owner, target, type, relationId)
+            );
         }
 
         lock (relationStorage._lock)
@@ -511,6 +532,16 @@ public sealed partial class World
                 }
             }
         }
+
+        RelationsEvents.InvokeOnRelationRemoved(
+            new RelationModified(
+                this,
+                owner,
+                target,
+                RelationsMeta.GetRelationType(relationId)._type,
+                relationId
+            )
+        );
 
         return true;
     }

@@ -6,12 +6,13 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
-    public readonly EntityEvents EntityEvents;
+    public readonly EntitiesEvents EntitiesEvents;
+    public readonly RelationsEvents RelationsEvents;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void InvokeOnGhoulified(EntityGhoulified entityGhoulified)
     {
-        EntityEvents.InvokeOnGhoulified(entityGhoulified);
+        EntitiesEvents.InvokeOnGhoulified(entityGhoulified);
         entityGhoulified
             ._belongedTo.GetMatchedAssemblage()
             ?.EntityEvents.InvokeOnGhoulified(entityGhoulified);
@@ -20,7 +21,7 @@ public sealed partial class World
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void InvokeOnComponentAdded(EntityModified entityModified)
     {
-        EntityEvents.InvokeOnComponentAdded(entityModified);
+        EntitiesEvents.InvokeOnComponentAdded(entityModified);
         entityModified
             ._belongedTo.GetMatchedAssemblage()
             ?.EntityEvents.InvokeOnComponentAdded(entityModified);
@@ -29,7 +30,7 @@ public sealed partial class World
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void InvokeOnComponentRemoved(EntityModified entityModified)
     {
-        EntityEvents.InvokeOnComponentRemoved(entityModified);
+        EntitiesEvents.InvokeOnComponentRemoved(entityModified);
         entityModified
             ._belongedTo.GetMatchedAssemblage()
             ?.EntityEvents.InvokeOnComponentRemoved(entityModified);

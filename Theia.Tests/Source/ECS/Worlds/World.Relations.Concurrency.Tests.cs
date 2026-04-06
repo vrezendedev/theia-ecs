@@ -48,7 +48,7 @@ public sealed class WorldRelationConcurrencyTests
 
         Entity target = assemblage.Create(new Position());
 
-        await RunConcurrent(ThreadCount, i => world.TryAddRelation<Friend>(owners[i], target));
+        await RunConcurrent(ThreadCount, i => world.TryAddTagRelation<Friend>(owners[i], target));
 
         Assert.Equal(ThreadCount, world.CountExternalLinks<Friend>(target));
 
@@ -70,7 +70,7 @@ public sealed class WorldRelationConcurrencyTests
 
         Entity target = assemblage.Create(new Position());
 
-        await RunConcurrent(ThreadCount, i => world.TryAddRelation<Friend>(owners[i], target));
+        await RunConcurrent(ThreadCount, i => world.TryAddTagRelation<Friend>(owners[i], target));
 
         foreach (Entity owner in owners)
             Assert.True(world.IsRelatedTo<Friend>(owner, target));
@@ -90,7 +90,7 @@ public sealed class WorldRelationConcurrencyTests
             .Select(_ => assemblage.Create(new Position()))
             .ToArray();
 
-        await RunConcurrent(ThreadCount, i => world.TryAddRelation<Friend>(owner, targets[i]));
+        await RunConcurrent(ThreadCount, i => world.TryAddTagRelation<Friend>(owner, targets[i]));
 
         Assert.Equal(ThreadCount, world.CountRelations<Friend>(owner));
     }
@@ -109,7 +109,7 @@ public sealed class WorldRelationConcurrencyTests
             .Select(_ => assemblage.Create(new Position()))
             .ToArray();
 
-        await RunConcurrent(ThreadCount, i => world.TryAddRelation<Friend>(owner, targets[i]));
+        await RunConcurrent(ThreadCount, i => world.TryAddTagRelation<Friend>(owner, targets[i]));
 
         foreach (Entity target in targets)
             Assert.True(world.IsRelatedTo<Friend>(owner, target));
@@ -150,7 +150,7 @@ public sealed class WorldRelationConcurrencyTests
         Entity owner = assemblage.Create(new Position());
 
         for (int i = 0; i < ThreadCount; i++)
-            world.TryAddRelation<Friend>(owner, assemblage.Create(new Position()));
+            world.TryAddTagRelation<Friend>(owner, assemblage.Create(new Position()));
 
         int[] results = new int[ThreadCount];
 
@@ -169,7 +169,7 @@ public sealed class WorldRelationConcurrencyTests
 
         Entity owner = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, assemblage.Create(new Position()));
+        world.TryAddTagRelation<Friend>(owner, assemblage.Create(new Position()));
 
         bool[] results = new bool[ThreadCount];
 
@@ -188,7 +188,7 @@ public sealed class WorldRelationConcurrencyTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, target);
+        world.TryAddTagRelation<Friend>(owner, target);
 
         bool[] results = new bool[ThreadCount];
 
@@ -210,7 +210,7 @@ public sealed class WorldRelationConcurrencyTests
         Entity target = assemblage.Create(new Position());
 
         for (int i = 0; i < ThreadCount; i++)
-            world.TryAddRelation<Friend>(assemblage.Create(new Position()), target);
+            world.TryAddTagRelation<Friend>(assemblage.Create(new Position()), target);
 
         int[] results = new int[ThreadCount];
 
@@ -235,7 +235,7 @@ public sealed class WorldRelationConcurrencyTests
         Entity owner = assemblage.Create(new Position());
 
         for (int i = 0; i < TargetCount; i++)
-            world.TryAddRelation<Friend>(owner, assemblage.Create(new Position()));
+            world.TryAddTagRelation<Friend>(owner, assemblage.Create(new Position()));
 
         int totalCallbacks = 0;
 
@@ -290,7 +290,7 @@ public sealed class WorldRelationConcurrencyTests
         Entity existingTarget = assemblage.Create(new Position());
         Entity newTarget = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, existingTarget);
+        world.TryAddTagRelation<Friend>(owner, existingTarget);
 
         using ManualResetEventSlim queryEntered = new(false);
         using ManualResetEventSlim queryRelease = new(false);
@@ -313,7 +313,7 @@ public sealed class WorldRelationConcurrencyTests
         Assert.True(entered);
 
         Assert.Throws<InvalidOperationException>(() =>
-            world.TryAddRelation<Friend>(owner, newTarget)
+            world.TryAddTagRelation<Friend>(owner, newTarget)
         );
 
         queryRelease.Set();
@@ -334,8 +334,8 @@ public sealed class WorldRelationConcurrencyTests
         Entity targetA = assemblage.Create(new Position());
         Entity targetB = assemblage.Create(new Position());
 
-        world.TryAddRelation<Friend>(owner, targetA);
-        world.TryAddRelation<Friend>(owner, targetB);
+        world.TryAddTagRelation<Friend>(owner, targetA);
+        world.TryAddTagRelation<Friend>(owner, targetB);
 
         using ManualResetEventSlim queryEntered = new(false);
         using ManualResetEventSlim queryRelease = new(false);
@@ -431,7 +431,7 @@ public sealed class WorldRelationConcurrencyTests
             .ToArray();
 
         foreach (Entity t in removeTargets)
-            world.TryAddRelation<Friend>(owner, t);
+            world.TryAddTagRelation<Friend>(owner, t);
 
         Entity[] addTargets = Enumerable
             .Range(0, half)
@@ -449,7 +449,7 @@ public sealed class WorldRelationConcurrencyTests
                 Task.Run(() =>
                 {
                     barrier.SignalAndWait();
-                    addResults[i] = world.TryAddRelation<Friend>(owner, addTargets[i]);
+                    addResults[i] = world.TryAddTagRelation<Friend>(owner, addTargets[i]);
                 })
             )
             .Concat(
@@ -593,7 +593,7 @@ public sealed class WorldRelationConcurrencyTests
                 Task.Run(() =>
                 {
                     barrier.SignalAndWait();
-                    world.TryAddRelation<Friend>(owner, addTargets[i]);
+                    world.TryAddTagRelation<Friend>(owner, addTargets[i]);
                 })
             )
             .Concat(
@@ -641,7 +641,7 @@ public sealed class WorldRelationConcurrencyTests
 
         await RunConcurrent(
             ThreadCount,
-            i => results[i] = world.TryAddRelation<Friend>(owners[i], targets[i])
+            i => results[i] = world.TryAddTagRelation<Friend>(owners[i], targets[i])
         );
 
         Assert.All(results, r => Assert.True(r));
@@ -670,7 +670,7 @@ public sealed class WorldRelationConcurrencyTests
             .ToArray();
 
         foreach (Entity o in removeOwners)
-            world.TryAddRelation<Friend>(o, target);
+            world.TryAddTagRelation<Friend>(o, target);
 
         Entity[] addOwners = Enumerable
             .Range(0, half)
@@ -688,7 +688,7 @@ public sealed class WorldRelationConcurrencyTests
                 Task.Run(() =>
                 {
                     barrier.SignalAndWait();
-                    addResults[i] = world.TryAddRelation<Friend>(addOwners[i], target);
+                    addResults[i] = world.TryAddTagRelation<Friend>(addOwners[i], target);
                 })
             )
             .Concat(
@@ -738,7 +738,7 @@ public sealed class WorldRelationConcurrencyTests
             .ToArray();
 
         foreach (Entity t in removeTargets)
-            world.TryAddRelation<Friend>(owner, t);
+            world.TryAddTagRelation<Friend>(owner, t);
 
         Entity[] addTargets = Enumerable
             .Range(0, half)
@@ -756,7 +756,7 @@ public sealed class WorldRelationConcurrencyTests
                 Task.Run(() =>
                 {
                     barrier.SignalAndWait();
-                    addResults[i] = world.TryAddRelation<Friend>(owner, addTargets[i]);
+                    addResults[i] = world.TryAddTagRelation<Friend>(owner, addTargets[i]);
                 })
             )
             .Concat(
