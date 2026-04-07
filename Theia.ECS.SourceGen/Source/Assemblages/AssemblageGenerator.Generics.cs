@@ -35,25 +35,26 @@ namespace Theia.ECS.Assemblages;
             string constraints = Generator.Constraints(
                 i,
                 Constants.GenericComponentPrefix,
-                "struct"
+                "struct",
+                "    "
             );
             string arguments = Generator.Arguments(
                 i,
                 "in",
                 Constants.GenericComponentPrefix,
-                Constants.GenericComponentParamPrefix
+                Constants.GenericComponentLocalPrefix
             );
-            string parameters = Generator.Params(i, "in", Constants.GenericComponentParamPrefix);
-            string mapping = Mapping(i, "in", Constants.GenericComponentParamPrefix);
+            string parameters = Generator.Params(i, "in", Constants.GenericComponentLocalPrefix);
+            string mapping = Mapping(i, "in", Constants.GenericComponentLocalPrefix);
             string entityCreateDeferredInit = EntityCreateDeferredInit(
                 i,
-                Constants.GenericComponentParamPrefix,
-                Constants.GenericComponentParamPrefix
+                Constants.GenericComponentLocalPrefix,
+                Constants.GenericComponentLocalPrefix
             );
             string deferredInParams = Generator.Params(
                 i,
                 string.Empty,
-                $"deferredCreate._{Constants.GenericComponentParamPrefix}"
+                $"deferredCreate._{Constants.GenericComponentLocalPrefix}"
             );
 
             sb.AppendLine(

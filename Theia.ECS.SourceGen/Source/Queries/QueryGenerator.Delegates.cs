@@ -30,12 +30,13 @@ namespace Theia.ECS.Queries;
                 i,
                 "ref",
                 Constants.GenericComponentPrefix,
-                Constants.GenericComponentParamPrefix
+                Constants.GenericComponentLocalPrefix
             );
             string constraints = Generator.Constraints(
                 i,
                 Constants.GenericComponentPrefix,
-                "struct"
+                "struct",
+                "    "
             );
 
             sb.AppendLine(ForEachEntityDelegateTemplate(generics, arguments, constraints));

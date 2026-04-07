@@ -25,13 +25,13 @@ public sealed partial class World
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
 
-        int componentId = ComponentMeta<ComponentT1>.s_id;
+        int componentT1Id = ComponentMeta<ComponentT1>.s_id;
 
-        Archetype archetype = FindOrCreateArchetype(stackalloc int[1] { componentId });
+        Archetype archetype = FindOrCreateArchetype(stackalloc int[1] { componentT1Id });
 
         Span<int> componentStorageMapping = stackalloc int[1];
 
-        componentStorageMapping[0] = archetype.GetStorageIndex(componentId);
+        componentStorageMapping[0] = archetype.GetStorageIndex(componentT1Id);
 
         Assemblage<ComponentT1> assemblage = new Assemblage<ComponentT1>(
             this,

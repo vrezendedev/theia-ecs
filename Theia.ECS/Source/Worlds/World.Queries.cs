@@ -62,7 +62,9 @@ public sealed partial class World
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
 
-        ReadOnlySpan<int> componentIds = stackalloc int[1] { ComponentMeta<ComponentT1>.s_id };
+        int componentT1Id = ComponentMeta<ComponentT1>.s_id;
+
+        ReadOnlySpan<int> componentIds = stackalloc int[1] { componentT1Id };
 
         NomadQuery<ComponentT1> nomadQuery = new NomadQuery<ComponentT1>(this, componentIds);
 

@@ -30,12 +30,13 @@ namespace Theia.ECS.Contracts;
             string fields = Fields(
                 i,
                 Constants.GenericComponentPrefix,
-                Constants.GenericComponentParamPrefix
+                Constants.GenericComponentLocalPrefix
             );
             string constraints = Generator.Constraints(
                 i,
                 Constants.GenericComponentPrefix,
-                "struct"
+                "struct",
+                "    "
             );
 
             sb.AppendLine(EntityCreateDeferredTemplate(generics, fields, constraints));
