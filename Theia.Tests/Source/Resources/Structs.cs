@@ -198,5 +198,65 @@ internal struct Damage
     public float Value;
 }
 
+public struct Mass
+{
+    public float Value;
+}
+
+public struct Age
+{
+    public int Value;
+}
+
+public struct Tag
+{
+    public int Value;
+}
+
+public struct Color
+{
+    public byte R;
+    public byte G;
+    public byte B;
+}
+
+public struct Force
+{
+    public float X;
+    public float Y;
+}
+
+public struct Momentum
+{
+    public float X;
+    public float Y;
+}
+
+public struct Gravity
+{
+    public float Value;
+}
+
+public struct Friction
+{
+    public float Value;
+}
+
+public struct Torque
+{
+    public float Value;
+}
+
+public struct Impulse
+{
+    public float X;
+    public float Y;
+}
+
+public struct Damping
+{
+    public float Value;
+}
+
 
 #pragma warning restore CS0649
