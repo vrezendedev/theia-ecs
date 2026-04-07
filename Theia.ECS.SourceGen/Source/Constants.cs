@@ -7,6 +7,7 @@ internal static class Constants
     internal const string ComponentIdVariableSuffix = "Id";
     internal const string QueryStoragesVariablePrefix = "storagesT";
     internal const string QueryStorageVariablePrefix = "storageT";
+    internal const string QueryStorageIndexVariableSufix = "Index";
     internal const int ComponentSetOverloadInitialIndex = 2;
     internal const int ComponentSetOverloadMaxRange = 16;
 }

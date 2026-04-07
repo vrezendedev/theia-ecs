@@ -15,13 +15,16 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
 
     public void ForEachEntity(ForEachEntity<ComponentT1> forEachEntity)
     {
-        _world.IncrementQueriesBeingExecuted();
-
         Archetype archetype = _archetype;
 
-        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
-
         Span<Indexer> indexers = archetype.GetIndexers();
+
+        if (indexers.Length == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
 
         Span<Storage> storagesT1 = archetype.GetStorages(mapping[0]);
 
@@ -47,13 +50,16 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
 
     public void ForEach(ForEach<ComponentT1> forEach)
     {
-        _world.IncrementQueriesBeingExecuted();
-
         Archetype archetype = _archetype;
 
-        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
-
         Span<Indexer> indexers = archetype.GetIndexers();
+
+        if (indexers.Length == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
 
         Span<Storage> storagesT1 = archetype.GetStorages(mapping[0]);
 
@@ -99,8 +105,11 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
         {
             Span<Indexer> indexers = archetype.GetIndexers();
 
-            int storageT1Index = archetype.GetStorageIndex(componentT1Id);
-            Span<Storage> storagesT1 = archetype.GetStorages(storageT1Index);
+            if (indexers.Length == 0)
+                continue;
+
+            int storagesT1Index = archetype.GetStorageIndex(componentT1Id);
+            Span<Storage> storagesT1 = archetype.GetStorages(storagesT1Index);
 
             for (int i = 0; i < indexers.Length; i++)
             {
@@ -142,8 +151,11 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
         {
             Span<Indexer> indexers = archetype.GetIndexers();
 
-            int storageT1Index = archetype.GetStorageIndex(componentT1Id);
-            Span<Storage> storagesT1 = archetype.GetStorages(storageT1Index);
+            if (indexers.Length == 0)
+                continue;
+
+            int storagesT1Index = archetype.GetStorageIndex(componentT1Id);
+            Span<Storage> storagesT1 = archetype.GetStorages(storagesT1Index);
 
             for (int i = 0; i < indexers.Length; i++)
             {

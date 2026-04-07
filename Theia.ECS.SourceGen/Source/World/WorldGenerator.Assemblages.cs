@@ -65,8 +65,7 @@ public sealed partial class World
         }
 
         sb.Append(
-            @"
-}
+            @"}
         "
         );
 

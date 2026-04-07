@@ -38,16 +38,6 @@ namespace Theia.ECS.Queries;
                 "struct",
                 "    "
             );
-            string variablesStorages = SettlerQueryStorages(
-                i,
-                Constants.QueryStoragesVariablePrefix
-            );
-            string variablesStorage = QueriesStorageAccess(
-                i,
-                Constants.GenericComponentPrefix,
-                Constants.QueryStorageVariablePrefix,
-                Constants.QueryStoragesVariablePrefix
-            );
             string componentsParams = QueriesComponentParams(
                 i,
                 "ref",
@@ -58,13 +48,43 @@ namespace Theia.ECS.Queries;
                 SettlerQueryTemplate(
                     generics,
                     constraints,
-                    variablesStorages,
-                    variablesStorage,
+                    SettlerQueryStorages(i, Constants.QueryStoragesVariablePrefix),
+                    QueriesStorageAccess(
+                        i,
+                        Constants.GenericComponentPrefix,
+                        Constants.QueryStorageVariablePrefix,
+                        Constants.QueryStoragesVariablePrefix,
+                        "            "
+                    ),
                     componentsParams
                 )
             );
 
-            //@TO-DO Nomad Query
+            sb.AppendLine(
+                NomadQueryTemplate(
+                    generics,
+                    constraints,
+                    Generator.VariablesDefinitionComponentsIds(
+                        i,
+                        Constants.GenericComponentLocalPrefix,
+                        Constants.GenericComponentPrefix
+                    ),
+                    NomadQueryStorages(
+                        i,
+                        Constants.QueryStoragesVariablePrefix,
+                        Constants.QueryStorageIndexVariableSufix,
+                        Constants.GenericComponentLocalPrefix
+                    ),
+                    QueriesStorageAccess(
+                        i,
+                        Constants.GenericComponentPrefix,
+                        Constants.QueryStorageVariablePrefix,
+                        Constants.QueryStoragesVariablePrefix,
+                        "                "
+                    ),
+                    componentsParams
+                )
+            );
         }
 
         context.RegisterPostInitializationOutput(ctx =>
@@ -82,18 +102,37 @@ namespace Theia.ECS.Queries;
                 )
         );
 
-    private static string QueriesStorageAccess(
+    private static string NomadQueryStorages(
         int count,
-        string genericPrefix,
-        string storagePrefix,
-        string storagesPrefix
+        string storagesPrefix,
+        string storageIndexSufix,
+        string componentIdVariablePrefix
     ) =>
         string.Join(
             "\n",
             Enumerable
                 .Range(1, count)
                 .Select(i =>
-                    $"            Span<{genericPrefix}{i}> {storagePrefix}{i} = ((Storage<{genericPrefix}{i}>){storagesPrefix}{i}[i]).GetValues(count);"
+                    $$"""
+            int {{storagesPrefix}}{{i}}{{storageIndexSufix}} = archetype.GetStorageIndex({{componentIdVariablePrefix}}{{i}}{{Constants.ComponentIdVariableSuffix}});
+            Span<Storage> {{storagesPrefix}}{{i}} = archetype.GetStorages({{storagesPrefix}}{{i}}{{storageIndexSufix}});
+"""
+                )
+        );
+
+    private static string QueriesStorageAccess(
+        int count,
+        string genericPrefix,
+        string storagePrefix,
+        string storagesPrefix,
+        string tabs
+    ) =>
+        string.Join(
+            "\n",
+            Enumerable
+                .Range(1, count)
+                .Select(i =>
+                    $"{tabs}Span<{genericPrefix}{i}> {storagePrefix}{i} = ((Storage<{genericPrefix}{i}>){storagesPrefix}{i}[i]).GetValues(count);"
                 )
         );
 
@@ -124,13 +163,16 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 
     public void ForEachEntity(ForEachEntity{{generics}} forEachEntity)
     {
-        _world.IncrementQueriesBeingExecuted();
-
         Archetype archetype = _archetype;
 
-        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
-
         Span<Indexer> indexers = archetype.GetIndexers();
+
+        if (indexers.Length == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
 
 {{storagesVariables}}
 
@@ -156,13 +198,16 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 
     public void ForEach(ForEach{{generics}} forEach)
     {
-        _world.IncrementQueriesBeingExecuted();
-
         Archetype archetype = _archetype;
 
-        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
-
         Span<Indexer> indexers = archetype.GetIndexers();
+
+        if (indexers.Length == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
 
 {{storagesVariables}}
 
@@ -183,7 +228,109 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 
         _world.DecrementQueriesBeingExecuted();
     }
-
 }
+
+""";
+
+    private static string NomadQueryTemplate(
+        string generics,
+        string constraints,
+        string componentIds,
+        string storages,
+        string storage,
+        string componentsParams
+    ) =>
+        $$"""
+public sealed class NomadQuery{{generics}} : NomadQuery
+{{constraints}}
+{
+    internal NomadQuery(in World world, ReadOnlySpan<int> componentIds)
+        : base(world, componentIds) { }
+
+    public void ForEachEntity(ForEachEntity{{generics}} forEachEntity)
+    {
+        int matchedArchetypeCount = _matchedArchetypesCount;
+
+        if (matchedArchetypeCount == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<Archetype> matchedArchetypesIds = GetMatchedArchetypes();
+
+{{componentIds}}
+
+        foreach (Archetype archetype in matchedArchetypesIds)
+        {
+            Span<Indexer> indexers = archetype.GetIndexers();
+
+            if (indexers.Length == 0)
+                continue;
+
+{{storages}}
+
+            for (int i = 0; i < indexers.Length; i++)
+            {
+                Indexer indexer = indexers[i];
+
+                int count = indexer.Count();
+
+                if (count == 0)
+                    continue;
+
+                Span<Entity> entities = indexer.GetValues();
+
+{{storage}}
+
+                for (int j = 0; j < count; j++)
+                    forEachEntity(entities[j], {{componentsParams}});
+            }
+        }
+
+        _world.DecrementQueriesBeingExecuted();
+    }
+
+    public void ForEach(ForEach{{generics}} forEach)
+    {
+        int matchedArchetypeCount = _matchedArchetypesCount;
+
+        if (matchedArchetypeCount == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<Archetype> matchedArchetypesIds = GetMatchedArchetypes();
+
+{{componentIds}}
+
+        foreach (Archetype archetype in matchedArchetypesIds)
+        {
+            Span<Indexer> indexers = archetype.GetIndexers();
+
+            if (indexers.Length == 0)
+                continue;
+
+{{storages}}
+
+            for (int i = 0; i < indexers.Length; i++)
+            {
+                Indexer indexer = indexers[i];
+
+                int count = indexer.Count();
+
+                if (count == 0)
+                    continue;
+
+{{storage}}
+
+                for (int j = 0; j < count; j++)
+                    forEach({{componentsParams}});
+            }
+        }
+
+        _world.DecrementQueriesBeingExecuted();
+    }
+}
+
 """;
 }

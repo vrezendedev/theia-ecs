@@ -45,6 +45,9 @@ internal static class ComponentMeta<TComponent>
         if (!BlittableMeta.IsStrictlyBlittable(typeof(TComponent)))
             BlittableMeta.ThrowBlittableException<TComponent>();
 
+        if (typeof(TComponent).IsPrimitive || typeof(TComponent).IsEnum)
+            ThrowComponentNotAStructException();
+
         int fieldsCounted = typeof(TComponent).GetFields(BlittableMeta.Flags).Length;
 
         if (fieldsCounted == 0)
@@ -59,5 +62,11 @@ internal static class ComponentMeta<TComponent>
     private static void ThrowEmptyStructException() =>
         throw new InvalidOperationException(
             $"Component '{typeof(TComponent).Name}' cannot be an empty struct. Components must contain at least one field."
+        );
+
+    [DoesNotReturn]
+    private static void ThrowComponentNotAStructException() =>
+        throw new InvalidOperationException(
+            $"Component '{typeof(TComponent).Name}' must be a struct."
         );
 }

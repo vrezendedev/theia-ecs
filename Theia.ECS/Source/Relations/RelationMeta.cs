@@ -52,6 +52,9 @@ internal static class RelationMeta<TRelation>
         if (!BlittableMeta.IsStrictlyBlittable(typeof(TRelation)))
             BlittableMeta.ThrowBlittableException<TRelation>();
 
+        if (typeof(TRelation).IsPrimitive || typeof(TRelation).IsEnum)
+            ThrowRelationNotAStructException();
+
         if (!RelationsMeta.HasRelationshipAttribute<TRelation>())
             ThrowRelationshipAttributeNotAdded();
 
@@ -62,5 +65,11 @@ internal static class RelationMeta<TRelation>
     private static void ThrowRelationshipAttributeNotAdded() =>
         throw new InvalidOperationException(
             $"Relation '{typeof(TRelation).Name}' must add Relationship attribute."
+        );
+
+    [DoesNotReturn]
+    private static void ThrowRelationNotAStructException() =>
+        throw new InvalidOperationException(
+            $"Relation '{typeof(TRelation).Name}' must be a struct."
         );
 }
