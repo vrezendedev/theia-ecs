@@ -6,9 +6,16 @@ namespace Theia.Benchmarks.Source.Frameworks.Fennecs;
 
 public class FennecsWorldConstructor : WorldConstructor
 {
+    private World? _world;
+
+    public override void CleanUp()
+    {
+        _world = null;
+    }
+
     [Benchmark]
     public override void Run()
     {
-        World world = new World(InitialSize);
+        _world = new World(InitialSize);
     }
 }

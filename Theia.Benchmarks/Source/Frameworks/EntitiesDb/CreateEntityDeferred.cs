@@ -5,78 +5,93 @@ using Theia.Benchmarks.Source.Resources;
 
 namespace Theia.Benchmarks.Source.Frameworks.EntitiesDb;
 
-public class EntitiesDbCreateEntityT1 : CreateEntityT1
+public class EntitiesDbCreateEntityDeferredT1 : CreateEntityDeferredT1
 {
     private EntityDatabase? _entityDatabase;
+    private CommandBuffer? _commandBuffer;
 
     public override void Setup()
     {
         _entityDatabase = new EntityDatabase(new(16384, int.MaxValue));
+        _commandBuffer = _entityDatabase.CreateCommandBuffer(EntityCount);
     }
 
     public override void CleanUp()
     {
         _entityDatabase = null;
+        _commandBuffer = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _entityDatabase!.Create(new Component1 { Value = i });
+            _commandBuffer!.Create(new Component1 { Value = i });
+
+        _commandBuffer!.Commit();
     }
 }
 
-public class EntitiesDbCreateEntityT3 : CreateEntityT3
+public class EntitiesDbCreateEntityDeferredT3 : CreateEntityDeferredT3
 {
     private EntityDatabase? _entityDatabase;
+    private CommandBuffer? _commandBuffer;
 
     public override void Setup()
     {
         _entityDatabase = new EntityDatabase(new(16384, int.MaxValue));
+        _commandBuffer = _entityDatabase.CreateCommandBuffer(EntityCount);
     }
 
     public override void CleanUp()
     {
         _entityDatabase = null;
+        _commandBuffer = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _entityDatabase!.Create(
+            _commandBuffer!.Create(
                 new Component1 { Value = i },
                 new Component2 { Value = i },
                 new Component3 { Value = i }
             );
+
+        _commandBuffer!.Commit();
     }
 }
 
-public class EntitiesDbCreateEntityT5 : CreateEntityT5
+public class EntitiesDbCreateEntityDeferredT5 : CreateEntityDeferredT5
 {
     private EntityDatabase? _entityDatabase;
+    private CommandBuffer? _commandBuffer;
 
     public override void Setup()
     {
         _entityDatabase = new EntityDatabase(new(16384, int.MaxValue));
+        _commandBuffer = _entityDatabase.CreateCommandBuffer(EntityCount);
     }
 
     public override void CleanUp()
     {
         _entityDatabase = null;
+        _commandBuffer = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _entityDatabase!.Create(
+            _commandBuffer!.Create(
                 new Component1 { Value = i },
                 new Component2 { Value = i },
                 new Component3 { Value = i },
                 new Component4 { Value = i },
                 new Component5 { Value = i }
             );
+
+        _commandBuffer!.Commit();
     }
 }

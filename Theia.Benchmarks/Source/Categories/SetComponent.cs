@@ -2,7 +2,8 @@ using BenchmarkDotNet.Attributes;
 
 namespace Theia.Benchmarks.Source.Categories;
 
-public abstract class DestroyEntity
+[BenchmarkCategory(nameof(SetComponentOnT1))]
+public abstract class SetComponentOnT1
 {
     [Params(16, 256, 512, 1_024, 4_096, 8_192, 16_384, 32_768)]
     public int EntityCount { get; set; }
@@ -15,12 +16,3 @@ public abstract class DestroyEntity
 
     public abstract void Run();
 }
-
-[BenchmarkCategory(nameof(DestroyEntityT1))]
-public abstract class DestroyEntityT1 : DestroyEntity;
-
-[BenchmarkCategory(nameof(DestroyEntityT3))]
-public abstract class DestroyEntityT3 : DestroyEntity;
-
-[BenchmarkCategory(nameof(DestroyEntityT5))]
-public abstract class DestroyEntityT5 : DestroyEntity;

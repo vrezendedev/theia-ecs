@@ -36,31 +36,3 @@ public class ArchGetComponentOnT1 : GetComponentOnT1
         }
     }
 }
-
-public class ArchSetComponentOnT1 : SetComponentOnT1
-{
-    private World? _world;
-    private List<Entity>? _entities;
-
-    public override void Setup()
-    {
-        _entities = new();
-        _world = World.Create();
-
-        for (int i = 0; i < EntityCount; i++)
-            _entities.Add(_world.Create(new Component1 { Value = i }));
-    }
-
-    public override void CleanUp()
-    {
-        _entities = null;
-        _world = null;
-    }
-
-    [Benchmark]
-    public override void Run()
-    {
-        for (int i = 0; i < EntityCount; i++)
-            _world!.Set(_entities![i], new Component1() { Value = i });
-    }
-}

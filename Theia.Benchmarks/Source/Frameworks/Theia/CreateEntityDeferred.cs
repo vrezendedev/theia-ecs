@@ -1,32 +1,24 @@
-using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using Theia.Benchmarks.Source.Categories;
 using Theia.Benchmarks.Source.Resources;
 using Theia.ECS.Assemblages;
-using Theia.ECS.Entities;
 using Theia.ECS.Worlds;
 
 namespace Theia.Benchmarks.Source.Frameworks.Theia;
 
-public class TheiaDestroyEntityT1 : DestroyEntityT1
+public class TheiaCreateEntityDeferredT1 : CreateEntityDeferredT1
 {
     private World? _world;
     private Assemblage<Component1>? _assemblage;
-    private List<Entity>? _entities;
 
     public override void Setup()
     {
-        _entities = new();
         _world = new World();
         _assemblage = _world.CreateAssemblage<Component1>();
-
-        for (int i = 0; i < EntityCount; i++)
-            _entities.Add(_assemblage.Create(new Component1 { Value = i }));
     }
 
     public override void CleanUp()
     {
-        _entities = null;
         _world = null;
         _assemblage = null;
     }
@@ -35,35 +27,25 @@ public class TheiaDestroyEntityT1 : DestroyEntityT1
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _assemblage!.DeferredCreate(new Component1 { Value = i });
+
+        _world!.FlushDeferred();
     }
 }
 
-public class TheiaDestroyEntityT3 : DestroyEntityT3
+public class TheiaCreateEntityDeferredT3 : CreateEntityDeferredT3
 {
     private World? _world;
     private Assemblage<Component1, Component2, Component3>? _assemblage;
-    private List<Entity>? _entities;
 
     public override void Setup()
     {
-        _entities = new();
         _world = new World();
         _assemblage = _world.CreateAssemblage<Component1, Component2, Component3>();
-
-        for (int i = 0; i < EntityCount; i++)
-            _entities.Add(
-                _assemblage.Create(
-                    new Component1 { Value = i },
-                    new Component2 { Value = i },
-                    new Component3 { Value = i }
-                )
-            );
     }
 
     public override void CleanUp()
     {
-        _entities = null;
         _world = null;
         _assemblage = null;
     }
@@ -72,19 +54,23 @@ public class TheiaDestroyEntityT3 : DestroyEntityT3
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _assemblage!.DeferredCreate(
+                new Component1 { Value = i },
+                new Component2 { Value = i },
+                new Component3 { Value = i }
+            );
+
+        _world!.FlushDeferred();
     }
 }
 
-public class TheiaDestroyEntityT5 : DestroyEntityT5
+public class TheiaCreateEntityDeferredT5 : CreateEntityDeferredT5
 {
     private World? _world;
     private Assemblage<Component1, Component2, Component3, Component4, Component5>? _assemblage;
-    private List<Entity>? _entities;
 
     public override void Setup()
     {
-        _entities = new();
         _world = new World();
         _assemblage = _world.CreateAssemblage<
             Component1,
@@ -93,22 +79,10 @@ public class TheiaDestroyEntityT5 : DestroyEntityT5
             Component4,
             Component5
         >();
-
-        for (int i = 0; i < EntityCount; i++)
-            _entities.Add(
-                _assemblage.Create(
-                    new Component1 { Value = i },
-                    new Component2 { Value = i },
-                    new Component3 { Value = i },
-                    new Component4 { Value = i },
-                    new Component5 { Value = i }
-                )
-            );
     }
 
     public override void CleanUp()
     {
-        _entities = null;
         _world = null;
         _assemblage = null;
     }
@@ -117,6 +91,14 @@ public class TheiaDestroyEntityT5 : DestroyEntityT5
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _assemblage!.DeferredCreate(
+                new Component1 { Value = i },
+                new Component2 { Value = i },
+                new Component3 { Value = i },
+                new Component4 { Value = i },
+                new Component5 { Value = i }
+            );
+
+        _world!.FlushDeferred();
     }
 }

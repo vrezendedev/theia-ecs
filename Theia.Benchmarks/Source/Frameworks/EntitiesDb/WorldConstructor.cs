@@ -7,10 +7,17 @@ namespace Theia.Benchmarks.Source.Frameworks.EntitiesDb;
 
 public class EntitiesDbWorldConstructor : WorldConstructor
 {
+    private EntityDatabase? _db;
+
+    public override void CleanUp()
+    {
+        _db = null;
+    }
+
     [Benchmark]
     [Warning("Initial Size not Applied")]
     public override void Run()
     {
-        EntityDatabase db = new EntityDatabase(new());
+        _db = new EntityDatabase(new(16384, int.MaxValue));
     }
 }

@@ -4,7 +4,7 @@ namespace Theia.Benchmarks.Source.Categories;
 
 public abstract class CreateEntity
 {
-    [Params(16, 512, 1_024, 4_096, 8_192, 16_384, 32_768, 65_536, 131_072)]
+    [Params(16, 256, 512, 1_024, 4_096, 8_192, 16_384, 32_768)]
     public int EntityCount { get; set; }
 
     [IterationSetup]

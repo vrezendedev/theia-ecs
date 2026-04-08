@@ -21,7 +21,7 @@ public class TheiaAddComponentOnT1 : AddComponentOnT1
         _assemblage = _world.CreateAssemblage<Component1>();
 
         for (int i = 0; i < EntityCount; i++)
-            _entities.Add(_assemblage!.Create(new Component1 { Value = i }));
+            _entities.Add(_assemblage.Create(new Component1 { Value = i }));
     }
 
     public override void CleanUp()
@@ -53,7 +53,7 @@ public class TheiaAddComponentOnT3 : AddComponentOnT3
 
         for (int i = 0; i < EntityCount; i++)
             _entities.Add(
-                _assemblage!.Create(
+                _assemblage.Create(
                     new Component1 { Value = i },
                     new Component2 { Value = i },
                     new Component3 { Value = i }
@@ -96,7 +96,7 @@ public class TheiaAddComponentOnT5 : AddComponentOnT5
 
         for (int i = 0; i < EntityCount; i++)
             _entities.Add(
-                _assemblage!.Create(
+                _assemblage.Create(
                     new Component1 { Value = i },
                     new Component2 { Value = i },
                     new Component3 { Value = i },

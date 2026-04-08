@@ -16,7 +16,7 @@ public class FrentCreateEntityT1 : CreateEntityT1
 
     public override void CleanUp()
     {
-        _world = null!;
+        _world = null;
     }
 
     [Benchmark]
@@ -38,7 +38,7 @@ public class FrentCreateEntityT3 : CreateEntityT3
 
     public override void CleanUp()
     {
-        _world = null!;
+        _world = null;
     }
 
     [Benchmark]
@@ -64,7 +64,7 @@ public class FrentCreateEntityT5 : CreateEntityT5
 
     public override void CleanUp()
     {
-        _world = null!;
+        _world = null;
     }
 
     [Benchmark]

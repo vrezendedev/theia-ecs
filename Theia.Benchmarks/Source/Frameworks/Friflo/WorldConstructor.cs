@@ -6,6 +6,13 @@ namespace Theia.Benchmarks.Source.Frameworks.Friflo;
 
 public class FrifloWorldConstructor : WorldConstructor
 {
+    private EntityStore? _entityStore;
+
+    public override void CleanUp()
+    {
+        _entityStore = null;
+    }
+
     [Benchmark]
     public override void Run()
     {

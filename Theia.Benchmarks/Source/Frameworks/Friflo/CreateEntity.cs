@@ -16,14 +16,14 @@ public class FrifloCreateEntityT1 : CreateEntityT1
 
     public override void CleanUp()
     {
-        _entityStore = null!;
+        _entityStore = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _entityStore!.CreateEntity(new FComponent1 { Value = i });
+            _entityStore.CreateEntity(new FComponent1 { Value = i });
     }
 }
 
@@ -38,14 +38,14 @@ public class FrifloCreateEntityT3 : CreateEntityT3
 
     public override void CleanUp()
     {
-        _entityStore = null!;
+        _entityStore = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _entityStore!.CreateEntity(
+            _entityStore.CreateEntity(
                 new FComponent1 { Value = i },
                 new FComponent2 { Value = i },
                 new FComponent3 { Value = i }
@@ -64,14 +64,14 @@ public class FrifloCreateEntityT5 : CreateEntityT5
 
     public override void CleanUp()
     {
-        _entityStore = null!;
+        _entityStore = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _entityStore!.CreateEntity(
+            _entityStore.CreateEntity(
                 new FComponent1 { Value = i },
                 new FComponent2 { Value = i },
                 new FComponent3 { Value = i },

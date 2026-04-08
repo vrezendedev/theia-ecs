@@ -1,59 +1,60 @@
 using System.Collections.Generic;
+using Arch.Buffer;
+using Arch.Core;
 using BenchmarkDotNet.Attributes;
 using Theia.Benchmarks.Source.Categories;
 using Theia.Benchmarks.Source.Resources;
-using Theia.ECS.Assemblages;
-using Theia.ECS.Entities;
-using Theia.ECS.Worlds;
 
-namespace Theia.Benchmarks.Source.Frameworks.Theia;
+namespace Theia.Benchmarks.Source.Frameworks.Arch;
 
-public class TheiaDestroyEntityT1 : DestroyEntityT1
+public class ArchDestroyEntityDeferredT1 : DestroyEntityDeferredT1
 {
     private World? _world;
-    private Assemblage<Component1>? _assemblage;
     private List<Entity>? _entities;
+    private CommandBuffer? _commandBuffer;
 
     public override void Setup()
     {
         _entities = new();
-        _world = new World();
-        _assemblage = _world.CreateAssemblage<Component1>();
+        _world = World.Create();
+        _commandBuffer = new CommandBuffer();
 
         for (int i = 0; i < EntityCount; i++)
-            _entities.Add(_assemblage.Create(new Component1 { Value = i }));
+            _entities.Add(_world.Create(new Component1 { Value = i }));
     }
 
     public override void CleanUp()
     {
         _entities = null;
         _world = null;
-        _assemblage = null;
+        _commandBuffer = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _commandBuffer!.Destroy(_entities![i]);
+
+        _commandBuffer!.Playback(_world!);
     }
 }
 
-public class TheiaDestroyEntityT3 : DestroyEntityT3
+public class ArchDestroyEntityDeferredT3 : DestroyEntityDeferredT3
 {
     private World? _world;
-    private Assemblage<Component1, Component2, Component3>? _assemblage;
     private List<Entity>? _entities;
+    private CommandBuffer? _commandBuffer;
 
     public override void Setup()
     {
         _entities = new();
-        _world = new World();
-        _assemblage = _world.CreateAssemblage<Component1, Component2, Component3>();
+        _world = World.Create();
+        _commandBuffer = new CommandBuffer();
 
         for (int i = 0; i < EntityCount; i++)
             _entities.Add(
-                _assemblage.Create(
+                _world.Create(
                     new Component1 { Value = i },
                     new Component2 { Value = i },
                     new Component3 { Value = i }
@@ -65,38 +66,34 @@ public class TheiaDestroyEntityT3 : DestroyEntityT3
     {
         _entities = null;
         _world = null;
-        _assemblage = null;
+        _commandBuffer = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _commandBuffer!.Destroy(_entities![i]);
+
+        _commandBuffer!.Playback(_world!);
     }
 }
 
-public class TheiaDestroyEntityT5 : DestroyEntityT5
+public class ArchDestroyEntityDeferredT5 : DestroyEntityDeferredT5
 {
     private World? _world;
-    private Assemblage<Component1, Component2, Component3, Component4, Component5>? _assemblage;
     private List<Entity>? _entities;
+    private CommandBuffer? _commandBuffer;
 
     public override void Setup()
     {
         _entities = new();
-        _world = new World();
-        _assemblage = _world.CreateAssemblage<
-            Component1,
-            Component2,
-            Component3,
-            Component4,
-            Component5
-        >();
+        _world = World.Create();
+        _commandBuffer = new CommandBuffer();
 
         for (int i = 0; i < EntityCount; i++)
             _entities.Add(
-                _assemblage.Create(
+                _world.Create(
                     new Component1 { Value = i },
                     new Component2 { Value = i },
                     new Component3 { Value = i },
@@ -110,13 +107,15 @@ public class TheiaDestroyEntityT5 : DestroyEntityT5
     {
         _entities = null;
         _world = null;
-        _assemblage = null;
+        _commandBuffer = null;
     }
 
     [Benchmark]
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _commandBuffer!.Destroy(_entities![i]);
+
+        _commandBuffer!.Playback(_world!);
     }
 }

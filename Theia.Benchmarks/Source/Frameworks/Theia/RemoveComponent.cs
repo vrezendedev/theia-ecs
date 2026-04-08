@@ -22,7 +22,7 @@ public class TheiaRemoveComponentOnT2 : RemoveComponentOnT2
 
         for (int i = 0; i < EntityCount; i++)
             _entities.Add(
-                _assemblage!.Create(new Component1 { Value = i }, new Component2() { Value = i })
+                _assemblage.Create(new Component1 { Value = i }, new Component2() { Value = i })
             );
     }
 
@@ -55,7 +55,7 @@ public class TheiaRemoveComponentOnT3 : RemoveComponentOnT3
 
         for (int i = 0; i < EntityCount; i++)
             _entities.Add(
-                _assemblage!.Create(
+                _assemblage.Create(
                     new Component1 { Value = i },
                     new Component2 { Value = i },
                     new Component3 { Value = i }
@@ -98,7 +98,7 @@ public class TheiaRemoveComponentOnT5 : RemoveComponentOnT5
 
         for (int i = 0; i < EntityCount; i++)
             _entities.Add(
-                _assemblage!.Create(
+                _assemblage.Create(
                     new Component1 { Value = i },
                     new Component2 { Value = i },
                     new Component3 { Value = i },

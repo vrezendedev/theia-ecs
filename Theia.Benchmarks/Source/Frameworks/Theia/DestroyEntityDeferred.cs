@@ -8,7 +8,7 @@ using Theia.ECS.Worlds;
 
 namespace Theia.Benchmarks.Source.Frameworks.Theia;
 
-public class TheiaDestroyEntityT1 : DestroyEntityT1
+public class TheiaDestroyEntityDeferredT1 : DestroyEntityDeferredT1
 {
     private World? _world;
     private Assemblage<Component1>? _assemblage;
@@ -35,11 +35,13 @@ public class TheiaDestroyEntityT1 : DestroyEntityT1
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _world!.DeferredGhoulify(_entities![i]);
+
+        _world!.FlushDeferred();
     }
 }
 
-public class TheiaDestroyEntityT3 : DestroyEntityT3
+public class TheiaDestroyEntityDeferredT3 : DestroyEntityDeferredT3
 {
     private World? _world;
     private Assemblage<Component1, Component2, Component3>? _assemblage;
@@ -72,11 +74,13 @@ public class TheiaDestroyEntityT3 : DestroyEntityT3
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _world!.DeferredGhoulify(_entities![i]);
+
+        _world!.FlushDeferred();
     }
 }
 
-public class TheiaDestroyEntityT5 : DestroyEntityT5
+public class TheiaDestroyEntityDeferredT5 : DestroyEntityDeferredT5
 {
     private World? _world;
     private Assemblage<Component1, Component2, Component3, Component4, Component5>? _assemblage;
@@ -117,6 +121,8 @@ public class TheiaDestroyEntityT5 : DestroyEntityT5
     public override void Run()
     {
         for (int i = 0; i < EntityCount; i++)
-            _world!.TryGhoulify(_entities![i]);
+            _world!.DeferredGhoulify(_entities![i]);
+
+        _world!.FlushDeferred();
     }
 }
