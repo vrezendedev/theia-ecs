@@ -118,9 +118,13 @@ internal sealed class Archetype
         int componentIndex = entityMeta._componentIndex;
 
         Indexer indexer = _indexers[storageIndex];
+
+        bool wasFull = indexer.IsFull();
+
         int swapped = indexer.Remove(componentIndex);
 
-        _free.Push(storageIndex);
+        if (wasFull)
+            _free.Push(storageIndex);
 
         if (swapped != EntitySwapped.InvalidEntitySwappedIndexes)
         {
