@@ -15,7 +15,10 @@ internal static class RelationsMeta
     internal static int RegisterRelation<TRelation>(bool isTag)
         where TRelation : struct
     {
-        int relationId = s_relationRegistry.Account();
+        if (s_relationRegistry.TryGetTypeId(typeof(TRelation), out int relationId))
+            return relationId;
+
+        relationId = s_relationRegistry.Account();
 
         RelationType<TRelation> relationType = new RelationType<TRelation>(
             typeof(TRelation),
@@ -23,6 +26,25 @@ internal static class RelationsMeta
         );
 
         s_relationRegistry.Set(relationId, relationType);
+
+        return relationId;
+    }
+
+    internal static int RegisterRelation(Type type)
+    {
+        if (!s_relationRegistry.TryGetTypeId(type, out int relationId))
+        {
+            relationId = s_relationRegistry.Account();
+
+            Type genericType = typeof(RelationType<>).MakeGenericType([type]);
+
+            RelationType relationType = (RelationType)Activator.CreateInstance(genericType)!;
+
+            relationType.Initialize(type, IsTag(type));
+
+            s_relationRegistry.Set(relationId, relationType);
+        }
+
         return relationId;
     }
 
@@ -36,7 +58,9 @@ internal static class RelationsMeta
     internal static int Count() => s_relationRegistry.Count();
 
     internal static bool IsTag<TRelation>()
-        where TRelation : struct => typeof(TRelation).GetFields(BlittableMeta.Flags).Length == 0;
+        where TRelation : struct => IsTag(typeof(TRelation));
+
+    private static bool IsTag(Type type) => type.GetFields(BlittableMeta.Flags).Length == 0;
 
     internal static bool HasRelationshipAttribute<T>()
         where T : struct => typeof(T).GetCustomAttribute<Relationship>() is not null;

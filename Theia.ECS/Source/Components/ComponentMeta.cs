@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Theia.ECS.Reflection;
 using Theia.ECS.Reflection.Types;
 
@@ -13,12 +14,36 @@ internal static class ComponentsMeta
     internal static int RegisterComponent<TComponent>(int sizeOfT)
         where TComponent : struct
     {
-        int componentId = s_componentRegistry.Account();
+        if (s_componentRegistry.TryGetTypeId(typeof(TComponent), out int componentId))
+            return componentId;
+
+        componentId = s_componentRegistry.Account();
+
         ComponentType<TComponent> componentType = new ComponentType<TComponent>(
             typeof(TComponent),
             sizeOfT
         );
+
         s_componentRegistry.Set(componentId, componentType);
+
+        return componentId;
+    }
+
+    internal static int RegisterComponent(Type type)
+    {
+        if (!s_componentRegistry.TryGetTypeId(type, out int componentId))
+        {
+            componentId = s_componentRegistry.Account();
+
+            Type genericType = typeof(ComponentType<>).MakeGenericType([type]);
+
+            ComponentType componentType = (ComponentType)Activator.CreateInstance(genericType)!;
+
+            componentType.Initialize(type, Marshal.SizeOf(type));
+
+            s_componentRegistry.Set(componentId, componentType);
+        }
+
         return componentId;
     }
 

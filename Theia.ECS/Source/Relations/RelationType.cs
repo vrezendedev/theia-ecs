@@ -10,13 +10,21 @@ internal abstract class RelationType : ITypeMeta
     private const int DefaultRelationPoolCapacity = 4;
     private const int DefaultRelationLinkPoolCapacity = 16;
 
-    internal readonly Type _type;
-    internal readonly bool _isTag;
+    internal Type _type;
+    internal bool _isTag;
 
     protected readonly Lock _relationPoolLock = new();
     protected Queue<Relation> _relationPool;
     protected readonly Lock _relationLinkPoolLock = new();
     protected Queue<RelationLink> _relationLinkPool;
+
+#pragma warning disable CS8618
+    public RelationType()
+    {
+        _relationPool = new(DefaultRelationPoolCapacity);
+        _relationLinkPool = new(DefaultRelationLinkPoolCapacity);
+    }
+#pragma warning restore CS8618
 
     internal RelationType(Type type, bool isTag)
     {
@@ -24,6 +32,12 @@ internal abstract class RelationType : ITypeMeta
         _isTag = isTag;
         _relationPool = new(DefaultRelationPoolCapacity);
         _relationLinkPool = new(DefaultRelationLinkPoolCapacity);
+    }
+
+    public void Initialize(Type type, bool isTag)
+    {
+        _type = type;
+        _isTag = isTag;
     }
 
     internal void PoolRelation(Relation relation)

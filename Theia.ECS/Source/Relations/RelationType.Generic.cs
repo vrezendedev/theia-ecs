@@ -5,6 +5,9 @@ namespace Theia.ECS.Relations;
 internal sealed class RelationType<TRelation> : RelationType
     where TRelation : struct
 {
+    public RelationType()
+        : base() { }
+
     internal RelationType(Type type, bool isTag)
         : base(type, isTag) { }
 

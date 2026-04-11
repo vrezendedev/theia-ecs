@@ -49,5 +49,14 @@ internal sealed class TypeRegistry<T>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal T GetTypeMeta(int index) => _typeMetaMap[index];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal bool TryGetTypeId(Type type, out int index)
+    {
+        if (_typeId.TryGetValue(type, out index))
+            return true;
+
+        return false;
+    }
+
     internal int Count() => Volatile.Read(ref _count);
 }

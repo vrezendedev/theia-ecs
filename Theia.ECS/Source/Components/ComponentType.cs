@@ -5,11 +5,21 @@ namespace Theia.ECS.Components;
 
 internal abstract class ComponentType : ITypeMeta
 {
-    internal readonly Type _type;
-    internal readonly int _sizeOf;
+    internal Type _type;
+    internal int _sizeOf;
+
+#pragma warning disable CS8618
+    public ComponentType() { }
+#pragma warning restore CS8618
 
     internal ComponentType(Type type, int sizeOf)
         : base()
+    {
+        _type = type;
+        _sizeOf = sizeOf;
+    }
+
+    public void Initialize(Type type, int sizeOf)
     {
         _type = type;
         _sizeOf = sizeOf;

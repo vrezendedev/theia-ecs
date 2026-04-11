@@ -67,6 +67,20 @@ public struct ComponentJ
     public int J;
 }
 
+public struct ViaTypeComponent
+{
+    public int Value;
+}
+
+[Relationship]
+public struct ViaTypeTagRelation { }
+
+[Relationship]
+public struct ViaTypeEvaluatedRelation
+{
+    public int Value;
+}
+
 public struct Position
 {
     public int X;

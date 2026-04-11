@@ -5,6 +5,9 @@ namespace Theia.ECS.Components;
 internal sealed class ComponentType<TComponent> : ComponentType
     where TComponent : struct
 {
+    public ComponentType()
+        : base() { }
+
     internal ComponentType(Type type, int sizeOf)
         : base(type, sizeOf) { }
 

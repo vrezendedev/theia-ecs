@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Theia.ECS.Components;
 using Theia.Tests.Resources;
@@ -86,5 +87,26 @@ public sealed class ComponentsMetaTests
     {
         int id = ComponentMeta<ComponentA>.s_id;
         Assert.NotNull(ComponentsMeta.GetComponentType(id));
+    }
+
+    [Fact]
+    public void RegisterComponent_WithType_ReturnsIndexOfValidComponentType()
+    {
+        int id = ComponentsMeta.RegisterComponent(typeof(ViaTypeComponent));
+
+        ComponentType componentType = ComponentsMeta.GetComponentType(id);
+
+        Assert.Equal(typeof(ViaTypeComponent), componentType.Get());
+        Assert.Equal(Unsafe.SizeOf<ViaTypeComponent>(), componentType._sizeOf);
+        Assert.NotNull(componentType);
+        Assert.IsType<ComponentType<ViaTypeComponent>>(componentType);
+
+        Storage storage = componentType.CreateStorage(1);
+
+        Assert.IsType<Storage<ViaTypeComponent>>(storage);
+
+        int idViaGeneric = ComponentMeta<ViaTypeComponent>.s_id;
+
+        Assert.Equal(id, idViaGeneric);
     }
 }
