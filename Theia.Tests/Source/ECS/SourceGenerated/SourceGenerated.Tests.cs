@@ -72,15 +72,15 @@ public sealed class SourceGeneratedTests
 
         Assemblage<Position, Velocity> assemblage = world.CreateAssemblage<Position, Velocity>();
 
-        int countBefore = world.CountEntities();
+        int countBefore = world.CountEntitiesAlive();
 
         assemblage.DeferredCreate(new Position() { X = 9 }, new Velocity() { X = 4 });
 
-        Assert.Equal(countBefore, world.CountEntities());
+        Assert.Equal(countBefore, world.CountEntitiesAlive());
 
         world.FlushDeferred();
 
-        Assert.Equal(countBefore + 1, world.CountEntities());
+        Assert.Equal(countBefore + 1, world.CountEntitiesAlive());
     }
 
     [Fact]
@@ -1527,10 +1527,10 @@ public sealed class SourceGeneratedTests
 
         int countBefore = initial;
 
-        Assert.Equal(countBefore, world.CountEntities());
+        Assert.Equal(countBefore, world.CountEntitiesAlive());
 
         world.FlushDeferred();
 
-        Assert.Equal(initial + (initial * initial), world.CountEntities());
+        Assert.Equal(initial + (initial * initial), world.CountEntitiesAlive());
     }
 }

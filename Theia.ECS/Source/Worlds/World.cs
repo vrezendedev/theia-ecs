@@ -25,7 +25,9 @@ public sealed partial class World
 
     internal readonly int _worldId;
 
-    internal int CountEntities() => _entitiesCount - _ghouls.Count;
+    internal int CountEntities() => _entitiesCount;
+
+    internal int CountEntitiesAlive() => _entitiesCount - _ghouls.Count;
 
     internal int CountGhouls() => _ghouls.Count;
 

@@ -54,11 +54,11 @@ public sealed class WorldEntityLifecycleTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        int before = world.CountEntities();
+        int before = world.CountEntitiesAlive();
 
         assemblage.Create(new Position());
 
-        Assert.Equal(before + 1, world.CountEntities());
+        Assert.Equal(before + 1, world.CountEntitiesAlive());
     }
 
     [Fact]
@@ -68,11 +68,11 @@ public sealed class WorldEntityLifecycleTests
 
         Entity entity = world.CreateAssemblage<Position>().Create(new Position());
 
-        int before = world.CountEntities();
+        int before = world.CountEntitiesAlive();
 
         world.TryGhoulify(entity);
 
-        Assert.Equal(before - 1, world.CountEntities());
+        Assert.Equal(before - 1, world.CountEntitiesAlive());
     }
 
     [Fact]

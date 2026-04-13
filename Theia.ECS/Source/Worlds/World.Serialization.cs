@@ -17,14 +17,13 @@ public sealed partial class World
         );
 
     private WorldDataTransferObject CreateWorldDataTransferObject() =>
-        new WorldSerializer()
-            .AccountComponentsTypes()
-            .AccountRelationsTypes()
-            .AccountComponentSets(_archetypes)
-            .Build();
+        new WorldSerializer().Create(this);
 
     public void Serialize(string path)
     {
+        ThrowIfQueriesExecuting();
+        ThrowIfFlushingDeferred();
+
         using FileStream fileStream = new FileStream(path, FileMode.Create);
         MessagePackSerializer.Serialize(
             fileStream,
@@ -35,6 +34,9 @@ public sealed partial class World
 
     public async Task SerializeAsync(string path, CancellationToken cancellationToken = default)
     {
+        ThrowIfQueriesExecuting();
+        ThrowIfFlushingDeferred();
+
         await using FileStream fileStream = new FileStream(path, FileMode.Create);
         await MessagePackSerializer.SerializeAsync(
             fileStream,

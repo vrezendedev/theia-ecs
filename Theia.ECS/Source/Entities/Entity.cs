@@ -1,12 +1,18 @@
 using System;
+using MessagePack;
 
 namespace Theia.ECS.Entities;
 
+[MessagePackObject(AllowPrivate = true)]
 public readonly struct Entity : IEquatable<Entity>
 {
+    [Key(0)]
     internal readonly int _id { get; init; }
+
+    [IgnoreMember]
     internal readonly int _version { get; init; }
 
+    [IgnoreMember]
     public int ID => _id;
 
     public bool Equals(Entity other) => _id == other._id && _version == other._version;

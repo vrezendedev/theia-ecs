@@ -43,6 +43,9 @@ public sealed partial class World
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Archetype GetArchetype(int archetypeId) => _archetypes[archetypeId];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ReadOnlySpan<Archetype> GetArchetypes() => _archetypes.AsSpan(0, _archetypesCount);
+
     internal Archetype FindOrCreateArchetype(ReadOnlySpan<int> componentIds)
     {
         int componentLength = componentIds.Length;

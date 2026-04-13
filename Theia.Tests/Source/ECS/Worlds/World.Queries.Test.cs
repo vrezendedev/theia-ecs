@@ -618,7 +618,7 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position());
 
-        int countBefore = world.CountEntities();
+        int countBefore = world.CountEntitiesAlive();
 
         query.ForEachEntity(
             (Entity _, ref Position __) => assemblage.DeferredCreate(new Position { X = 1 })
@@ -626,7 +626,7 @@ public sealed class WorldQueriesTest
 
         world.FlushDeferred();
 
-        Assert.Equal(countBefore + 1, world.CountEntities());
+        Assert.Equal(countBefore + 1, world.CountEntitiesAlive());
     }
 
     [Fact]
@@ -640,7 +640,7 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position());
 
-        int countBefore = world.CountEntities();
+        int countBefore = world.CountEntitiesAlive();
 
         query.ForEachEntity(
             (Entity _, ref Position _2) => assemblage.DeferredCreate(new Position { X = 1 })
@@ -648,7 +648,7 @@ public sealed class WorldQueriesTest
 
         world.FlushDeferred();
 
-        Assert.Equal(countBefore + 1, world.CountEntities());
+        Assert.Equal(countBefore + 1, world.CountEntitiesAlive());
     }
 
     [Fact]

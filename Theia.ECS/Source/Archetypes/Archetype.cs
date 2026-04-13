@@ -263,6 +263,10 @@ internal sealed class Archetype
         _storages[componentStorageIndex].AsSpan(0, _initializedCount);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Storage GetStorage(int componentStorageIndex, int storageIndex) =>
+        _storages[componentStorageIndex][storageIndex];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<Storage> GetStorages<TComponent>()
         where TComponent : struct =>
         _storages[_componentStorageMapping[ComponentMeta<TComponent>.s_id]]

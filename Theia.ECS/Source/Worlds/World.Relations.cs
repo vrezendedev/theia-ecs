@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
@@ -699,6 +700,9 @@ public sealed partial class World
             return _relationStorages[relationId];
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ReadOnlySpan<RelationStorage> GetRelationStorages() => _relationStorages;
 
     private static void ThrowIfExpectedTagRelation(RelationType relationType)
     {

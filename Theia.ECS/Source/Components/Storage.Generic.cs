@@ -1,5 +1,7 @@
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Theia.ECS.Components;
 
@@ -28,4 +30,8 @@ internal sealed class Storage<TComponent> : Storage
         Storage<TComponent> target = (Storage<TComponent>)to;
         target.Set(newIndex, _values[oldIndex]);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal override void Write(ArrayBufferWriter<byte> arrayBufferWriter, int length) =>
+        arrayBufferWriter.Write(MemoryMarshal.AsBytes(_values.AsSpan(0, length)));
 }

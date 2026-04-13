@@ -1,18 +1,27 @@
-#pragma warning disable CS8618
 using MessagePack;
 
 namespace Theia.ECS.Serialization;
 
-[MessagePackObject(true, AllowPrivate = true)]
+[MessagePackObject(AllowPrivate = true)]
 internal sealed class WorldDataTransferObject
 {
-    internal uint Version { get; set; }
-    internal string[] ComponentsAccounted { get; set; }
-    internal string[] RelationsAccounted { get; set; }
+    [Key(0)]
+    public uint Version { get; set; }
 
-    // internal EntityDataTransfer[] EntityDataTransfer { get; set; }
-    // internal ArchetypeDataTransferObject[] Archetypes { get; set; }
+    [Key(1)]
+    public string[]? ComponentsTypesAccounted { get; set; }
+
+    [Key(2)]
+    public string[]? RelationsTypesAccounted { get; set; }
+
+    [Key(3)]
+    public int MaxEntityId { get; set; }
+
+    [Key(4)]
+    public ArchetypeDataTransferObject[]? ArchetypesAccounted { get; set; }
+
+    [Key(5)]
+    public RelationDataTransferObject[]? RelationsAccounted { get; set; }
 
     public WorldDataTransferObject() { }
 }
-#pragma warning restore CS8618
