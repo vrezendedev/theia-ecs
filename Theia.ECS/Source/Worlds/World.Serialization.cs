@@ -20,6 +20,11 @@ public sealed partial class World
         MessagePackSerializerOptions serializerOptions
     ) => new WorldSerializer(serializerOptions).Create(this);
 
+    private void Deserialize(
+        WorldDataTransferObject worldDataTransferObject,
+        MessagePackSerializerOptions deserializerOptions
+    ) => new WorldDeserializer(worldDataTransferObject, deserializerOptions).To(this);
+
     public void Serialize(string path, MessagePackSerializerOptions? serializerOptions = null)
     {
         ThrowIfQueriesExecuting();
@@ -32,6 +37,23 @@ public sealed partial class World
             fileStream,
             CreateWorldDataTransferObject(serializerOptions),
             serializerOptions
+        );
+    }
+
+    public void Deserialize(string path, MessagePackSerializerOptions? deserializerOptions = null)
+    {
+        ThrowIfQueriesExecuting();
+        ThrowIfFlushingDeferred();
+
+        deserializerOptions ??= DefaultMessagePackSerializerOptions;
+
+        using FileStream fileStream = new FileStream(path, FileMode.Open);
+        Deserialize(
+            MessagePackSerializer.Deserialize<WorldDataTransferObject>(
+                fileStream,
+                deserializerOptions
+            ),
+            deserializerOptions
         );
     }
 
@@ -52,6 +74,28 @@ public sealed partial class World
             CreateWorldDataTransferObject(serializerOptions),
             serializerOptions,
             cancellationToken
+        );
+    }
+
+    public async Task DeserializeAsync(
+        string path,
+        MessagePackSerializerOptions? deserializerOptions = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        ThrowIfQueriesExecuting();
+        ThrowIfFlushingDeferred();
+
+        deserializerOptions ??= DefaultMessagePackSerializerOptions;
+
+        await using FileStream fileStream = new FileStream(path, FileMode.Open);
+        Deserialize(
+            await MessagePackSerializer.DeserializeAsync<WorldDataTransferObject>(
+                fileStream,
+                deserializerOptions,
+                cancellationToken
+            ),
+            deserializerOptions
         );
     }
 }
