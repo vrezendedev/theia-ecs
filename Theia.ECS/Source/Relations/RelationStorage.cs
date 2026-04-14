@@ -17,6 +17,8 @@ internal sealed class RelationStorage
     private Relation[] _relations;
     private Queue<int> _free;
 
+    internal int CountStorageSlotsOccupied() => _relations.Length - _free.Count;
+
     internal RelationStorage(int relationId)
     {
         _relationId = relationId;
@@ -35,6 +37,9 @@ internal sealed class RelationStorage
         Relation[] relations = _relations;
         return relations[primaryKey];
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal Relation[] GetRelations() => _relations;
 
     internal RelationKeyed RentRelation()
     {

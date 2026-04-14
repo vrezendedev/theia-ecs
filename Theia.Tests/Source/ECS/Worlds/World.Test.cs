@@ -47,7 +47,7 @@ public sealed class WorldConstructorTests
 
     [Fact]
     public void Constructor_EntityCountStartsAtZero() =>
-        Assert.Equal(0, new World().CountEntitiesAlive());
+        Assert.Equal(0, new World().CountEntities());
 
     [Fact]
     public void Constructor_GhoulCountStartsAtZero() => Assert.Equal(0, new World().CountGhouls());

@@ -1,6 +1,8 @@
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using MessagePack;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
 
@@ -114,6 +116,11 @@ internal class Relation
         Interlocked.Exchange(ref _updateCount, 0);
         _relatedToCount = 0;
     }
+
+    internal virtual void Write(
+        ArrayBufferWriter<byte> arrayBufferWriter,
+        MessagePackSerializerOptions options
+    ) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual void Resize(int currentLength) =>

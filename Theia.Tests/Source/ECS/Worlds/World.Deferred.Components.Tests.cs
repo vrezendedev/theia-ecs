@@ -243,10 +243,10 @@ public sealed class WorldDeferredComponentsTests
         world.DeferredAddComponent<Velocity>(entity);
         world.FlushDeferred();
 
-        int countAfterFirstFlush = world.CountEntitiesAlive();
+        int countAfterFirstFlush = world.CountEntities();
         world.FlushDeferred();
 
-        Assert.Equal(countAfterFirstFlush, world.CountEntitiesAlive());
+        Assert.Equal(countAfterFirstFlush, world.CountEntities());
         Assert.True(world.IsAlive(entity));
     }
 

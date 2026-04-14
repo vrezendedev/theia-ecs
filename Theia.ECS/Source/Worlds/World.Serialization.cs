@@ -8,7 +8,7 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
-    private static readonly MessagePackSerializerOptions DefaultMessagePackOptions =
+    public static MessagePackSerializerOptions DefaultMessagePackSerializerOptions { get; } =
         MessagePackSerializerOptions.Standard.WithResolver(
             MessagePack.Resolvers.CompositeResolver.Create(
                 MessagePack.Resolvers.StandardResolver.Instance,
@@ -16,32 +16,41 @@ public sealed partial class World
             )
         );
 
-    private WorldDataTransferObject CreateWorldDataTransferObject() =>
-        new WorldSerializer().Create(this);
+    private WorldDataTransferObject CreateWorldDataTransferObject(
+        MessagePackSerializerOptions serializerOptions
+    ) => new WorldSerializer(serializerOptions).Create(this);
 
-    public void Serialize(string path)
+    public void Serialize(string path, MessagePackSerializerOptions? serializerOptions = null)
     {
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
+
+        serializerOptions ??= DefaultMessagePackSerializerOptions;
 
         using FileStream fileStream = new FileStream(path, FileMode.Create);
         MessagePackSerializer.Serialize(
             fileStream,
-            CreateWorldDataTransferObject(),
-            DefaultMessagePackOptions
+            CreateWorldDataTransferObject(serializerOptions),
+            serializerOptions
         );
     }
 
-    public async Task SerializeAsync(string path, CancellationToken cancellationToken = default)
+    public async Task SerializeAsync(
+        string path,
+        MessagePackSerializerOptions? serializerOptions = null,
+        CancellationToken cancellationToken = default
+    )
     {
         ThrowIfQueriesExecuting();
         ThrowIfFlushingDeferred();
 
+        serializerOptions ??= DefaultMessagePackSerializerOptions;
+
         await using FileStream fileStream = new FileStream(path, FileMode.Create);
         await MessagePackSerializer.SerializeAsync(
             fileStream,
-            CreateWorldDataTransferObject(),
-            DefaultMessagePackOptions,
+            CreateWorldDataTransferObject(serializerOptions),
+            serializerOptions,
             cancellationToken
         );
     }

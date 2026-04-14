@@ -1,4 +1,5 @@
 using MessagePack;
+using Theia.ECS.Entities;
 
 namespace Theia.ECS.Serialization;
 
@@ -6,5 +7,21 @@ namespace Theia.ECS.Serialization;
 internal class RelationDataTransferObject
 {
     [Key(0)]
-    public string? Relation { get; set; }
+    public string? RelationType { get; set; }
+
+    [Key(1)]
+    public EntityRelationDataTransferObject[]? EntityRelations { get; set; }
+}
+
+[MessagePackObject(AllowPrivate = true)]
+internal class EntityRelationDataTransferObject
+{
+    [Key(0)]
+    public Entity Owner { get; set; }
+
+    [Key(1)]
+    public Entity[]? Related { get; set; }
+
+    [Key(2)]
+    public byte[]? RelationData { get; set; }
 }

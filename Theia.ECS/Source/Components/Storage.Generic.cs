@@ -1,7 +1,7 @@
 using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using MessagePack;
 
 namespace Theia.ECS.Components;
 
@@ -32,6 +32,30 @@ internal sealed class Storage<TComponent> : Storage
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal override void Write(ArrayBufferWriter<byte> arrayBufferWriter, int length) =>
-        arrayBufferWriter.Write(MemoryMarshal.AsBytes(_values.AsSpan(0, length)));
+    internal override void WriteAll(
+        ReadOnlySpan<Storage> storages,
+        int accLength,
+        ReadOnlySpan<int> lengths,
+        ArrayBufferWriter<byte> arrayBufferWriter,
+        MessagePackSerializerOptions options
+    )
+    {
+        TComponent[] combined = new TComponent[accLength];
+
+        int offset = 0;
+
+        for (int i = 0; i < storages.Length; i++)
+        {
+            Storage<TComponent> typed = (Storage<TComponent>)storages[i];
+            int length = lengths[i];
+
+            if (length > 0)
+            {
+                typed.GetValues(length).CopyTo(combined.AsSpan(offset));
+                offset += length;
+            }
+        }
+
+        MessagePackSerializer.Serialize(arrayBufferWriter, combined, options);
+    }
 }

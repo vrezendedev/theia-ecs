@@ -108,10 +108,10 @@ public sealed class AssemblageTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        int countBefore = world.CountEntitiesAlive();
+        int countBefore = world.CountEntities();
         assemblage.Create(new Position { X = 1, Y = 2 });
 
-        Assert.Equal(countBefore + 1, world.CountEntitiesAlive());
+        Assert.Equal(countBefore + 1, world.CountEntities());
     }
 
     [Fact]
@@ -168,10 +168,10 @@ public sealed class AssemblageTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        int countBefore = world.CountEntitiesAlive();
+        int countBefore = world.CountEntities();
         assemblage.DeferredCreate(new Position { X = 1, Y = 2 });
 
-        Assert.Equal(countBefore, world.CountEntitiesAlive());
+        Assert.Equal(countBefore, world.CountEntities());
     }
 
     [Fact]
@@ -181,11 +181,11 @@ public sealed class AssemblageTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        int countBefore = world.CountEntitiesAlive();
+        int countBefore = world.CountEntities();
         assemblage.DeferredCreate(new Position { X = 1, Y = 2 });
         world.FlushDeferred();
 
-        Assert.Equal(countBefore + 1, world.CountEntitiesAlive());
+        Assert.Equal(countBefore + 1, world.CountEntities());
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public sealed class AssemblageTests
 
         Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
 
-        int countBefore = world.CountEntitiesAlive();
+        int countBefore = world.CountEntities();
         const int deferredCount = 5;
 
         for (int i = 0; i < deferredCount; i++)
@@ -223,7 +223,7 @@ public sealed class AssemblageTests
 
         world.FlushDeferred();
 
-        Assert.Equal(countBefore + deferredCount, world.CountEntitiesAlive());
+        Assert.Equal(countBefore + deferredCount, world.CountEntities());
     }
 
     [Fact]
@@ -251,7 +251,7 @@ public sealed class AssemblageTests
 
         int expectedTotal = threadCount * commandsPerThread;
 
-        int countBefore = world.CountEntitiesAlive();
+        int countBefore = world.CountEntities();
 
         Task[] tasks = new Task[threadCount];
 
@@ -268,6 +268,6 @@ public sealed class AssemblageTests
 
         world.FlushDeferred();
 
-        Assert.Equal(countBefore + expectedTotal, world.CountEntitiesAlive());
+        Assert.Equal(countBefore + expectedTotal, world.CountEntities());
     }
 }

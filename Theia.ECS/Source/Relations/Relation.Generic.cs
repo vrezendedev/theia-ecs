@@ -1,5 +1,7 @@
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
+using MessagePack;
 using Theia.ECS.Entities;
 
 namespace Theia.ECS.Relations;
@@ -50,6 +52,16 @@ internal sealed class EvaluatedRelation<TRelation> : Relation
             }
         }
     }
+
+    internal override void Write(
+        ArrayBufferWriter<byte> arrayBufferWriter,
+        MessagePackSerializerOptions options
+    ) =>
+        MessagePackSerializer.Serialize(
+            arrayBufferWriter,
+            _data.AsSpan(0, _relatedToCount).ToArray(),
+            options
+        );
 
     protected override void Resize(int currentLength)
     {
