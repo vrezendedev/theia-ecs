@@ -55,9 +55,6 @@ internal struct EntityMeta : IEquatable<EntityMeta>
             _relationsIndexerIndex
         );
 
-    public override string ToString() =>
-        $"{nameof(EntityMeta)}(Version: {_version} | Archetype: {_archetypeIndex} | StorageIndex: {_storageIndex} | ComponentIndex: {_componentIndex} | RelationsIndexerIndex: {_relationsIndexerIndex}))";
-
     public static bool operator ==(EntityMeta left, EntityMeta right) => left.Equals(right);
 
     public static bool operator !=(EntityMeta left, EntityMeta right) => !left.Equals(right);

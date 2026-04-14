@@ -1,12 +1,15 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using MessagePack;
 
 namespace Theia.ECS.Blittables;
 
+[MessagePackObject(AllowPrivate = true)]
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-public struct BlittableChar : IEquatable<BlittableChar>
+public partial struct BlittableChar : IEquatable<BlittableChar>
 {
+    [Key(0)]
     private char _value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

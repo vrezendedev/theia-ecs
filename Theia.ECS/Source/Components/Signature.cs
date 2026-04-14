@@ -98,7 +98,4 @@ internal readonly struct Signature : IEquatable<Signature>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(Signature other) =>
         Signature.IsEqual(_length, other._length, _mask, other._mask);
-
-    public override string ToString() =>
-        $"{nameof(Signature)}(Components: {string.Join(", ", _components)} | Length: {_length} | Sizeof: {_sizeOf} | MaxId: {_maxId} | Mask: {string.Join(", ", _mask)} | Mask Length: {_maskLength})";
 }

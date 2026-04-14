@@ -53,13 +53,13 @@ internal sealed class EvaluatedRelation<TRelation> : Relation
         }
     }
 
-    internal override void Write(
+    internal override void WriteData(
         ArrayBufferWriter<byte> arrayBufferWriter,
         MessagePackSerializerOptions options
     ) =>
         MessagePackSerializer.Serialize(
             arrayBufferWriter,
-            _data.AsSpan(0, _relatedToCount).ToArray(),
+            _data.AsMemory(0, _relatedToCount),
             options
         );
 

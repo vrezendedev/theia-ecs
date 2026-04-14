@@ -1,10 +1,13 @@
 using System;
 using System.Runtime.CompilerServices;
+using MessagePack;
 
 namespace Theia.ECS.Blittables;
 
-public struct BlittableBoolean : IEquatable<BlittableBoolean>
+[MessagePackObject(AllowPrivate = true)]
+public partial struct BlittableBoolean : IEquatable<BlittableBoolean>
 {
+    [Key(0)]
     private byte byteValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

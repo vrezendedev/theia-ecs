@@ -169,27 +169,37 @@ internal sealed class WorldSerializer
             _tempEntities.AddRange(indexer.GetValues());
         }
 
-        for (int i = 0; i < componentsIds.Length; i++)
+        if (accLength == 0)
         {
-            ReadOnlySpan<Storage> storages = archetype.GetStorages(
-                archetype.GetStorageIndex(componentsIds[i])
-            );
+            archetypeDto.Entities = Array.Empty<Entity>();
 
-            _bufferWriter.ResetWrittenCount();
+            for (int i = 0; i < componentsIds.Length; i++)
+                archetypeDto.ComponentData![i] = Array.Empty<byte>();
+        }
+        else
+        {
+            archetypeDto.Entities = _tempEntities.ToArray();
 
-            storages[0]
-                .WriteAll(
-                    storages,
-                    accLength,
-                    CollectionsMarshal.AsSpan(_tempLengths),
-                    _bufferWriter,
-                    _serializerOptions
+            for (int i = 0; i < componentsIds.Length; i++)
+            {
+                ReadOnlySpan<Storage> storages = archetype.GetStorages(
+                    archetype.GetStorageIndex(componentsIds[i])
                 );
 
-            archetypeDto.ComponentData![i] = _bufferWriter.WrittenSpan.ToArray();
-        }
+                _bufferWriter.ResetWrittenCount();
 
-        archetypeDto.Entities = _tempEntities.ToArray();
+                storages[0]
+                    .WriteAllData(
+                        storages,
+                        accLength,
+                        CollectionsMarshal.AsSpan(_tempLengths),
+                        _bufferWriter,
+                        _serializerOptions
+                    );
+
+                archetypeDto.ComponentData![i] = _bufferWriter.WrittenSpan.ToArray();
+            }
+        }
 
         _tempEntities.Clear();
         _tempLengths.Clear();
@@ -217,7 +227,7 @@ internal sealed class WorldSerializer
 
             _bufferWriter.ResetWrittenCount();
 
-            relation.Write(_bufferWriter, _serializerOptions);
+            relation.WriteData(_bufferWriter, _serializerOptions);
 
             EntityRelationDataTransferObject dtoEntityRelation =
                 new EntityRelationDataTransferObject

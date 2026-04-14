@@ -32,7 +32,7 @@ internal sealed class Storage<TComponent> : Storage
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal override void WriteAll(
+    internal override void WriteAllData(
         ReadOnlySpan<Storage> storages,
         int accLength,
         ReadOnlySpan<int> lengths,
@@ -40,22 +40,33 @@ internal sealed class Storage<TComponent> : Storage
         MessagePackSerializerOptions options
     )
     {
-        TComponent[] combined = new TComponent[accLength];
+        TComponent[] combined = ArrayPool<TComponent>.Shared.Rent(accLength);
 
-        int offset = 0;
-
-        for (int i = 0; i < storages.Length; i++)
+        try
         {
-            Storage<TComponent> typed = (Storage<TComponent>)storages[i];
-            int length = lengths[i];
+            int offset = 0;
 
-            if (length > 0)
+            for (int i = 0; i < storages.Length; i++)
             {
-                typed.GetValues(length).CopyTo(combined.AsSpan(offset));
-                offset += length;
-            }
-        }
+                Storage<TComponent> storage = (Storage<TComponent>)storages[i];
+                int length = lengths[i];
 
-        MessagePackSerializer.Serialize(arrayBufferWriter, combined, options);
+                if (length > 0)
+                {
+                    storage.GetValues(length).CopyTo(combined.AsSpan(offset));
+                    offset += length;
+                }
+            }
+
+            MessagePackSerializer.Serialize(
+                arrayBufferWriter,
+                combined.AsMemory(0, accLength),
+                options
+            );
+        }
+        finally
+        {
+            ArrayPool<TComponent>.Shared.Return(combined);
+        }
     }
 }

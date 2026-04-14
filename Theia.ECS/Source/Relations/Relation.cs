@@ -117,7 +117,7 @@ internal class Relation
         _relatedToCount = 0;
     }
 
-    internal virtual void Write(
+    internal virtual void WriteData(
         ArrayBufferWriter<byte> arrayBufferWriter,
         MessagePackSerializerOptions options
     ) { }

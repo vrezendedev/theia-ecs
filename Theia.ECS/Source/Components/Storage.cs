@@ -10,7 +10,7 @@ internal abstract class Storage
 
     internal abstract void Transfer(int oldIndex, int newIndex, Storage to);
 
-    internal abstract void WriteAll(
+    internal abstract void WriteAllData(
         ReadOnlySpan<Storage> storages,
         int accLength,
         ReadOnlySpan<int> lengths,
