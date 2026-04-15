@@ -45,6 +45,7 @@ internal sealed class WorldSerializer
             .AccountRelationsTypes()
             .AccountArchetypes(world.GetArchetypes())
             .AccountRelations(world.GetRelationStorages())
+            .AccountUniques(world.GetUniques())
             ._dtoWorld;
 
     private WorldSerializer AccountMaxEntityId(World world)
@@ -58,9 +59,10 @@ internal sealed class WorldSerializer
     {
         int componentsCount = ComponentsMeta.Count();
 
-        _componentsTypeName = new string[componentsCount];
+        _componentsTypeName =
+            componentsCount > 0 ? new string[componentsCount] : Array.Empty<string>();
 
-        for (int i = 0; i < _componentsTypeName.Length; i++)
+        for (int i = 0; i < componentsCount; i++)
             _componentsTypeName[i] = GetTypeName(ComponentsMeta.GetComponentType(i)._type);
 
         _dtoWorld.ComponentsTypesAccounted = _componentsTypeName;
@@ -70,9 +72,12 @@ internal sealed class WorldSerializer
 
     private WorldSerializer AccountRelationsTypes()
     {
-        _relationsTypeName = new string[RelationsMeta.Count()];
+        int relationsCount = RelationsMeta.Count();
 
-        for (int i = 0; i < _relationsTypeName.Length; i++)
+        _relationsTypeName =
+            relationsCount > 0 ? new string[RelationsMeta.Count()] : Array.Empty<string>();
+
+        for (int i = 0; i < relationsCount; i++)
             _relationsTypeName[i] = GetTypeName(RelationsMeta.GetRelationType(i)._type);
 
         _dtoWorld.RelationsTypesAccounted = _relationsTypeName;
@@ -82,7 +87,10 @@ internal sealed class WorldSerializer
 
     private WorldSerializer AccountArchetypes(ReadOnlySpan<Archetype> archetypes)
     {
-        _dtoWorld.ArchetypesAccounted = new ArchetypeDataTransferObject[archetypes.Length];
+        _dtoWorld.ArchetypesAccounted =
+            archetypes.Length > 0
+                ? new ArchetypeDataTransferObject[archetypes.Length]
+                : Array.Empty<ArchetypeDataTransferObject>();
 
         for (int i = 0; i < archetypes.Length; i++)
         {
@@ -101,7 +109,10 @@ internal sealed class WorldSerializer
 
     private WorldSerializer AccountRelations(ReadOnlySpan<RelationStorage> relationStorages)
     {
-        _dtoWorld.RelationsAccounted = new RelationDataTransferObject[relationStorages.Length];
+        _dtoWorld.RelationsAccounted =
+            relationStorages.Length > 0
+                ? new RelationDataTransferObject[relationStorages.Length]
+                : Array.Empty<RelationDataTransferObject>();
 
         for (int i = 0; i < relationStorages.Length; i++)
         {
@@ -118,6 +129,34 @@ internal sealed class WorldSerializer
 
             _dtoWorld.RelationsAccounted[i] = dtoRelation;
         }
+
+        return this;
+    }
+
+    private WorldSerializer AccountUniques(ReadOnlySpan<Unique> uniques)
+    {
+        UniqueDataTransferObject[] uniqueDataTransferObjects =
+            uniques.Length > 0
+                ? new UniqueDataTransferObject[uniques.Length]
+                : Array.Empty<UniqueDataTransferObject>();
+
+        for (int i = 0; i < uniques.Length; i++)
+        {
+            Unique unique = uniques[i];
+
+            UniqueDataTransferObject uniqueDto = new() { ComponentType = _componentsTypeName[i] };
+
+            if (unique is not null)
+            {
+                _bufferWriter.ResetWrittenCount();
+                unique.WriteData(_bufferWriter, _serializerOptions);
+                uniqueDto.ComponentData = _bufferWriter.WrittenSpan.ToArray();
+            }
+
+            uniqueDataTransferObjects[i] = uniqueDto;
+        }
+
+        _dtoWorld.UniquesAccounted = uniqueDataTransferObjects;
 
         return this;
     }

@@ -23,5 +23,8 @@ internal sealed class WorldDataTransferObject
     [Key(5)]
     public RelationDataTransferObject[]? RelationsAccounted { get; set; }
 
+    [Key(6)]
+    public UniqueDataTransferObject[]? UniquesAccounted { get; set; }
+
     public WorldDataTransferObject() { }
 }

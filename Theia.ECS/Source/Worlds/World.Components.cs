@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Theia.ECS.Components;
 
@@ -30,6 +31,9 @@ public sealed partial class World
             return (Unique<TComponent>)_uniques[componentId];
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal ReadOnlySpan<Unique> GetUniques() => _uniques;
 
     public TComponent ReadUnique<TComponent>()
         where TComponent : struct => GetOrCreateUnique<TComponent>().Read();

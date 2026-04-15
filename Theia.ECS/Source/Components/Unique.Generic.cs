@@ -1,5 +1,7 @@
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using MessagePack;
 
 namespace Theia.ECS.Components;
 
@@ -25,4 +27,9 @@ internal sealed class Unique<TComponent> : Unique
             update(ref _value);
         }
     }
+
+    internal override void WriteData(
+        ArrayBufferWriter<byte> arrayBufferWriter,
+        MessagePackSerializerOptions options
+    ) => MessagePackSerializer.Serialize(arrayBufferWriter, _value, options);
 }
