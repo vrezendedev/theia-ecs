@@ -9,22 +9,22 @@ internal sealed class WorldDataTransferObject
     public uint Version { get; set; }
 
     [Key(1)]
-    public string[]? ComponentsTypesAccounted { get; set; }
+    public required string[] ComponentsTypesAccounted { get; set; }
 
     [Key(2)]
-    public string[]? RelationsTypesAccounted { get; set; }
+    public required string[] RelationsTypesAccounted { get; set; }
 
     [Key(3)]
     public int MaxEntityId { get; set; }
 
     [Key(4)]
-    public ArchetypeDataTransferObject[]? ArchetypesAccounted { get; set; }
+    public required ArchetypeDataTransferObject[] ArchetypesAccounted { get; set; }
 
     [Key(5)]
-    public RelationDataTransferObject[]? RelationsAccounted { get; set; }
+    public required RelationDataTransferObject[] RelationsAccounted { get; set; }
 
     [Key(6)]
-    public UniqueDataTransferObject[]? UniquesAccounted { get; set; }
+    public required UniqueDataTransferObject[] UniquesAccounted { get; set; }
 
     public WorldDataTransferObject() { }
 }

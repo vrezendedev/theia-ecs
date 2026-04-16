@@ -31,7 +31,6 @@ internal sealed class Storage<TComponent> : Storage
         target.Set(newIndex, _values[oldIndex]);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal override void WriteAllData(
         ReadOnlySpan<Storage> storages,
         int accLength,
@@ -67,6 +66,32 @@ internal sealed class Storage<TComponent> : Storage
         finally
         {
             ArrayPool<TComponent>.Shared.Return(combined);
+        }
+    }
+
+    internal override void CopyAllData(
+        ReadOnlySpan<Storage> storages,
+        byte[] rawComponents,
+        int capacity,
+        MessagePackSerializerOptions options
+    )
+    {
+        TComponent[] components = MessagePackSerializer.Deserialize<TComponent[]>(
+            rawComponents,
+            options
+        );
+
+        int offset = 0;
+
+        for (int i = 0; i < storages.Length; i++)
+        {
+            Storage<TComponent> storage = (Storage<TComponent>)storages[i];
+
+            int available = Math.Min(capacity, components.Length - offset);
+
+            components.AsSpan(offset, available).CopyTo(storage.GetValues(capacity));
+
+            offset += capacity;
         }
     }
 }

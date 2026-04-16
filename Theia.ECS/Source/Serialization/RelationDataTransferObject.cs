@@ -7,21 +7,21 @@ namespace Theia.ECS.Serialization;
 internal class RelationDataTransferObject
 {
     [Key(0)]
-    public string? RelationType { get; set; }
+    public required string RelationType { get; set; }
 
     [Key(1)]
-    public EntityRelationDataTransferObject[]? EntityRelations { get; set; }
+    public required EntityRelationDataTransferObject[] EntityRelations { get; set; }
 }
 
 [MessagePackObject(AllowPrivate = true)]
 internal class EntityRelationDataTransferObject
 {
     [Key(0)]
-    public Entity Owner { get; set; }
+    public required Entity Owner { get; set; }
 
     [Key(1)]
-    public Entity[]? Related { get; set; }
+    public required Entity[] Related { get; set; }
 
     [Key(2)]
-    public byte[]? RelationData { get; set; }
+    public required byte[] RelationData { get; set; }
 }

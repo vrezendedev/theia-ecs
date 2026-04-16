@@ -6,8 +6,8 @@ namespace Theia.ECS.Serialization;
 internal class UniqueDataTransferObject
 {
     [Key(0)]
-    public string? ComponentType { get; set; }
+    public required string ComponentType { get; set; }
 
     [Key(1)]
-    public byte[]? ComponentData { get; set; }
+    public required byte[] ComponentData { get; set; }
 }

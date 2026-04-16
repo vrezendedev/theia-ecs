@@ -2,7 +2,6 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using MessagePack;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Components;
@@ -17,7 +16,6 @@ internal sealed class WorldSerializer
     private readonly WorldDataTransferObject _dtoWorld;
     private readonly MessagePackSerializerOptions _serializerOptions;
 
-    private readonly StringBuilder _stringBuilder;
     private readonly List<Entity> _tempEntities;
     private readonly List<int> _tempLengths;
     private readonly ArrayBufferWriter<byte> _bufferWriter;
@@ -27,12 +25,20 @@ internal sealed class WorldSerializer
 
     internal WorldSerializer(MessagePackSerializerOptions options)
     {
-        _dtoWorld = new() { Version = 1 };
+        _dtoWorld = new()
+        {
+            Version = 1,
+            ComponentsTypesAccounted = Array.Empty<string>(),
+            RelationsTypesAccounted = Array.Empty<string>(),
+            ArchetypesAccounted = Array.Empty<ArchetypeDataTransferObject>(),
+            RelationsAccounted = Array.Empty<RelationDataTransferObject>(),
+            UniquesAccounted = Array.Empty<UniqueDataTransferObject>(),
+        };
+
         _serializerOptions = options;
 
-        _stringBuilder = new();
-        _tempEntities = new();
-        _tempLengths = new();
+        _tempEntities = new(Archetype.MinimumEntitiesPerChunk);
+        _tempLengths = new(Archetype.MinimumEntitiesPerChunk);
         _bufferWriter = new();
 
         _componentsTypeName = Array.Empty<string>();
@@ -63,7 +69,7 @@ internal sealed class WorldSerializer
             componentsCount > 0 ? new string[componentsCount] : Array.Empty<string>();
 
         for (int i = 0; i < componentsCount; i++)
-            _componentsTypeName[i] = GetTypeName(ComponentsMeta.GetComponentType(i)._type);
+            _componentsTypeName[i] = ComponentsMeta.GetComponentType(i)._name!;
 
         _dtoWorld.ComponentsTypesAccounted = _componentsTypeName;
 
@@ -78,7 +84,7 @@ internal sealed class WorldSerializer
             relationsCount > 0 ? new string[RelationsMeta.Count()] : Array.Empty<string>();
 
         for (int i = 0; i < relationsCount; i++)
-            _relationsTypeName[i] = GetTypeName(RelationsMeta.GetRelationType(i)._type);
+            _relationsTypeName[i] = RelationsMeta.GetRelationType(i)._name!;
 
         _dtoWorld.RelationsTypesAccounted = _relationsTypeName;
 
@@ -94,7 +100,12 @@ internal sealed class WorldSerializer
 
         for (int i = 0; i < archetypes.Length; i++)
         {
-            ArchetypeDataTransferObject dtoArchetype = new();
+            ArchetypeDataTransferObject dtoArchetype = new()
+            {
+                ComponentsTypeSet = Array.Empty<string>(),
+                Entities = Array.Empty<Entity>(),
+                ComponentData = Array.Empty<byte[]>(),
+            };
 
             Archetype archetype = archetypes[i];
 
@@ -118,13 +129,15 @@ internal sealed class WorldSerializer
         {
             RelationStorage relationStorage = relationStorages[i];
 
-            RelationDataTransferObject dtoRelation = new() { RelationType = _relationsTypeName[i] };
+            RelationDataTransferObject dtoRelation = new()
+            {
+                RelationType = _relationsTypeName[i],
+                EntityRelations = Array.Empty<EntityRelationDataTransferObject>(),
+            };
 
             int slotsOccupied = relationStorage?.CountStorageSlotsOccupied() ?? 0;
 
-            if (relationStorage is null || slotsOccupied == 0)
-                dtoRelation.EntityRelations = Array.Empty<EntityRelationDataTransferObject>();
-            else
+            if (relationStorage is not null && slotsOccupied > 0)
                 AccountEntityRelations(relationStorage, slotsOccupied, dtoRelation);
 
             _dtoWorld.RelationsAccounted[i] = dtoRelation;
@@ -144,7 +157,11 @@ internal sealed class WorldSerializer
         {
             Unique unique = uniques[i];
 
-            UniqueDataTransferObject uniqueDto = new() { ComponentType = _componentsTypeName[i] };
+            UniqueDataTransferObject uniqueDto = new()
+            {
+                ComponentType = _componentsTypeName[i],
+                ComponentData = Array.Empty<byte>(),
+            };
 
             if (unique is not null)
             {
@@ -210,34 +227,32 @@ internal sealed class WorldSerializer
 
         if (accLength == 0)
         {
-            archetypeDto.Entities = Array.Empty<Entity>();
-
             for (int i = 0; i < componentsIds.Length; i++)
-                archetypeDto.ComponentData![i] = Array.Empty<byte>();
+                archetypeDto.ComponentData[i] = Array.Empty<byte>();
+
+            return;
         }
-        else
-        {
-            archetypeDto.Entities = _tempEntities.ToArray();
 
-            for (int i = 0; i < componentsIds.Length; i++)
-            {
-                ReadOnlySpan<Storage> storages = archetype.GetStorages(
-                    archetype.GetStorageIndex(componentsIds[i])
+        archetypeDto.Entities = _tempEntities.ToArray();
+
+        for (int i = 0; i < componentsIds.Length; i++)
+        {
+            ReadOnlySpan<Storage> storages = archetype.GetStorages(
+                archetype.GetStorageIndex(componentsIds[i])
+            );
+
+            _bufferWriter.ResetWrittenCount();
+
+            storages[0]
+                .WriteAllData(
+                    storages,
+                    accLength,
+                    CollectionsMarshal.AsSpan(_tempLengths),
+                    _bufferWriter,
+                    _serializerOptions
                 );
 
-                _bufferWriter.ResetWrittenCount();
-
-                storages[0]
-                    .WriteAllData(
-                        storages,
-                        accLength,
-                        CollectionsMarshal.AsSpan(_tempLengths),
-                        _bufferWriter,
-                        _serializerOptions
-                    );
-
-                archetypeDto.ComponentData![i] = _bufferWriter.WrittenSpan.ToArray();
-            }
+            archetypeDto.ComponentData[i] = _bufferWriter.WrittenSpan.ToArray();
         }
 
         _tempEntities.Clear();
@@ -282,18 +297,5 @@ internal sealed class WorldSerializer
         }
 
         relationDataTransferObject.EntityRelations = dtoEntityRelations;
-    }
-
-    private string GetTypeName(Type type)
-    {
-        _stringBuilder.Append(type.FullName);
-        _stringBuilder.Append(", ");
-        _stringBuilder.Append(type.Assembly.GetName().Name);
-
-        string typeName = _stringBuilder.ToString();
-
-        _stringBuilder.Clear();
-
-        return typeName;
     }
 }

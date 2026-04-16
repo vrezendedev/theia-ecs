@@ -16,7 +16,7 @@ internal sealed class Archetype
     /// avoid greedy cache usage without significantly reducing the available chunk budget.
     /// </summary>
     private const int AvailableMemoryPerChunk = 16_384 - 128;
-    private const int MinimumEntitiesPerChunk = 64;
+    internal const int MinimumEntitiesPerChunk = 64;
     private const int DefaultIndexersAndStoragesGrowthFactor = 2;
     private const int DefaultInvalidStorageMappingIndexes = -1;
 

@@ -11,6 +11,7 @@ internal abstract class RelationType : ITypeMeta
     private const int DefaultRelationLinkPoolCapacity = 16;
 
     internal Type _type;
+    internal string? _name;
     internal bool _isTag;
 
     protected readonly Lock _relationPoolLock = new();
@@ -57,6 +58,10 @@ internal abstract class RelationType : ITypeMeta
     }
 
     public Type Get() => _type;
+
+    public void SetTypeName(string name) => _name = name;
+
+    public string GetTypeName() => _name!;
 
     public static int Count() => RelationsMeta.Count();
 

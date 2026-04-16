@@ -11,7 +11,7 @@ internal static class ComponentsMeta
 {
     private static TypeRegistry<ComponentType> s_componentRegistry = new();
 
-    internal static int RegisterComponent<TComponent>(int sizeOfT)
+    internal static int AttemptRegisterComponent<TComponent>(int sizeOfT)
         where TComponent : struct
     {
         if (s_componentRegistry.TryGetTypeId(typeof(TComponent), out int componentId))
@@ -29,10 +29,15 @@ internal static class ComponentsMeta
         return componentId;
     }
 
-    internal static int RegisterComponent(Type type)
+    internal static int AttemptRegisterComponent(string name)
     {
-        if (!s_componentRegistry.TryGetTypeId(type, out int componentId))
+        if (!s_componentRegistry.TryGetTypeId(name, out int componentId))
         {
+            Type? type = Type.GetType(name);
+
+            if (type is null)
+                TypeRegistry<ComponentType>.ThrowTypeLoadException(name);
+
             componentId = s_componentRegistry.Account();
 
             Type genericType = typeof(ComponentType<>).MakeGenericType([type]);
@@ -49,6 +54,9 @@ internal static class ComponentsMeta
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int GetComponentId(Type type) => s_componentRegistry.GetTypeId(type);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int GetComponentId(string typeName) => s_componentRegistry.GetTypeId(typeName);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ComponentType GetComponentType(int index) =>
@@ -80,7 +88,7 @@ internal static class ComponentMeta<TComponent>
 
         int sizeOfT = Unsafe.SizeOf<TComponent>();
 
-        s_id = ComponentsMeta.RegisterComponent<TComponent>(sizeOfT);
+        s_id = ComponentsMeta.AttemptRegisterComponent<TComponent>(sizeOfT);
     }
 
     [DoesNotReturn]

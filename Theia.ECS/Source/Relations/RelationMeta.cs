@@ -12,7 +12,7 @@ internal static class RelationsMeta
 {
     private static TypeRegistry<RelationType> s_relationRegistry = new();
 
-    internal static int RegisterRelation<TRelation>(bool isTag)
+    internal static int AttemptRegisterRelation<TRelation>(bool isTag)
         where TRelation : struct
     {
         if (s_relationRegistry.TryGetTypeId(typeof(TRelation), out int relationId))
@@ -30,10 +30,15 @@ internal static class RelationsMeta
         return relationId;
     }
 
-    internal static int RegisterRelation(Type type)
+    internal static int AttemptRegisterRelation(string name)
     {
-        if (!s_relationRegistry.TryGetTypeId(type, out int relationId))
+        if (!s_relationRegistry.TryGetTypeId(name, out int relationId))
         {
+            Type? type = Type.GetType(name);
+
+            if (type is null)
+                TypeRegistry<RelationType>.ThrowTypeLoadException(name);
+
             relationId = s_relationRegistry.Account();
 
             Type genericType = typeof(RelationType<>).MakeGenericType([type]);
@@ -82,7 +87,7 @@ internal static class RelationMeta<TRelation>
         if (!RelationsMeta.HasRelationshipAttribute<TRelation>())
             ThrowRelationshipAttributeNotAdded();
 
-        s_id = RelationsMeta.RegisterRelation<TRelation>(RelationsMeta.IsTag<TRelation>());
+        s_id = RelationsMeta.AttemptRegisterRelation<TRelation>(RelationsMeta.IsTag<TRelation>());
     }
 
     [DoesNotReturn]

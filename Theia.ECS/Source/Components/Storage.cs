@@ -17,4 +17,11 @@ internal abstract class Storage
         ArrayBufferWriter<byte> arrayBufferWriter,
         MessagePackSerializerOptions options
     );
+
+    internal abstract void CopyAllData(
+        ReadOnlySpan<Storage> storages,
+        byte[] rawComponents,
+        int perStorageCapacity,
+        MessagePackSerializerOptions options
+    );
 }

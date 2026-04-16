@@ -6,6 +6,7 @@ namespace Theia.ECS.Components;
 internal abstract class ComponentType : ITypeMeta
 {
     internal Type _type;
+    internal string? _name;
     internal int _sizeOf;
 
 #pragma warning disable CS8618
@@ -27,9 +28,15 @@ internal abstract class ComponentType : ITypeMeta
 
     public Type Get() => _type;
 
+    public void SetTypeName(string name) => _name = name;
+
+    public string GetTypeName() => _name!;
+
     public static int Count() => ComponentsMeta.Count();
 
     public static int GetId(Type type) => ComponentsMeta.GetComponentId(type);
 
     internal abstract Storage CreateStorage(int capacity);
+
+    internal abstract Unique CreateUnique();
 }

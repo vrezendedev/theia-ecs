@@ -12,4 +12,6 @@ internal sealed class ComponentType<TComponent> : ComponentType
         : base(type, sizeOf) { }
 
     internal override Storage CreateStorage(int capacity) => new Storage<TComponent>(capacity);
+
+    internal override Unique CreateUnique() => new Unique<TComponent>();
 }

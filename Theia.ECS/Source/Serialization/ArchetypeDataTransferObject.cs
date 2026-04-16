@@ -7,11 +7,11 @@ namespace Theia.ECS.Serialization;
 internal class ArchetypeDataTransferObject
 {
     [Key(0)]
-    public string[]? ComponentsTypeSet { get; set; }
+    public required string[] ComponentsTypeSet { get; set; }
 
     [Key(1)]
-    public Entity[]? Entities { get; set; }
+    public required Entity[] Entities { get; set; }
 
     [Key(2)]
-    public byte[][]? ComponentData { get; set; }
+    public required byte[][] ComponentData { get; set; }
 }
