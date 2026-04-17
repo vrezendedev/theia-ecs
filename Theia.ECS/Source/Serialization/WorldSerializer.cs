@@ -213,6 +213,9 @@ internal sealed class WorldSerializer
         ArchetypeDataTransferObject archetypeDto
     )
     {
+        _tempEntities.Clear();
+        _tempLengths.Clear();
+
         ReadOnlySpan<int> componentsIds = archetype._signature.GetComponents();
 
         ReadOnlySpan<Indexer> indexers = archetype.GetIndexers();
@@ -263,9 +266,6 @@ internal sealed class WorldSerializer
 
             archetypeDto.ComponentData[i] = _bufferWriter.WrittenSpan.ToArray();
         }
-
-        _tempEntities.Clear();
-        _tempLengths.Clear();
     }
 
     private void AccountEntityRelations(

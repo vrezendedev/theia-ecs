@@ -189,25 +189,25 @@ public struct UnmappedComponent
 }
 
 [Relationship]
-internal struct TaggedRelation { }
+public struct TaggedRelation { }
 
 [Relationship]
-internal struct EvaluatedRelation
+public struct EvaluatedRelation
 {
     public int Value;
 }
 
 [Relationship]
-internal struct NonBlittableRelation
+public struct NonBlittableRelation
 {
     public string Value;
 }
 
 [Relationship]
-internal struct Friend { }
+public struct Friend { }
 
 [Relationship]
-internal struct Damage
+public struct Damage
 {
     public float Value;
 }
@@ -268,6 +268,18 @@ public struct Impulse
 }
 
 public struct Damping
+{
+    public float Value;
+}
+
+[Relationship]
+public struct ParentOf { }
+
+[Relationship]
+public struct Friendship { }
+
+[Relationship]
+public struct LinkWeight
 {
     public float Value;
 }
