@@ -119,7 +119,12 @@ internal class Relation
 
     internal virtual void WriteData(
         ArrayBufferWriter<byte> arrayBufferWriter,
-        MessagePackSerializerOptions options
+        MessagePackSerializerOptions serializerOptions
+    ) { }
+
+    internal virtual void CopyAllData(
+        byte[] rawRelations,
+        MessagePackSerializerOptions deserializerOptions
     ) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

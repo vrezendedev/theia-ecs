@@ -15,13 +15,13 @@ internal abstract class Storage
         int accLength,
         ReadOnlySpan<int> lengths,
         ArrayBufferWriter<byte> arrayBufferWriter,
-        MessagePackSerializerOptions options
+        MessagePackSerializerOptions serializerOptions
     );
 
     internal abstract void CopyAllData(
         ReadOnlySpan<Storage> storages,
         byte[] rawComponents,
         int perStorageCapacity,
-        MessagePackSerializerOptions options
+        MessagePackSerializerOptions deserializerOptions
     );
 }

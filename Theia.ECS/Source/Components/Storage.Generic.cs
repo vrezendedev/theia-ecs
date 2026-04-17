@@ -36,7 +36,7 @@ internal sealed class Storage<TComponent> : Storage
         int accLength,
         ReadOnlySpan<int> lengths,
         ArrayBufferWriter<byte> arrayBufferWriter,
-        MessagePackSerializerOptions options
+        MessagePackSerializerOptions serializerOptions
     )
     {
         TComponent[] combined = ArrayPool<TComponent>.Shared.Rent(accLength);
@@ -60,7 +60,7 @@ internal sealed class Storage<TComponent> : Storage
             MessagePackSerializer.Serialize(
                 arrayBufferWriter,
                 combined.AsMemory(0, accLength),
-                options
+                serializerOptions
             );
         }
         finally
@@ -73,12 +73,12 @@ internal sealed class Storage<TComponent> : Storage
         ReadOnlySpan<Storage> storages,
         byte[] rawComponents,
         int capacity,
-        MessagePackSerializerOptions options
+        MessagePackSerializerOptions deserializerOptions
     )
     {
         TComponent[] components = MessagePackSerializer.Deserialize<TComponent[]>(
             rawComponents,
-            options
+            deserializerOptions
         );
 
         int offset = 0;

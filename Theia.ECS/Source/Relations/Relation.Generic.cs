@@ -55,13 +55,22 @@ internal sealed class EvaluatedRelation<TRelation> : Relation
 
     internal override void WriteData(
         ArrayBufferWriter<byte> arrayBufferWriter,
-        MessagePackSerializerOptions options
+        MessagePackSerializerOptions serializerOptions
     ) =>
         MessagePackSerializer.Serialize(
             arrayBufferWriter,
             _data.AsMemory(0, _relatedToCount),
-            options
+            serializerOptions
         );
+
+    internal override void CopyAllData(
+        byte[] rawRelations,
+        MessagePackSerializerOptions deserializerOptions
+    ) =>
+        MessagePackSerializer
+            .Deserialize<TRelation[]>(rawRelations, deserializerOptions)
+            .AsSpan()
+            .CopyTo(_data.AsSpan(0, _relatedToCount));
 
     protected override void Resize(int currentLength)
     {

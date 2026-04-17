@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Threading;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
@@ -19,11 +18,6 @@ public sealed partial class World
     /// that exceeds <see cref="int.MaxValue"/>, causing an overflow when cast back to <see langword="int"/>.
     /// </summary>
     private const int MaxEntityCapacity = 1 << 30;
-
-    private static int s_worldsCount;
-    private static readonly Lock s_lock = new();
-
-    internal readonly int _worldId;
 
     internal int CountTotalEntities() => _entitiesCount;
 
@@ -80,11 +74,5 @@ public sealed partial class World
 
         EntitiesEvents = new();
         RelationsEvents = new();
-
-        lock (s_lock)
-        {
-            _worldId = s_worldsCount;
-            s_worldsCount++;
-        }
     }
 }

@@ -57,6 +57,9 @@ internal static class RelationsMeta
     internal static int GetRelationId(Type type) => s_relationRegistry.GetTypeId(type);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int GetRelationId(string typeName) => s_relationRegistry.GetTypeId(typeName);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static RelationType GetRelationType(int index) =>
         s_relationRegistry.GetTypeMeta(index);
 

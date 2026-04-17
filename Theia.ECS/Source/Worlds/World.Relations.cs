@@ -45,6 +45,13 @@ public sealed partial class World
         return relationLinked._linked;
     }
 
+    internal Relation UnrestrictedAddRelation(int relationId, Entity owner, Entity target)
+    {
+        RelationAccounted relationAccounted = AttemptAccountRelation(relationId, owner, target);
+        TryRelate(owner, target, relationAccounted);
+        return relationAccounted._relation;
+    }
+
     public bool TryAddEvaluatedRelation<TRelation>(
         Entity owner,
         Entity target,

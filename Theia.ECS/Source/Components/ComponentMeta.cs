@@ -59,8 +59,8 @@ internal static class ComponentsMeta
     internal static int GetComponentId(string typeName) => s_componentRegistry.GetTypeId(typeName);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static ComponentType GetComponentType(int index) =>
-        s_componentRegistry.GetTypeMeta(index);
+    internal static ComponentType GetComponentType(int componentId) =>
+        s_componentRegistry.GetTypeMeta(componentId);
 
     internal static int Count() => s_componentRegistry.Count();
 

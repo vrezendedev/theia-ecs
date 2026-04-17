@@ -7,6 +7,8 @@ internal abstract class Unique
 {
     internal abstract void WriteData(
         ArrayBufferWriter<byte> arrayBufferWriter,
-        MessagePackSerializerOptions options
+        MessagePackSerializerOptions serializerOptions
     );
+
+    internal abstract void CopyData(byte[] data, MessagePackSerializerOptions deserializerOptions);
 }

@@ -32,4 +32,9 @@ internal sealed class Unique<TComponent> : Unique
         ArrayBufferWriter<byte> arrayBufferWriter,
         MessagePackSerializerOptions options
     ) => MessagePackSerializer.Serialize(arrayBufferWriter, _value, options);
+
+    internal override void CopyData(
+        byte[] data,
+        MessagePackSerializerOptions deserializerOptions
+    ) => _value = MessagePackSerializer.Deserialize<TComponent>(data, deserializerOptions);
 }

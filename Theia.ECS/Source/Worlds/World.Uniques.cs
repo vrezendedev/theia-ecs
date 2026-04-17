@@ -10,6 +10,25 @@ public sealed partial class World
     private Unique[] _uniques = Array.Empty<Unique>();
     private readonly Lock _uniquesLock = new();
 
+    internal Unique GetOrCreateUnique(int componentId)
+    {
+        Unique[] uniques = _uniques;
+
+        if (IsUniqueAlreadyCreated(componentId, uniques))
+            return uniques[componentId];
+
+        lock (_uniquesLock)
+        {
+            if (componentId >= _uniques.Length)
+                Array.Resize(ref _uniques, componentId + 1);
+
+            if (_uniques[componentId] is null)
+                _uniques[componentId] = ComponentsMeta.GetComponentType(componentId).CreateUnique();
+
+            return _uniques[componentId];
+        }
+    }
+
     private Unique<TComponent> GetOrCreateUnique<TComponent>()
         where TComponent : struct
     {
@@ -17,7 +36,7 @@ public sealed partial class World
 
         Unique[] uniques = _uniques;
 
-        if (componentId < uniques.Length && uniques[componentId] is not null)
+        if (IsUniqueAlreadyCreated(componentId, uniques))
             return (Unique<TComponent>)uniques[componentId];
 
         lock (_uniquesLock)
@@ -31,6 +50,10 @@ public sealed partial class World
             return (Unique<TComponent>)_uniques[componentId];
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool IsUniqueAlreadyCreated(int componentId, Unique[] snapshot) =>
+        componentId < snapshot.Length && snapshot[componentId] is not null;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ReadOnlySpan<Unique> GetUniques() => _uniques;

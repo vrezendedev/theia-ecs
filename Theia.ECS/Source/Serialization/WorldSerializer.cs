@@ -146,14 +146,25 @@ internal sealed class WorldSerializer
         return this;
     }
 
+    /// <summary>
+    /// Iterates in reverse order so that <see cref="UniqueDataTransferObject"/> entries are written
+    /// from the highest component ID down to zero.
+    /// <para>
+    /// During deserialization, the forward pass then encounters the highest component ID first, allowing
+    /// <see cref="World.GetOrCreateUnique"/> to, presumably, resize <c>_uniques</c> to its final required length
+    /// in a single allocation.
+    /// </para>
+    /// All subsequent calls for lower IDs may be guaranteed to fit within the already-allocated array, avoiding
+    /// incremental resizes that would otherwise occur for each unique crossing a capacity boundary.
+    /// </summary>
     private WorldSerializer AccountUniques(ReadOnlySpan<Unique> uniques)
     {
-        UniqueDataTransferObject[] uniqueDataTransferObjects =
+        _dtoWorld.UniquesAccounted =
             uniques.Length > 0
                 ? new UniqueDataTransferObject[uniques.Length]
                 : Array.Empty<UniqueDataTransferObject>();
 
-        for (int i = 0; i < uniques.Length; i++)
+        for (int i = uniques.Length - 1; i >= 0; i--)
         {
             Unique unique = uniques[i];
 
@@ -170,10 +181,8 @@ internal sealed class WorldSerializer
                 uniqueDto.ComponentData = _bufferWriter.WrittenSpan.ToArray();
             }
 
-            uniqueDataTransferObjects[i] = uniqueDto;
+            _dtoWorld.UniquesAccounted[i] = uniqueDto;
         }
-
-        _dtoWorld.UniquesAccounted = uniqueDataTransferObjects;
 
         return this;
     }
