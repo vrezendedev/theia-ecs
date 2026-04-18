@@ -13,7 +13,8 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
     internal SettlerQuery(in World world, in Assemblage<ComponentT1> assemblage)
         : base(world, assemblage) { }
 
-    public void ForEachEntity(ForEachEntity<ComponentT1> forEachEntity)
+    public void ForEachEntity<T>(ref T forEachEntity)
+        where T : struct, IForEachEntity<ComponentT1>
     {
         Archetype archetype = _archetype;
 
@@ -42,13 +43,14 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
             Span<ComponentT1> storageT1 = ((Storage<ComponentT1>)storagesT1[i]).GetValues(count);
 
             for (int j = 0; j < count; j++)
-                forEachEntity(entities[j], ref storageT1[j]);
+                forEachEntity.Execute(entities[j], ref storageT1[j]);
         }
 
         _world.DecrementQueriesBeingExecuted();
     }
 
-    public void ForEach(ForEach<ComponentT1> forEach)
+    public void ForEach<T>(ref T forEach)
+        where T : struct, IForEach<ComponentT1>
     {
         Archetype archetype = _archetype;
 
@@ -75,7 +77,7 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
             Span<ComponentT1> storageT1 = ((Storage<ComponentT1>)storagesT1[i]).GetValues(count);
 
             for (int j = 0; j < count; j++)
-                forEach(ref storageT1[j]);
+                forEach.Execute(ref storageT1[j]);
         }
 
         _world.DecrementQueriesBeingExecuted();
@@ -88,7 +90,8 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
     internal NomadQuery(in World world, ReadOnlySpan<int> componentIds)
         : base(world, componentIds) { }
 
-    public void ForEachEntity(ForEachEntity<ComponentT1> forEachEntity)
+    public void ForEachEntity<T>(ref T forEachEntity)
+        where T : struct, IForEachEntity<ComponentT1>
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 
@@ -127,14 +130,15 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
                 );
 
                 for (int j = 0; j < count; j++)
-                    forEachEntity(entities[j], ref storageT1[j]);
+                    forEachEntity.Execute(entities[j], ref storageT1[j]);
             }
         }
 
         _world.DecrementQueriesBeingExecuted();
     }
 
-    public void ForEach(ForEach<ComponentT1> forEach)
+    public void ForEach<T>(ref T forEach)
+        where T : struct, IForEach<ComponentT1>
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 
@@ -171,7 +175,7 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
                 );
 
                 for (int j = 0; j < count; j++)
-                    forEach(ref storageT1[j]);
+                    forEach.Execute(ref storageT1[j]);
             }
         }
 

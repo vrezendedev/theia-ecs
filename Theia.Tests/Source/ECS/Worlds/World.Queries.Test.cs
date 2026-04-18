@@ -9,6 +9,125 @@ namespace Theia.Tests.ECS.Worlds;
 
 public sealed class WorldQueriesTest
 {
+    private struct ForEachPosition : IForEach<Position>
+    {
+        public int CallCount;
+        public int X;
+        public int Y;
+
+        public void Execute(ref Position c1)
+        {
+            CallCount++;
+            c1.X = X;
+            c1.Y = Y;
+        }
+    }
+
+    private struct ForEachPositionMultiply : IForEach<Position>
+    {
+        public int XMultiplier;
+
+        public void Execute(ref Position c1)
+        {
+            c1.X *= XMultiplier;
+        }
+    }
+
+    private struct ForEachEntityPosition : IForEachEntity<Position>
+    {
+        public int CallCount;
+        public int X;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            CallCount++;
+            c1.X = X;
+        }
+    }
+
+    private struct AttemptAddForEachEntityPosition : IForEachEntity<Position>
+    {
+        public World World;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            World.TryAddComponent(entity, new Velocity());
+        }
+    }
+
+    private struct AttemptGhoulifyForEachEntityPosition : IForEachEntity<Position>
+    {
+        public World World;
+        public Entity Target;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            World.TryGhoulify(Target);
+        }
+    }
+
+    private struct CaptureEntityForEachEntityPosition : IForEachEntity<Position>
+    {
+        public Entity Entity;
+        public Position Position;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            Entity = entity;
+            Position = c1;
+        }
+    }
+
+    private struct DeferredCreateForEachEntityPosition : IForEachEntity<Position>
+    {
+        public Assemblage<Position> Assemblage;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            Assemblage.DeferredCreate(new Position { X = 1 });
+        }
+    }
+
+    private struct DeferredGhoulifyForEachEntityPosition : IForEachEntity<Position>
+    {
+        public World World;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            World.DeferredGhoulify(entity);
+        }
+    }
+
+    private struct DeferredAddVelocityForEachEntityPosition : IForEachEntity<Position>
+    {
+        public World World;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            World.DeferredAddComponent<Velocity>(entity);
+        }
+    }
+
+    private struct DeferredRemovePositionForEachEntityPosition : IForEachEntity<Position>
+    {
+        public World World;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            World.DeferredRemoveComponent<Position>(entity);
+        }
+    }
+
+    private struct DeferredRemoveVelocityForEachEntityPosition : IForEachEntity<Position>
+    {
+        public World World;
+
+        public void Execute(Entity entity, ref Position c1)
+        {
+            World.DeferredRemoveComponent<Velocity>(entity);
+        }
+    }
+
     [Fact]
     public void CreateSettlerQuery_ReturnsNonNullInstance()
     {
@@ -64,11 +183,11 @@ public sealed class WorldQueriesTest
 
         NomadQuery<Position> query = world.CreateNomadQuery<Position>();
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -82,11 +201,11 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position { X = 1 });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -98,11 +217,11 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(0, callCount);
+        Assert.Equal(0, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -112,11 +231,11 @@ public sealed class WorldQueriesTest
 
         NomadQuery<Position> query = world.CreateNomadQuery<Position>();
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(0, callCount);
+        Assert.Equal(0, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -130,11 +249,11 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position { X = 1 });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -148,11 +267,11 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position { X = 1 });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -169,11 +288,11 @@ public sealed class WorldQueriesTest
         for (int i = 0; i < count; i++)
             assemblage.Create(new Position { X = i });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -187,13 +306,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position { X = 1, Y = 2 });
 
-        query.ForEach(
-            (ref Position position) =>
-            {
-                position.X = 99;
-                position.Y = 77;
-            }
-        );
+        ForEachPosition forEachPosition = new() { X = 99, Y = 77 };
+
+        query.ForEach(ref forEachPosition);
 
         Assert.Equal(99, world.Get<Position>(entity).X);
         Assert.Equal(77, world.Get<Position>(entity).Y);
@@ -210,7 +325,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position { X = 1 });
 
-        query.ForEach((ref Position position) => position.X = 55);
+        ForEachPosition forEachPosition = new() { X = 55 };
+
+        query.ForEach(ref forEachPosition);
 
         Assert.Equal(55, world.Get<Position>(entity).X);
     }
@@ -231,7 +348,9 @@ public sealed class WorldQueriesTest
         for (int i = 0; i < count; i++)
             entities[i] = assemblage.Create(new Position { X = i });
 
-        query.ForEach((ref Position position) => position.X *= 2);
+        ForEachPositionMultiply forEachPositionMultiply = new() { XMultiplier = 2 };
+
+        query.ForEach(ref forEachPositionMultiply);
 
         for (int i = 0; i < count; i++)
             Assert.Equal(i * 2, world.Get<Position>(entities[i]).X);
@@ -250,13 +369,13 @@ public sealed class WorldQueriesTest
 
         Assert.True(world.TryAddComponent<Velocity>(entityA));
 
-        Entity entityB = positionOnly.Create(new Position { X = 2 });
+        positionOnly.Create(new Position { X = 2 });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(2, callCount);
+        Assert.Equal(2, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -272,11 +391,11 @@ public sealed class WorldQueriesTest
 
         world.TryAddComponent<Velocity>(entity);
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -290,11 +409,11 @@ public sealed class WorldQueriesTest
 
         velocityOnly.Create(new Velocity { X = 1 });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(0, callCount);
+        Assert.Equal(0, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -308,7 +427,9 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position());
 
-        query.ForEach((ref Position _) => { });
+        ForEachPosition forEachPosition = new();
+
+        query.ForEach(ref forEachPosition);
 
         Assert.False(world.AreThereAnyQueriesBeingExecuted());
     }
@@ -324,7 +445,9 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position());
 
-        query.ForEach((ref Position _) => { });
+        ForEachPosition forEachPosition = new();
+
+        query.ForEach(ref forEachPosition);
 
         Assert.False(world.AreThereAnyQueriesBeingExecuted());
     }
@@ -340,8 +463,10 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
+        AttemptAddForEachEntityPosition attemptAddForEachEntityPosition = new() { World = world };
+
         Assert.Throws<InvalidOperationException>(() =>
-            query.ForEach((ref Position _) => world.TryAddComponent<Velocity>(entity))
+            query.ForEachEntity(ref attemptAddForEachEntityPosition)
         );
     }
 
@@ -356,8 +481,10 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
+        AttemptAddForEachEntityPosition attemptAddForEachEntityPosition = new() { World = world };
+
         Assert.Throws<InvalidOperationException>(() =>
-            query.ForEach((ref Position _) => world.TryAddComponent<Velocity>(entity))
+            query.ForEachEntity(ref attemptAddForEachEntityPosition)
         );
     }
 
@@ -375,11 +502,11 @@ public sealed class WorldQueriesTest
         for (int i = 0; i < count; i++)
             assemblage.Create(new Position { X = i });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -396,11 +523,11 @@ public sealed class WorldQueriesTest
         for (int i = 0; i < count; i++)
             assemblage.Create(new Position { X = i });
 
-        int callCount = 0;
+        ForEachPosition forEachPosition = new();
 
-        query.ForEach((ref Position _) => callCount++);
+        query.ForEach(ref forEachPosition);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEachPosition.CallCount);
     }
 
     [Fact]
@@ -412,11 +539,11 @@ public sealed class WorldQueriesTest
 
         SettlerQuery<Position> query = world.CreateSettlerQuery(assemblage);
 
-        int callCount = 0;
+        ForEachEntityPosition forEachEntityPosition = new();
 
-        query.ForEachEntity((Entity _, ref Position __) => callCount++);
+        query.ForEachEntity(ref forEachEntityPosition);
 
-        Assert.Equal(0, callCount);
+        Assert.Equal(0, forEachEntityPosition.CallCount);
     }
 
     [Fact]
@@ -426,11 +553,11 @@ public sealed class WorldQueriesTest
 
         NomadQuery<Position> query = world.CreateNomadQuery<Position>();
 
-        int callCount = 0;
+        ForEachEntityPosition forEachEntityPosition = new();
 
-        query.ForEachEntity((Entity _, ref Position __) => callCount++);
+        query.ForEachEntity(ref forEachEntityPosition);
 
-        Assert.Equal(0, callCount);
+        Assert.Equal(0, forEachEntityPosition.CallCount);
     }
 
     [Fact]
@@ -444,11 +571,11 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position());
 
-        int callCount = 0;
+        ForEachEntityPosition forEachEntityPosition = new();
 
-        query.ForEachEntity((Entity _, ref Position __) => callCount++);
+        query.ForEachEntity(ref forEachEntityPosition);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, forEachEntityPosition.CallCount);
     }
 
     [Fact]
@@ -462,20 +589,12 @@ public sealed class WorldQueriesTest
 
         Entity created = assemblage.Create(new Position { X = 5, Y = 10 });
 
-        Entity receivedEntity = default;
+        CaptureEntityForEachEntityPosition captureEntityForEachEntityPosition = new();
 
-        float receivedX = 0;
+        query.ForEachEntity(ref captureEntityForEachEntityPosition);
 
-        query.ForEachEntity(
-            (Entity entity, ref Position position) =>
-            {
-                receivedEntity = entity;
-                receivedX = position.X;
-            }
-        );
-
-        Assert.Equal(created._id, receivedEntity._id);
-        Assert.Equal(5, receivedX);
+        Assert.Equal(created._id, captureEntityForEachEntityPosition.Entity._id);
+        Assert.Equal(5, captureEntityForEachEntityPosition.Position.X);
     }
 
     [Fact]
@@ -489,20 +608,12 @@ public sealed class WorldQueriesTest
 
         Entity created = assemblage.Create(new Position { X = 7, Y = 3 });
 
-        Entity receivedEntity = default;
+        CaptureEntityForEachEntityPosition captureEntityForEachEntityPosition = new();
 
-        float receivedX = 0;
+        query.ForEachEntity(ref captureEntityForEachEntityPosition);
 
-        query.ForEachEntity(
-            (Entity entity, ref Position position) =>
-            {
-                receivedEntity = entity;
-                receivedX = position.X;
-            }
-        );
-
-        Assert.Equal(created._id, receivedEntity._id);
-        Assert.Equal(7, receivedX);
+        Assert.Equal(created._id, captureEntityForEachEntityPosition.Entity._id);
+        Assert.Equal(7, captureEntityForEachEntityPosition.Position.X);
     }
 
     [Fact]
@@ -516,7 +627,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position { X = 1 });
 
-        query.ForEachEntity((Entity _, ref Position position) => position.X = 42);
+        ForEachEntityPosition forEachPosition = new() { X = 42 };
+
+        query.ForEachEntity(ref forEachPosition);
 
         Assert.Equal(42, world.Get<Position>(entity).X);
     }
@@ -534,13 +647,13 @@ public sealed class WorldQueriesTest
 
         Assert.True(world.TryAddComponent<Velocity>(entityA));
 
-        Entity entityB = positionOnly.Create(new Position { X = 2 });
+        positionOnly.Create(new Position { X = 2 });
 
-        int callCount = 0;
+        ForEachEntityPosition forEachEntityPosition = new();
 
-        query.ForEachEntity((Entity _, ref Position __) => callCount++);
+        query.ForEachEntity(ref forEachEntityPosition);
 
-        Assert.Equal(2, callCount);
+        Assert.Equal(2, forEachEntityPosition.CallCount);
     }
 
     [Fact]
@@ -554,7 +667,9 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity _, ref Position __) => { });
+        ForEachEntityPosition forEachEntityPosition = new();
+
+        query.ForEachEntity(ref forEachEntityPosition);
 
         Assert.False(world.AreThereAnyQueriesBeingExecuted());
     }
@@ -570,7 +685,9 @@ public sealed class WorldQueriesTest
 
         assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity _, ref Position __) => { });
+        ForEachEntityPosition forEachEntityPosition = new();
+
+        query.ForEachEntity(ref forEachEntityPosition);
 
         Assert.False(world.AreThereAnyQueriesBeingExecuted());
     }
@@ -586,9 +703,13 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        Assert.Throws<InvalidOperationException>(() =>
-            query.ForEachEntity((Entity _, ref Position __) => world.TryGhoulify(entity))
-        );
+        AttemptGhoulifyForEachEntityPosition attemptGhoulify = new()
+        {
+            World = world,
+            Target = entity,
+        };
+
+        Assert.Throws<InvalidOperationException>(() => query.ForEachEntity(ref attemptGhoulify));
     }
 
     [Fact]
@@ -602,9 +723,13 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        Assert.Throws<InvalidOperationException>(() =>
-            query.ForEachEntity((Entity _, ref Position __) => world.TryGhoulify(entity))
-        );
+        AttemptGhoulifyForEachEntityPosition attemptGhoulify = new()
+        {
+            World = world,
+            Target = entity,
+        };
+
+        Assert.Throws<InvalidOperationException>(() => query.ForEachEntity(ref attemptGhoulify));
     }
 
     [Fact]
@@ -620,9 +745,9 @@ public sealed class WorldQueriesTest
 
         int countBefore = world.CountEntities();
 
-        query.ForEachEntity(
-            (Entity _, ref Position __) => assemblage.DeferredCreate(new Position { X = 1 })
-        );
+        DeferredCreateForEachEntityPosition deferredCreate = new() { Assemblage = assemblage };
+
+        query.ForEachEntity(ref deferredCreate);
 
         world.FlushDeferred();
 
@@ -642,9 +767,9 @@ public sealed class WorldQueriesTest
 
         int countBefore = world.CountEntities();
 
-        query.ForEachEntity(
-            (Entity _, ref Position _2) => assemblage.DeferredCreate(new Position { X = 1 })
-        );
+        DeferredCreateForEachEntityPosition deferredCreate = new() { Assemblage = assemblage };
+
+        query.ForEachEntity(ref deferredCreate);
 
         world.FlushDeferred();
 
@@ -662,7 +787,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredGhoulify(e));
+        DeferredGhoulifyForEachEntityPosition deferredGhoulify = new() { World = world };
+
+        query.ForEachEntity(ref deferredGhoulify);
 
         world.FlushDeferred();
 
@@ -680,7 +807,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredGhoulify(e));
+        DeferredGhoulifyForEachEntityPosition deferredGhoulify = new() { World = world };
+
+        query.ForEachEntity(ref deferredGhoulify);
 
         world.FlushDeferred();
 
@@ -698,7 +827,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredAddComponent<Velocity>(e));
+        DeferredAddVelocityForEachEntityPosition deferredAdd = new() { World = world };
+
+        query.ForEachEntity(ref deferredAdd);
 
         world.FlushDeferred();
 
@@ -716,7 +847,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity((Entity e, ref Position _) => world.DeferredAddComponent<Velocity>(e));
+        DeferredAddVelocityForEachEntityPosition deferredAdd = new() { World = world };
+
+        query.ForEachEntity(ref deferredAdd);
 
         world.FlushDeferred();
 
@@ -734,9 +867,9 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        query.ForEachEntity(
-            (Entity e, ref Position _) => world.DeferredRemoveComponent<Position>(e)
-        );
+        DeferredRemovePositionForEachEntityPosition deferredRemove = new() { World = world };
+
+        query.ForEachEntity(ref deferredRemove);
 
         world.FlushDeferred();
 
@@ -756,9 +889,9 @@ public sealed class WorldQueriesTest
 
         world.TryAddComponent<Velocity>(entity);
 
-        query.ForEachEntity(
-            (Entity e, ref Position _) => world.DeferredRemoveComponent<Velocity>(e)
-        );
+        DeferredRemoveVelocityForEachEntityPosition deferredRemove = new() { World = world };
+
+        query.ForEachEntity(ref deferredRemove);
 
         world.FlushDeferred();
 

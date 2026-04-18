@@ -8,6 +8,361 @@ namespace Theia.Tests.ECS.SourceGenerated;
 
 public sealed class SourceGeneratedTests
 {
+    private struct ForEachPositionVelocityCount : IForEach<Position, Velocity>
+    {
+        public int CallCount;
+
+        public void Execute(ref Position c1, ref Velocity c2) => CallCount++;
+    }
+
+    private struct ForEachPositionVelocityReadSum : IForEach<Position, Velocity>
+    {
+        public float SumX;
+        public float SumY;
+
+        public void Execute(ref Position c1, ref Velocity c2)
+        {
+            SumX = c1.X + c2.X;
+            SumY = c1.Y + c2.Y;
+        }
+    }
+
+    private struct ForEachPositionVelocityMutate : IForEach<Position, Velocity>
+    {
+        public int PositionX;
+        public int VelocityX;
+        public int VelocityY;
+
+        public void Execute(ref Position c1, ref Velocity c2)
+        {
+            c1.X = PositionX;
+            c2.X = VelocityX;
+            c2.Y = VelocityY;
+        }
+    }
+
+    private struct ForEachEntityPositionVelocityCapture : IForEachEntity<Position, Velocity>
+    {
+        public Entity Entity;
+        public float PositionX;
+        public float VelocityX;
+
+        public void Execute(Entity entity, ref Position c1, ref Velocity c2)
+        {
+            Entity = entity;
+            PositionX = c1.X;
+            VelocityX = c2.X;
+        }
+    }
+
+    private struct ForEachT4Count : IForEach<Position, Velocity, Rotation, Health>
+    {
+        public int CallCount;
+
+        public void Execute(ref Position c1, ref Velocity c2, ref Rotation c3, ref Health c4) =>
+            CallCount++;
+    }
+
+    private struct ForEachT4ReadPositionVelocity : IForEach<Position, Velocity, Rotation, Health>
+    {
+        public float PositionX;
+        public float VelocityX;
+
+        public void Execute(ref Position c1, ref Velocity c2, ref Rotation c3, ref Health c4)
+        {
+            PositionX = c1.X;
+            VelocityX = c2.X;
+        }
+    }
+
+    private struct ForEachEntityT4CaptureEntity
+        : IForEachEntity<Position, Velocity, Rotation, Health>
+    {
+        public Entity Entity;
+
+        public void Execute(
+            Entity entity,
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4
+        ) => Entity = entity;
+    }
+
+    private struct ForEachT8Count
+        : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
+    {
+        public int CallCount;
+
+        public void Execute(
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4,
+            ref Mass c5,
+            ref Scale c6,
+            ref Age c7,
+            ref Tag c8
+        ) => CallCount++;
+    }
+
+    private struct ForEachT8ReadSampled
+        : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
+    {
+        public float PositionX;
+        public float Mass;
+        public int Age;
+        public int Tag;
+
+        public void Execute(
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4,
+            ref Mass c5,
+            ref Scale c6,
+            ref Age c7,
+            ref Tag c8
+        )
+        {
+            PositionX = c1.X;
+            Mass = c5.Value;
+            Age = c7.Value;
+            Tag = c8.Value;
+        }
+    }
+
+    private struct ForEachEntityT8CaptureEntity
+        : IForEachEntity<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
+    {
+        public Entity Entity;
+
+        public void Execute(
+            Entity entity,
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4,
+            ref Mass c5,
+            ref Scale c6,
+            ref Age c7,
+            ref Tag c8
+        ) => Entity = entity;
+    }
+
+    private struct ForEachT16Count
+        : IForEach<
+            Position,
+            Velocity,
+            Rotation,
+            Health,
+            Mass,
+            Scale,
+            Age,
+            Tag,
+            Color,
+            Force,
+            Momentum,
+            Gravity,
+            Friction,
+            Torque,
+            Impulse,
+            Damping
+        >
+    {
+        public int CallCount;
+
+        public void Execute(
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4,
+            ref Mass c5,
+            ref Scale c6,
+            ref Age c7,
+            ref Tag c8,
+            ref Color c9,
+            ref Force c10,
+            ref Momentum c11,
+            ref Gravity c12,
+            ref Friction c13,
+            ref Torque c14,
+            ref Impulse c15,
+            ref Damping c16
+        ) => CallCount++;
+    }
+
+    private struct ForEachT16ReadFirstLast
+        : IForEach<
+            Position,
+            Velocity,
+            Rotation,
+            Health,
+            Mass,
+            Scale,
+            Age,
+            Tag,
+            Color,
+            Force,
+            Momentum,
+            Gravity,
+            Friction,
+            Torque,
+            Impulse,
+            Damping
+        >
+    {
+        public float PositionX;
+        public float Damping;
+
+        public void Execute(
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4,
+            ref Mass c5,
+            ref Scale c6,
+            ref Age c7,
+            ref Tag c8,
+            ref Color c9,
+            ref Force c10,
+            ref Momentum c11,
+            ref Gravity c12,
+            ref Friction c13,
+            ref Torque c14,
+            ref Impulse c15,
+            ref Damping c16
+        )
+        {
+            PositionX = c1.X;
+            Damping = c16.Value;
+        }
+    }
+
+    private struct ForEachEntityT16CaptureEntity
+        : IForEachEntity<
+            Position,
+            Velocity,
+            Rotation,
+            Health,
+            Mass,
+            Scale,
+            Age,
+            Tag,
+            Color,
+            Force,
+            Momentum,
+            Gravity,
+            Friction,
+            Torque,
+            Impulse,
+            Damping
+        >
+    {
+        public Entity Entity;
+
+        public void Execute(
+            Entity entity,
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4,
+            ref Mass c5,
+            ref Scale c6,
+            ref Age c7,
+            ref Tag c8,
+            ref Color c9,
+            ref Force c10,
+            ref Momentum c11,
+            ref Gravity c12,
+            ref Friction c13,
+            ref Torque c14,
+            ref Impulse c15,
+            ref Damping c16
+        ) => Entity = entity;
+    }
+
+    private struct ForEachT16DeferredCreate
+        : IForEach<
+            Position,
+            Velocity,
+            Rotation,
+            Health,
+            Mass,
+            Scale,
+            Age,
+            Tag,
+            Color,
+            Force,
+            Momentum,
+            Gravity,
+            Friction,
+            Torque,
+            Impulse,
+            Damping
+        >
+    {
+        public Assemblage<
+            Position,
+            Velocity,
+            Rotation,
+            Health,
+            Mass,
+            Scale,
+            Age,
+            Tag,
+            Color,
+            Force,
+            Momentum,
+            Gravity,
+            Friction,
+            Torque,
+            Impulse,
+            Damping
+        > Assemblage;
+        public int Count;
+
+        public void Execute(
+            ref Position c1,
+            ref Velocity c2,
+            ref Rotation c3,
+            ref Health c4,
+            ref Mass c5,
+            ref Scale c6,
+            ref Age c7,
+            ref Tag c8,
+            ref Color c9,
+            ref Force c10,
+            ref Momentum c11,
+            ref Gravity c12,
+            ref Friction c13,
+            ref Torque c14,
+            ref Impulse c15,
+            ref Damping c16
+        )
+        {
+            for (int i = 0; i < Count; i++)
+                Assemblage.DeferredCreate(
+                    new Position(),
+                    new Velocity(),
+                    new Rotation(),
+                    new Health(),
+                    new Mass(),
+                    new Scale(),
+                    new Age(),
+                    new Tag(),
+                    new Color(),
+                    new Force(),
+                    new Momentum(),
+                    new Gravity(),
+                    new Friction(),
+                    new Torque(),
+                    new Impulse(),
+                    new Damping()
+                );
+        }
+    }
+
     [Fact]
     public void CreateAssemblage_T2_ReturnsNonNullInstance()
     {
@@ -456,11 +811,11 @@ public sealed class SourceGeneratedTests
         for (int i = 0; i < count; i++)
             assemblage.Create(new Position() { X = i }, new Velocity() { X = i });
 
-        int callCount = 0;
+        ForEachPositionVelocityCount forEach = new();
 
-        query.ForEach((ref Position _, ref Velocity __) => callCount++);
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -474,19 +829,12 @@ public sealed class SourceGeneratedTests
 
         assemblage.Create(new Position() { X = 3, Y = 7 }, new Velocity() { X = 5, Y = 11 });
 
-        float sumX = 0;
-        float sumY = 0;
+        ForEachPositionVelocityReadSum forEach = new();
 
-        query.ForEach(
-            (ref Position p, ref Velocity v) =>
-            {
-                sumX = p.X + v.X;
-                sumY = p.Y + v.Y;
-            }
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(8, sumX);
-        Assert.Equal(18, sumY);
+        Assert.Equal(8, forEach.SumX);
+        Assert.Equal(18, forEach.SumY);
     }
 
     [Fact]
@@ -503,13 +851,9 @@ public sealed class SourceGeneratedTests
             new Velocity() { X = 3, Y = 4 }
         );
 
-        query.ForEach(
-            (ref Position p, ref Velocity v) =>
-            {
-                p.X = 99;
-                v.Y = 77;
-            }
-        );
+        ForEachPositionVelocityMutate forEach = new() { PositionX = 99, VelocityY = 77 };
+
+        query.ForEach(ref forEach);
 
         Assert.Equal(99, world.Get<Position>(entity).X);
         Assert.Equal(77, world.Get<Velocity>(entity).Y);
@@ -526,22 +870,13 @@ public sealed class SourceGeneratedTests
 
         Entity created = assemblage.Create(new Position() { X = 10 }, new Velocity() { X = 20 });
 
-        Entity receivedEntity = default;
-        float receivedPX = 0;
-        float receivedVX = 0;
+        ForEachEntityPositionVelocityCapture forEach = new();
 
-        query.ForEachEntity(
-            (Entity e, ref Position p, ref Velocity v) =>
-            {
-                receivedEntity = e;
-                receivedPX = p.X;
-                receivedVX = v.X;
-            }
-        );
+        query.ForEachEntity(ref forEach);
 
-        Assert.Equal(created._id, receivedEntity._id);
-        Assert.Equal(10, receivedPX);
-        Assert.Equal(20, receivedVX);
+        Assert.Equal(created._id, forEach.Entity._id);
+        Assert.Equal(10, forEach.PositionX);
+        Assert.Equal(20, forEach.VelocityX);
     }
 
     [Fact]
@@ -558,11 +893,11 @@ public sealed class SourceGeneratedTests
         for (int i = 0; i < count; i++)
             assemblage.Create(new Position() { X = i }, new Velocity() { X = i });
 
-        int callCount = 0;
+        ForEachPositionVelocityCount forEach = new();
 
-        query.ForEach((ref Position _, ref Velocity __) => callCount++);
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -576,13 +911,9 @@ public sealed class SourceGeneratedTests
 
         Entity entity = assemblage.Create(new Position() { X = 1 }, new Velocity() { X = 2 });
 
-        query.ForEach(
-            (ref Position p, ref Velocity v) =>
-            {
-                p.X = 55;
-                v.X = 66;
-            }
-        );
+        ForEachPositionVelocityMutate forEach = new() { PositionX = 55, VelocityX = 66 };
+
+        query.ForEach(ref forEach);
 
         Assert.Equal(55, world.Get<Position>(entity).X);
         Assert.Equal(66, world.Get<Velocity>(entity).X);
@@ -599,23 +930,13 @@ public sealed class SourceGeneratedTests
 
         Entity created = assemblage.Create(new Position() { X = 7 }, new Velocity() { X = 13 });
 
-        Entity receivedEntity = default;
+        ForEachEntityPositionVelocityCapture forEach = new();
 
-        float receivedPX = 0;
-        float receivedVX = 0;
+        query.ForEachEntity(ref forEach);
 
-        query.ForEachEntity(
-            (Entity e, ref Position p, ref Velocity v) =>
-            {
-                receivedEntity = e;
-                receivedPX = p.X;
-                receivedVX = v.X;
-            }
-        );
-
-        Assert.Equal(created._id, receivedEntity._id);
-        Assert.Equal(7, receivedPX);
-        Assert.Equal(13, receivedVX);
+        Assert.Equal(created._id, forEach.Entity._id);
+        Assert.Equal(7, forEach.PositionX);
+        Assert.Equal(13, forEach.VelocityX);
     }
 
     [Fact]
@@ -631,11 +952,11 @@ public sealed class SourceGeneratedTests
 
         world.TryAddComponent<Rotation>(entity);
 
-        int callCount = 0;
+        ForEachPositionVelocityCount forEach = new();
 
-        query.ForEach((ref Position _, ref Velocity __) => callCount++);
+        query.ForEach(ref forEach);
 
-        Assert.Equal(1, callCount);
+        Assert.Equal(1, forEach.CallCount);
     }
 
     [Fact]
@@ -659,13 +980,11 @@ public sealed class SourceGeneratedTests
         for (int i = 0; i < count; i++)
             assemblage.Create(new Position(), new Velocity(), new Rotation(), new Health());
 
-        int callCount = 0;
+        ForEachT4Count forEach = new();
 
-        query.ForEach(
-            (ref Position _, ref Velocity __, ref Rotation ___, ref Health ____) => callCount++
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -691,19 +1010,12 @@ public sealed class SourceGeneratedTests
             new Health()
         );
 
-        float posX = 0;
-        float velX = 0;
+        ForEachT4ReadPositionVelocity forEach = new();
 
-        query.ForEach(
-            (ref Position p, ref Velocity v, ref Rotation _, ref Health __) =>
-            {
-                posX = p.X;
-                velX = v.X;
-            }
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(1, posX);
-        Assert.Equal(2, velX);
+        Assert.Equal(1, forEach.PositionX);
+        Assert.Equal(2, forEach.VelocityX);
     }
 
     [Fact]
@@ -730,13 +1042,11 @@ public sealed class SourceGeneratedTests
         for (int i = 0; i < count; i++)
             assemblage.Create(new Position(), new Velocity(), new Rotation(), new Health());
 
-        int callCount = 0;
+        ForEachT4Count forEach = new();
 
-        query.ForEach(
-            (ref Position _, ref Velocity __, ref Rotation ___, ref Health ____) => callCount++
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -762,14 +1072,11 @@ public sealed class SourceGeneratedTests
             new Health()
         );
 
-        Entity receivedEntity = default;
+        ForEachEntityT4CaptureEntity forEach = new();
 
-        query.ForEachEntity(
-            (Entity e, ref Position _, ref Velocity __, ref Rotation ___, ref Health ____) =>
-                receivedEntity = e
-        );
+        query.ForEachEntity(ref forEach);
 
-        Assert.Equal(created._id, receivedEntity._id);
+        Assert.Equal(created._id, forEach.Entity._id);
     }
 
     [Fact]
@@ -797,22 +1104,11 @@ public sealed class SourceGeneratedTests
                 new Tag()
             );
 
-        int callCount = 0;
+        ForEachT8Count forEach = new();
 
-        query.ForEach(
-            (
-                ref Position _,
-                ref Velocity __,
-                ref Rotation ___,
-                ref Health ____,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8
-            ) => callCount++
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -837,34 +1133,14 @@ public sealed class SourceGeneratedTests
             new Tag() { Value = 5 }
         );
 
-        float posX = 0;
-        float mass = 0;
-        int age = 0;
-        int tag = 0;
+        ForEachT8ReadSampled forEach = new();
 
-        query.ForEach(
-            (
-                ref Position p,
-                ref Velocity _,
-                ref Rotation __,
-                ref Health ___,
-                ref Mass m,
-                ref Scale _4,
-                ref Age a,
-                ref Tag t
-            ) =>
-            {
-                posX = p.X;
-                mass = m.Value;
-                age = a.Value;
-                tag = t.Value;
-            }
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(1, posX);
-        Assert.Equal(3f, mass);
-        Assert.Equal(4, age);
-        Assert.Equal(5, tag);
+        Assert.Equal(1, forEach.PositionX);
+        Assert.Equal(3f, forEach.Mass);
+        Assert.Equal(4, forEach.Age);
+        Assert.Equal(5, forEach.Tag);
     }
 
     [Fact]
@@ -892,22 +1168,11 @@ public sealed class SourceGeneratedTests
                 new Tag()
             );
 
-        int callCount = 0;
+        ForEachT8Count forEach = new();
 
-        query.ForEach(
-            (
-                ref Position _,
-                ref Velocity __,
-                ref Rotation ___,
-                ref Health ____,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8
-            ) => callCount++
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -932,23 +1197,11 @@ public sealed class SourceGeneratedTests
             new Tag()
         );
 
-        Entity receivedEntity = default;
+        ForEachEntityT8CaptureEntity forEach = new();
 
-        query.ForEachEntity(
-            (
-                Entity e,
-                ref Position _,
-                ref Velocity __,
-                ref Rotation ___,
-                ref Health ____,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8
-            ) => receivedEntity = e
-        );
+        query.ForEachEntity(ref forEach);
 
-        Assert.Equal(created._id, receivedEntity._id);
+        Assert.Equal(created._id, forEach.Entity._id);
     }
 
     [Fact]
@@ -1033,30 +1286,11 @@ public sealed class SourceGeneratedTests
                 new Damping()
             );
 
-        int callCount = 0;
+        ForEachT16Count forEach = new();
 
-        query.ForEach(
-            (
-                ref Position _1,
-                ref Velocity _2,
-                ref Rotation _3,
-                ref Health _4,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8,
-                ref Color _9,
-                ref Force _10,
-                ref Momentum _11,
-                ref Gravity _12,
-                ref Friction _13,
-                ref Torque _14,
-                ref Impulse _15,
-                ref Damping _16
-            ) => callCount++
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -1138,36 +1372,12 @@ public sealed class SourceGeneratedTests
             new Damping() { Value = 0.9f }
         );
 
-        float posX = 0;
-        float damping = 0;
+        ForEachT16ReadFirstLast forEach = new();
 
-        query.ForEach(
-            (
-                ref Position p,
-                ref Velocity _2,
-                ref Rotation _3,
-                ref Health _4,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8,
-                ref Color _9,
-                ref Force _10,
-                ref Momentum _11,
-                ref Gravity _12,
-                ref Friction _13,
-                ref Torque _14,
-                ref Impulse _15,
-                ref Damping d
-            ) =>
-            {
-                posX = p.X;
-                damping = d.Value;
-            }
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(1, posX);
-        Assert.Equal(0.9f, damping, precision: 4);
+        Assert.Equal(1, forEach.PositionX);
+        Assert.Equal(0.9f, forEach.Damping, precision: 4);
     }
 
     [Fact]
@@ -1269,30 +1479,11 @@ public sealed class SourceGeneratedTests
                 new Damping()
             );
 
-        int callCount = 0;
+        ForEachT16Count forEach = new();
 
-        query.ForEach(
-            (
-                ref Position _1,
-                ref Velocity _2,
-                ref Rotation _3,
-                ref Health _4,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8,
-                ref Color _9,
-                ref Force _10,
-                ref Momentum _11,
-                ref Gravity _12,
-                ref Friction _13,
-                ref Torque _14,
-                ref Impulse _15,
-                ref Damping _16
-            ) => callCount++
-        );
+        query.ForEach(ref forEach);
 
-        Assert.Equal(count, callCount);
+        Assert.Equal(count, forEach.CallCount);
     }
 
     [Fact]
@@ -1374,31 +1565,11 @@ public sealed class SourceGeneratedTests
             new Damping()
         );
 
-        Entity receivedEntity = default;
+        ForEachEntityT16CaptureEntity forEach = new();
 
-        query.ForEachEntity(
-            (
-                Entity e,
-                ref Position _1,
-                ref Velocity _2,
-                ref Rotation _3,
-                ref Health _4,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8,
-                ref Color _9,
-                ref Force _10,
-                ref Momentum _11,
-                ref Gravity _12,
-                ref Friction _13,
-                ref Torque _14,
-                ref Impulse _15,
-                ref Damping _16
-            ) => receivedEntity = e
-        );
+        query.ForEachEntity(ref forEach);
 
-        Assert.Equal(created._id, receivedEntity._id);
+        Assert.Equal(created._id, forEach.Entity._id);
     }
 
     [Fact]
@@ -1483,51 +1654,11 @@ public sealed class SourceGeneratedTests
                 new Damping()
             );
 
-        settlerQuery.ForEach(
-            (
-                ref Position _1,
-                ref Velocity _2,
-                ref Rotation _3,
-                ref Health _4,
-                ref Mass _5,
-                ref Scale _6,
-                ref Age _7,
-                ref Tag _8,
-                ref Color _9,
-                ref Force _10,
-                ref Momentum _11,
-                ref Gravity _12,
-                ref Friction _13,
-                ref Torque _14,
-                ref Impulse _15,
-                ref Damping _16
-            ) =>
-            {
-                for (int i = 0; i < initial; i++)
-                    assemblage.DeferredCreate(
-                        new Position(),
-                        new Velocity(),
-                        new Rotation(),
-                        new Health(),
-                        new Mass(),
-                        new Scale(),
-                        new Age(),
-                        new Tag(),
-                        new Color(),
-                        new Force(),
-                        new Momentum(),
-                        new Gravity(),
-                        new Friction(),
-                        new Torque(),
-                        new Impulse(),
-                        new Damping()
-                    );
-            }
-        );
+        ForEachT16DeferredCreate forEach = new() { Assemblage = assemblage, Count = initial };
 
-        int countBefore = initial;
+        settlerQuery.ForEach(ref forEach);
 
-        Assert.Equal(countBefore, world.CountEntities());
+        Assert.Equal(initial, world.CountEntities());
 
         world.FlushDeferred();
 

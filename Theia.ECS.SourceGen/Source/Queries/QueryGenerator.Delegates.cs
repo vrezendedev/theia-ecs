@@ -39,8 +39,8 @@ namespace Theia.ECS.Queries;
                 "    "
             );
 
-            sb.AppendLine(ForEachEntityDelegateTemplate(generics, arguments, constraints));
-            sb.AppendLine(ForEachDelegateTemplate(generics, arguments, constraints));
+            sb.AppendLine(IForEachEntityTemplate(generics, constraints, arguments));
+            sb.AppendLine(IForEachTemplate(generics, constraints, arguments));
         }
 
         context.RegisterPostInitializationOutput(ctx =>
@@ -48,30 +48,27 @@ namespace Theia.ECS.Queries;
         );
     }
 
-    private static string ForEachEntityDelegateTemplate(
+    private static string IForEachEntityTemplate(
         string generics,
-        string arguments,
-        string constraints
+        string constraints,
+        string arguments
     ) =>
         $$"""
-public delegate void ForEachEntity{{generics}}(
-    Entity entity,
-    {{arguments}}
-)
-{{constraints}};
+public interface IForEachEntity{{generics}}
+{{constraints}}
+{
+    void Execute(Entity entity, {{arguments}});
+}
 
 """;
 
-    private static string ForEachDelegateTemplate(
-        string generics,
-        string arguments,
-        string constraints
-    ) =>
+    private static string IForEachTemplate(string generics, string constraints, string arguments) =>
         $$"""
-public delegate void ForEach{{generics}}(
-    {{arguments}}
-)
-{{constraints}};
+public interface IForEach{{generics}}
+{{constraints}}
+{
+    void Execute({{arguments}});
+}
 
 """;
 }

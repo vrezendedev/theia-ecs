@@ -161,7 +161,8 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
     internal SettlerQuery(in World world, in Assemblage{{generics}} assemblage)
         : base(world, assemblage) { }
 
-    public void ForEachEntity(ForEachEntity{{generics}} forEachEntity)
+    public void ForEachEntity<T>(ref T forEachEntity)
+        where T : struct, IForEachEntity{{generics}}
     {
         Archetype archetype = _archetype;
 
@@ -190,13 +191,14 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 {{storageVariables}}
 
             for (int j = 0; j < count; j++)
-               forEachEntity(entities[j], {{componentsParams}});
+               forEachEntity.Execute(entities[j], {{componentsParams}});
         }
 
         _world.DecrementQueriesBeingExecuted();
     }
 
-    public void ForEach(ForEach{{generics}} forEach)
+    public void ForEach<T>(ref T forEach)
+        where T : struct, IForEach{{generics}}
     {
         Archetype archetype = _archetype;
 
@@ -223,7 +225,7 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 {{storageVariables}}
 
             for (int j = 0; j < count; j++)
-               forEach({{componentsParams}});
+               forEach.Execute({{componentsParams}});
         }
 
         _world.DecrementQueriesBeingExecuted();
@@ -247,7 +249,8 @@ public sealed class NomadQuery{{generics}} : NomadQuery
     internal NomadQuery(in World world, ReadOnlySpan<int> componentIds)
         : base(world, componentIds) { }
 
-    public void ForEachEntity(ForEachEntity{{generics}} forEachEntity)
+    public void ForEachEntity<T>(ref T forEachEntity)
+        where T : struct, IForEachEntity{{generics}}
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 
@@ -283,14 +286,15 @@ public sealed class NomadQuery{{generics}} : NomadQuery
 {{storage}}
 
                 for (int j = 0; j < count; j++)
-                    forEachEntity(entities[j], {{componentsParams}});
+                    forEachEntity.Execute(entities[j], {{componentsParams}});
             }
         }
 
         _world.DecrementQueriesBeingExecuted();
     }
 
-    public void ForEach(ForEach{{generics}} forEach)
+    public void ForEach<T>(ref T forEach)
+        where T : struct, IForEach{{generics}}
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 
@@ -324,7 +328,7 @@ public sealed class NomadQuery{{generics}} : NomadQuery
 {{storage}}
 
                 for (int j = 0; j < count; j++)
-                    forEach({{componentsParams}});
+                    forEach.Execute({{componentsParams}});
             }
         }
 

@@ -15,6 +15,14 @@ public class TheiaCrossArchetypeQueryOnT1 : CrossArchetypeQueryOnT1
     private Assemblage<Component1, Component2>? _assemblageB;
     private NomadQuery<Component1>? _query;
 
+    private struct ForEachEntity : IForEachEntity<Component1>
+    {
+        public void Execute(Entity entity, ref Component1 c1)
+        {
+            c1.Value += 1;
+        }
+    }
+
     public override void Setup()
     {
         _world = new World();
@@ -40,12 +48,8 @@ public class TheiaCrossArchetypeQueryOnT1 : CrossArchetypeQueryOnT1
     [Benchmark]
     public override void Run()
     {
-        _query!.ForEachEntity(
-            (Entity entity, ref Component1 c1) =>
-            {
-                c1.Value += 1;
-            }
-        );
+        ForEachEntity forEach = new ForEachEntity();
+        _query!.ForEachEntity(ref forEach);
     }
 }
 
@@ -55,6 +59,16 @@ public class TheiaCrossArchetypeQueryOnT3 : CrossArchetypeQueryOnT3
     private Assemblage<Component1, Component2, Component3>? _assemblageA;
     private Assemblage<Component1, Component2, Component3, Component4>? _assemblageB;
     private NomadQuery<Component1, Component2, Component3>? _query;
+
+    private struct ForEachEntity : IForEachEntity<Component1, Component2, Component3>
+    {
+        public void Execute(Entity entity, ref Component1 c1, ref Component2 c2, ref Component3 c3)
+        {
+            c1.Value += 1;
+            c2.Value += 1;
+            c3.Value += 1;
+        }
+    }
 
     public override void Setup()
     {
@@ -90,14 +104,8 @@ public class TheiaCrossArchetypeQueryOnT3 : CrossArchetypeQueryOnT3
     [Benchmark]
     public override void Run()
     {
-        _query!.ForEachEntity(
-            (Entity entity, ref Component1 c1, ref Component2 c2, ref Component3 c3) =>
-            {
-                c1.Value += 1;
-                c2.Value += 1;
-                c3.Value += 1;
-            }
-        );
+        ForEachEntity forEachEntity = new();
+        _query!.ForEachEntity(ref forEachEntity);
     }
 }
 
@@ -114,6 +122,26 @@ public class TheiaCrossArchetypeQueryOnT5 : CrossArchetypeQueryOnT5
         Component6
     >? _assemblageB;
     private NomadQuery<Component1, Component2, Component3, Component4, Component5>? _query;
+
+    private struct ForEachEntity
+        : IForEachEntity<Component1, Component2, Component3, Component4, Component5>
+    {
+        public void Execute(
+            Entity entity,
+            ref Component1 c1,
+            ref Component2 c2,
+            ref Component3 c3,
+            ref Component4 c4,
+            ref Component5 c5
+        )
+        {
+            c1.Value += 1;
+            c2.Value += 1;
+            c3.Value += 1;
+            c4.Value += 1;
+            c5.Value += 1;
+        }
+    }
 
     public override void Setup()
     {
@@ -172,22 +200,7 @@ public class TheiaCrossArchetypeQueryOnT5 : CrossArchetypeQueryOnT5
     [Benchmark]
     public override void Run()
     {
-        _query!.ForEachEntity(
-            (
-                Entity entity,
-                ref Component1 c1,
-                ref Component2 c2,
-                ref Component3 c3,
-                ref Component4 c4,
-                ref Component5 c5
-            ) =>
-            {
-                c1.Value += 1;
-                c2.Value += 1;
-                c3.Value += 1;
-                c4.Value += 1;
-                c5.Value += 1;
-            }
-        );
+        ForEachEntity forEachEntity = new();
+        _query!.ForEachEntity(ref forEachEntity);
     }
 }
