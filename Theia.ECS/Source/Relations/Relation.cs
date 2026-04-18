@@ -84,7 +84,8 @@ internal class Relation
         return entities.AsSpan(0, _relatedToCount);
     }
 
-    internal void Query(QueryRelation update)
+    internal void Query<TQueryRelation>(ref TQueryRelation query)
+        where TQueryRelation : struct, IQueryRelation, allows ref struct
     {
         IncrementUpdateCount();
 
@@ -99,7 +100,7 @@ internal class Relation
                     ReadOnlySpan<Entity> entities = To();
 
                     for (int i = 0; i < count; i++)
-                        update(entities[i]);
+                        query.Execute(entities[i]);
                 }
             }
             finally

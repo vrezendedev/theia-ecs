@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Contracts;
 using Theia.ECS.Entities;
@@ -11,6 +10,47 @@ namespace Theia.Tests.ECS.Worlds;
 
 public sealed class WorldRelationTests
 {
+    private struct FriendQueryRelation : IQueryRelation
+    {
+        public int Count;
+
+        public void Execute(Entity other)
+        {
+            Count++;
+        }
+    }
+
+    private struct FriendQueryRelationInvalidOperationException : IQueryRelation
+    {
+        public World World;
+        public Entity Owner;
+        public Entity EntityB;
+
+        public void Execute(Entity other)
+        {
+            World.TryAddTagRelation<Friend>(Owner, EntityB);
+        }
+    }
+
+    private struct DamageQueryRelation : IQueryEvaluatedRelation<Damage>
+    {
+        public float Set;
+        public float Total;
+
+        public void Execute(Entity other, ref Damage relation)
+        {
+            if (Set > 0)
+                relation.Value = Set;
+
+            Total += relation.Value;
+        }
+    }
+
+    private struct FriendQueryEvaluatedRelationException : IQueryEvaluatedRelation<Friend>
+    {
+        public void Execute(Entity other, ref Friend relation) { }
+    }
+
     [Fact]
     public void TryAddTagRelation_WithAliveEntities_ReturnsTrue()
     {
@@ -866,11 +906,11 @@ public sealed class WorldRelationTests
         world.TryAddTagRelation<Friend>(owner, targetB);
         world.TryAddTagRelation<Friend>(owner, targetC);
 
-        List<Entity> visited = new();
+        FriendQueryRelation friendQueryRelation = new();
 
-        world.QueryRelation<Friend>(owner, e => visited.Add(e));
+        world.QueryRelation<Friend, FriendQueryRelation>(owner, ref friendQueryRelation);
 
-        Assert.Equal(3, visited.Count);
+        Assert.Equal(3, friendQueryRelation.Count);
     }
 
     [Fact]
@@ -886,10 +926,11 @@ public sealed class WorldRelationTests
         world.TryAddTagRelation<Friend>(owner, target);
         world.TryRemoveRelation<Friend>(owner, target);
 
-        int callCount = 0;
-        world.QueryRelation<Friend>(owner, _ => callCount++);
+        FriendQueryRelation friendQueryRelation = new();
 
-        Assert.Equal(0, callCount);
+        world.QueryRelation<Friend, FriendQueryRelation>(owner, ref friendQueryRelation);
+
+        Assert.Equal(0, friendQueryRelation.Count);
     }
 
     [Fact]
@@ -906,8 +947,11 @@ public sealed class WorldRelationTests
         world.TryGhoulify(owner);
 
         Assert.Throws<InvalidOperationException>(() =>
-            world.QueryRelation<Friend>(owner, _ => { })
-        );
+        {
+            FriendQueryRelation friendQueryRelation = new();
+
+            world.QueryRelation<Friend, FriendQueryRelation>(owner, ref friendQueryRelation);
+        });
     }
 
     [Fact]
@@ -924,8 +968,19 @@ public sealed class WorldRelationTests
         world.TryAddTagRelation<Friend>(owner, targetA);
 
         Assert.Throws<InvalidOperationException>(() =>
-            world.QueryRelation<Friend>(owner, _ => world.TryAddTagRelation<Friend>(owner, targetB))
-        );
+        {
+            FriendQueryRelationInvalidOperationException friendQueryRelationException = new()
+            {
+                World = world,
+                Owner = owner,
+                EntityB = targetB,
+            };
+
+            world.QueryRelation<Friend, FriendQueryRelationInvalidOperationException>(
+                owner,
+                ref friendQueryRelationException
+            );
+        });
     }
 
     [Fact]
@@ -942,11 +997,11 @@ public sealed class WorldRelationTests
         world.TryAddEvaluatedRelation(owner, targetA, new Damage { Value = 10f });
         world.TryAddEvaluatedRelation(owner, targetB, new Damage { Value = 20f });
 
-        float total = 0f;
+        DamageQueryRelation queryDamageRelation = new() { };
 
-        world.QueryEvaluatedRelation(owner, (Entity _, ref Damage d) => total += d.Value);
+        world.QueryEvaluatedRelation<Damage, DamageQueryRelation>(owner, ref queryDamageRelation);
 
-        Assert.Equal(30f, total);
+        Assert.Equal(30f, queryDamageRelation.Total);
     }
 
     [Fact]
@@ -961,7 +1016,9 @@ public sealed class WorldRelationTests
 
         world.TryAddEvaluatedRelation(owner, target, new Damage { Value = 5f });
 
-        world.QueryEvaluatedRelation(owner, (Entity _, ref Damage d) => d.Value = 99f);
+        DamageQueryRelation queryDamageRelation = new() { Set = 99 };
+
+        world.QueryEvaluatedRelation<Damage, DamageQueryRelation>(owner, ref queryDamageRelation);
 
         Assert.Equal(99f, world.GetEvaluatedRelation<Damage>(owner, target).Value);
     }
@@ -978,8 +1035,13 @@ public sealed class WorldRelationTests
 
         world.TryAddTagRelation<Friend>(owner, target);
 
+        FriendQueryEvaluatedRelationException friendQueryRelationException = new();
+
         Assert.Throws<InvalidOperationException>(() =>
-            world.QueryEvaluatedRelation(owner, (Entity _, ref Friend _) => { })
+            world.QueryEvaluatedRelation<Friend, FriendQueryEvaluatedRelationException>(
+                owner,
+                ref friendQueryRelationException
+            )
         );
     }
 

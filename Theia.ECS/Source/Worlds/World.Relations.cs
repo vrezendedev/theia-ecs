@@ -192,21 +192,26 @@ public sealed partial class World
         }
     }
 
-    public void QueryRelation<TRelation>(Entity owner, QueryRelation update)
-        where TRelation : struct =>
-        GetEntityRelation(RelationMeta<TRelation>.s_id, owner)._relation.Query(update);
-
-    public void QueryEvaluatedRelation<TRelation>(Entity owner, QueryRelation<TRelation> update)
+    public void QueryRelation<TRelation, TQueryRelation>(Entity owner, ref TQueryRelation query)
         where TRelation : struct
+        where TQueryRelation : struct, IQueryRelation, allows ref struct =>
+        GetEntityRelation(RelationMeta<TRelation>.s_id, owner)._relation.Query(ref query);
+
+    public void QueryEvaluatedRelation<TRelation, TQueryRelation>(
+        Entity owner,
+        ref TQueryRelation update
+    )
+        where TRelation : struct
+        where TQueryRelation : struct, IQueryEvaluatedRelation<TRelation>, allows ref struct
     {
         int relationdId = RelationMeta<TRelation>.s_id;
         RelationType relationType = RelationsMeta.GetRelationType(relationdId);
 
         ThrowIfExpectedEvaluatedRelation(relationType);
 
-        ((EvaluatedRelation<TRelation>)GetEntityRelation(relationdId, owner)._relation).Query(
-            update
-        );
+        (
+            (EvaluatedRelation<TRelation>)GetEntityRelation(relationdId, owner)._relation
+        ).QueryEvaluated(ref update);
     }
 
     public ReadOnlySpan<Entity> GetRelations<TRelation>(Entity owner)

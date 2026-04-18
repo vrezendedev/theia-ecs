@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Entities;
+using Theia.ECS.Relations;
 using Theia.ECS.Worlds;
 using Theia.Tests.Resources;
 
@@ -32,6 +33,84 @@ public sealed class WorldRelationConcurrencyTests
             .ToArray();
 
         await Task.WhenAll(tasks).WaitAsync(TestTimeoutSpan);
+    }
+
+    private struct FriendQueryRelation : IQueryRelation
+    {
+        public static int Count;
+
+        public void Execute(Entity other)
+        {
+            Interlocked.Increment(ref Count);
+        }
+    }
+
+    private struct DamageQueryRelation : IQueryEvaluatedRelation<Damage>
+    {
+        public static int Count;
+
+        public void Execute(Entity other, ref Damage relation)
+        {
+            Interlocked.Increment(ref Count);
+        }
+    }
+
+    private struct BlockingFriendQueryRelation : IQueryRelation
+    {
+        private readonly ManualResetEventSlim _entered;
+        private readonly ManualResetEventSlim _release;
+        private readonly bool[] _finished;
+
+        public BlockingFriendQueryRelation(
+            ManualResetEventSlim entered,
+            ManualResetEventSlim release,
+            bool[] finished
+        )
+        {
+            _entered = entered;
+            _release = release;
+            _finished = finished;
+        }
+
+        public void Execute(Entity other)
+        {
+            _entered.Set();
+            _release.Wait();
+            _finished[0] = true;
+        }
+    }
+
+    private struct BlockingDamageQueryRelation : IQueryEvaluatedRelation<Damage>
+    {
+        private readonly ManualResetEventSlim _entered;
+        private readonly ManualResetEventSlim _release;
+        private readonly bool[] _finished;
+
+        public BlockingDamageQueryRelation(
+            ManualResetEventSlim entered,
+            ManualResetEventSlim release,
+            bool[] finished
+        )
+        {
+            _entered = entered;
+            _release = release;
+            _finished = finished;
+        }
+
+        public void Execute(Entity other, ref Damage relation)
+        {
+            _entered.Set();
+            _release.Wait();
+            _finished[0] = true;
+        }
+    }
+
+    private struct IncrementDamageQueryRelation : IQueryEvaluatedRelation<Damage>
+    {
+        public void Execute(Entity other, ref Damage relation)
+        {
+            relation.Value += 1f;
+        }
     }
 
     [Fact]
@@ -237,14 +316,14 @@ public sealed class WorldRelationConcurrencyTests
         for (int i = 0; i < TargetCount; i++)
             world.TryAddTagRelation<Friend>(owner, assemblage.Create(new Position()));
 
-        int totalCallbacks = 0;
+        FriendQueryRelation friendQueryRelation = new();
 
         await RunConcurrent(
             ThreadCount,
-            _ => world.QueryRelation<Friend>(owner, _ => Interlocked.Increment(ref totalCallbacks))
+            _ => world.QueryRelation<Friend, FriendQueryRelation>(owner, ref friendQueryRelation)
         );
 
-        Assert.Equal(ThreadCount * TargetCount, totalCallbacks);
+        Assert.Equal(ThreadCount * TargetCount, FriendQueryRelation.Count);
     }
 
     [Fact]
@@ -265,18 +344,18 @@ public sealed class WorldRelationConcurrencyTests
                 new Damage { Value = 1f }
             );
 
-        int totalCallbacks = 0;
+        DamageQueryRelation damageQueryRelation = new();
 
         await RunConcurrent(
             ThreadCount,
             _ =>
-                world.QueryEvaluatedRelation<Damage>(
+                world.QueryEvaluatedRelation<Damage, DamageQueryRelation>(
                     owner,
-                    (Entity _, ref Damage _) => Interlocked.Increment(ref totalCallbacks)
+                    ref damageQueryRelation
                 )
         );
 
-        Assert.Equal(ThreadCount * TargetCount, totalCallbacks);
+        Assert.Equal(ThreadCount * TargetCount, DamageQueryRelation.Count);
     }
 
     [Fact]
@@ -295,18 +374,12 @@ public sealed class WorldRelationConcurrencyTests
         using ManualResetEventSlim queryEntered = new(false);
         using ManualResetEventSlim queryRelease = new(false);
 
-        bool finished = false;
+        bool[] finished = [false];
+
+        BlockingFriendQueryRelation queryRelation = new(queryEntered, queryRelease, finished);
 
         Task queryTask = Task.Run(() =>
-            world.QueryRelation<Friend>(
-                owner,
-                _ =>
-                {
-                    queryEntered.Set();
-                    queryRelease.Wait();
-                    finished = true;
-                }
-            )
+            world.QueryRelation<Friend, BlockingFriendQueryRelation>(owner, ref queryRelation)
         );
 
         bool entered = queryEntered.Wait(TestTimeoutMs);
@@ -320,7 +393,7 @@ public sealed class WorldRelationConcurrencyTests
 
         await queryTask.WaitAsync(TestTimeoutSpan);
 
-        Assert.True(finished);
+        Assert.True(finished[0]);
     }
 
     [Fact]
@@ -340,22 +413,15 @@ public sealed class WorldRelationConcurrencyTests
         using ManualResetEventSlim queryEntered = new(false);
         using ManualResetEventSlim queryRelease = new(false);
 
-        bool finished = false;
+        bool[] finished = [false];
+
+        BlockingFriendQueryRelation queryRelation = new(queryEntered, queryRelease, finished);
 
         Task queryTask = Task.Run(() =>
-            world.QueryRelation<Friend>(
-                owner,
-                _ =>
-                {
-                    queryEntered.Set();
-                    queryRelease.Wait();
-                    finished = true;
-                }
-            )
+            world.QueryRelation<Friend, BlockingFriendQueryRelation>(owner, ref queryRelation)
         );
 
         bool entered = queryEntered.Wait(TestTimeoutMs);
-
         Assert.True(entered);
 
         Assert.Throws<InvalidOperationException>(() =>
@@ -366,7 +432,7 @@ public sealed class WorldRelationConcurrencyTests
 
         await queryTask.WaitAsync(TestTimeoutSpan);
 
-        Assert.True(finished);
+        Assert.True(finished[0]);
     }
 
     [Fact]
@@ -385,22 +451,18 @@ public sealed class WorldRelationConcurrencyTests
         using ManualResetEventSlim queryEntered = new(false);
         using ManualResetEventSlim queryRelease = new(false);
 
-        bool finished = false;
+        bool[] finished = [false];
+
+        BlockingDamageQueryRelation queryRelation = new(queryEntered, queryRelease, finished);
 
         Task queryTask = Task.Run(() =>
-            world.QueryEvaluatedRelation(
+            world.QueryEvaluatedRelation<Damage, BlockingDamageQueryRelation>(
                 owner,
-                (Entity _, ref Damage _) =>
-                {
-                    queryEntered.Set();
-                    queryRelease.Wait();
-                    finished = true;
-                }
+                ref queryRelation
             )
         );
 
         bool entered = queryEntered.Wait(TestTimeoutMs);
-
         Assert.True(entered);
 
         Assert.Throws<InvalidOperationException>(() =>
@@ -411,7 +473,7 @@ public sealed class WorldRelationConcurrencyTests
 
         await queryTask.WaitAsync(TestTimeoutSpan);
 
-        Assert.True(finished);
+        Assert.True(finished[0]);
     }
 
     [Fact]
@@ -556,12 +618,14 @@ public sealed class WorldRelationConcurrencyTests
 
         world.TryAddEvaluatedRelation(owner, target, new Damage { Value = 0f });
 
+        IncrementDamageQueryRelation queryRelation = new();
+
         await RunConcurrent(
             ThreadCount,
             _ =>
-                world.QueryEvaluatedRelation<Damage>(
+                world.QueryEvaluatedRelation<Damage, IncrementDamageQueryRelation>(
                     owner,
-                    (Entity _, ref Damage d) => d.Value += 1f
+                    ref queryRelation
                 )
         );
 

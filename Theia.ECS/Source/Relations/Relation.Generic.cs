@@ -27,7 +27,8 @@ internal sealed class EvaluatedRelation<TRelation> : Relation
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Set(int index, in TRelation data) => _data[index] = data;
 
-    internal void Query(QueryRelation<TRelation> update)
+    internal void QueryEvaluated<TQueryRelation>(ref TQueryRelation query)
+        where TQueryRelation : struct, IQueryEvaluatedRelation<TRelation>, allows ref struct
     {
         IncrementUpdateCount();
 
@@ -43,7 +44,7 @@ internal sealed class EvaluatedRelation<TRelation> : Relation
                     Span<TRelation> relations = Get();
 
                     for (int i = 0; i < count; i++)
-                        update(entities[i], ref relations[i]);
+                        query.Execute(entities[i], ref relations[i]);
                 }
             }
             finally
