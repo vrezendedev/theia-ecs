@@ -9,7 +9,7 @@ namespace Theia.Tests.ECS.Worlds;
 
 public sealed class WorldQueriesTest
 {
-    private struct ForEachPosition : IForEach<Position>
+    private ref struct ForEachPosition : IForEach<Position>
     {
         public int CallCount;
         public int X;
@@ -23,7 +23,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct ForEachPositionMultiply : IForEach<Position>
+    private ref struct ForEachPositionMultiply : IForEach<Position>
     {
         public int XMultiplier;
 
@@ -33,7 +33,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct ForEachEntityPosition : IForEachEntity<Position>
+    private ref struct ForEachEntityPosition : IForEachEntity<Position>
     {
         public int CallCount;
         public int X;
@@ -45,7 +45,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct AttemptAddForEachEntityPosition : IForEachEntity<Position>
+    private ref struct AttemptAddForEachEntityPosition : IForEachEntity<Position>
     {
         public World World;
 
@@ -55,7 +55,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct AttemptGhoulifyForEachEntityPosition : IForEachEntity<Position>
+    private ref struct AttemptGhoulifyForEachEntityPosition : IForEachEntity<Position>
     {
         public World World;
         public Entity Target;
@@ -66,7 +66,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct CaptureEntityForEachEntityPosition : IForEachEntity<Position>
+    private ref struct CaptureEntityForEachEntityPosition : IForEachEntity<Position>
     {
         public Entity Entity;
         public Position Position;
@@ -78,7 +78,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct DeferredCreateForEachEntityPosition : IForEachEntity<Position>
+    private ref struct DeferredCreateForEachEntityPosition : IForEachEntity<Position>
     {
         public Assemblage<Position> Assemblage;
 
@@ -88,7 +88,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct DeferredGhoulifyForEachEntityPosition : IForEachEntity<Position>
+    private ref struct DeferredGhoulifyForEachEntityPosition : IForEachEntity<Position>
     {
         public World World;
 
@@ -98,7 +98,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct DeferredAddVelocityForEachEntityPosition : IForEachEntity<Position>
+    private ref struct DeferredAddVelocityForEachEntityPosition : IForEachEntity<Position>
     {
         public World World;
 
@@ -108,7 +108,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct DeferredRemovePositionForEachEntityPosition : IForEachEntity<Position>
+    private ref struct DeferredRemovePositionForEachEntityPosition : IForEachEntity<Position>
     {
         public World World;
 
@@ -118,7 +118,7 @@ public sealed class WorldQueriesTest
         }
     }
 
-    private struct DeferredRemoveVelocityForEachEntityPosition : IForEachEntity<Position>
+    private ref struct DeferredRemoveVelocityForEachEntityPosition : IForEachEntity<Position>
     {
         public World World;
 
@@ -463,11 +463,15 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        AttemptAddForEachEntityPosition attemptAddForEachEntityPosition = new() { World = world };
-
         Assert.Throws<InvalidOperationException>(() =>
-            query.ForEachEntity(ref attemptAddForEachEntityPosition)
-        );
+        {
+            AttemptAddForEachEntityPosition attemptAddForEachEntityPosition = new()
+            {
+                World = world,
+            };
+
+            query.ForEachEntity(ref attemptAddForEachEntityPosition);
+        });
     }
 
     [Fact]
@@ -484,8 +488,13 @@ public sealed class WorldQueriesTest
         AttemptAddForEachEntityPosition attemptAddForEachEntityPosition = new() { World = world };
 
         Assert.Throws<InvalidOperationException>(() =>
-            query.ForEachEntity(ref attemptAddForEachEntityPosition)
-        );
+        {
+            AttemptAddForEachEntityPosition attemptAddForEachEntityPosition = new()
+            {
+                World = world,
+            };
+            query.ForEachEntity(ref attemptAddForEachEntityPosition);
+        });
     }
 
     [Fact]
@@ -703,13 +712,16 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        AttemptGhoulifyForEachEntityPosition attemptGhoulify = new()
+        Assert.Throws<InvalidOperationException>(() =>
         {
-            World = world,
-            Target = entity,
-        };
+            AttemptGhoulifyForEachEntityPosition attemptGhoulify = new()
+            {
+                World = world,
+                Target = entity,
+            };
 
-        Assert.Throws<InvalidOperationException>(() => query.ForEachEntity(ref attemptGhoulify));
+            query.ForEachEntity(ref attemptGhoulify);
+        });
     }
 
     [Fact]
@@ -723,13 +735,15 @@ public sealed class WorldQueriesTest
 
         Entity entity = assemblage.Create(new Position());
 
-        AttemptGhoulifyForEachEntityPosition attemptGhoulify = new()
+        Assert.Throws<InvalidOperationException>(() =>
         {
-            World = world,
-            Target = entity,
-        };
-
-        Assert.Throws<InvalidOperationException>(() => query.ForEachEntity(ref attemptGhoulify));
+            AttemptGhoulifyForEachEntityPosition attemptGhoulify = new()
+            {
+                World = world,
+                Target = entity,
+            };
+            query.ForEachEntity(ref attemptGhoulify);
+        });
     }
 
     [Fact]

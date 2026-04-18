@@ -20,11 +20,12 @@ internal sealed class Unique<TComponent> : Unique
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal void Set(TComponent component) => _value = component;
 
-    internal void Update(UpdateUnique<TComponent> update)
+    internal void Query<T>(ref T query)
+        where T : struct, IUniqueQuery<TComponent>, allows ref struct
     {
         lock (_uniqueSet)
         {
-            update(ref _value);
+            query.Execute(ref _value);
         }
     }
 

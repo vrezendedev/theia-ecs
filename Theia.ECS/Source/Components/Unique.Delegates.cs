@@ -1,3 +1,7 @@
 namespace Theia.ECS.Components;
 
-public delegate void UpdateUnique<TComponent>(ref TComponent component);
+public interface IUniqueQuery<TComponent>
+    where TComponent : struct
+{
+    public void Execute(ref TComponent component);
+}

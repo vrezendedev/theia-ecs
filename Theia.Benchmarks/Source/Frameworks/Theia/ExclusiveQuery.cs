@@ -10,7 +10,7 @@ namespace Theia.Benchmarks.Source.Frameworks.Theia;
 
 public class TheiaExclusiveQueryOnT1 : ExclusiveQueryOnT1
 {
-    private struct ForEachEntity : IForEachEntity<Component1>
+    private ref struct ForEachEntity : IForEachEntity<Component1>
     {
         public void Execute(Entity entity, ref Component1 c1)
         {
@@ -53,7 +53,7 @@ public class TheiaExclusiveQueryOnT3 : ExclusiveQueryOnT3
     private Assemblage<Component1, Component2, Component3>? _assemblage;
     private SettlerQuery<Component1, Component2, Component3>? _query;
 
-    private struct ForEachEntity : IForEachEntity<Component1, Component2, Component3>
+    private ref struct ForEachEntity : IForEachEntity<Component1, Component2, Component3>
     {
         public void Execute(Entity entity, ref Component1 c1, ref Component2 c2, ref Component3 c3)
         {
@@ -98,7 +98,7 @@ public class TheiaExclusiveQueryOnT5 : ExclusiveQueryOnT5
     private Assemblage<Component1, Component2, Component3, Component4, Component5>? _assemblage;
     private SettlerQuery<Component1, Component2, Component3, Component4, Component5>? _query;
 
-    private struct ForEachEntity
+    private ref struct ForEachEntity
         : IForEachEntity<Component1, Component2, Component3, Component4, Component5>
     {
         public void Execute(

@@ -1,3 +1,4 @@
+using Theia.ECS.Components;
 using Theia.ECS.Worlds;
 using Theia.Tests.Resources;
 
@@ -5,6 +6,32 @@ namespace Theia.Tests.ECS.Worlds;
 
 public sealed partial class WorldUniqueTests
 {
+    private ref struct ComponentAUpdate : IUniqueQuery<ComponentA>
+    {
+        public int A;
+        public ComponentA ComponentA;
+
+        public void Execute(ref ComponentA component)
+        {
+            if (A > 0)
+            {
+                component.A = A;
+            }
+
+            ComponentA = component;
+        }
+    }
+
+    private ref struct ComponentBUpdate : IUniqueQuery<ComponentB>
+    {
+        public int B;
+
+        public void Execute(ref ComponentB component)
+        {
+            component.B = B;
+        }
+    }
+
     [Fact]
     public void ReadUnique_DefaultsToDefault_WhenNeverSet()
     {
@@ -29,6 +56,7 @@ public sealed partial class WorldUniqueTests
         ref ComponentA c = ref world.GetUnique<ComponentA>();
 
         const int targetA = 10;
+
         c.A = targetA;
 
         Assert.Equal(targetA, world.ReadUnique<ComponentA>().A);
@@ -39,10 +67,14 @@ public sealed partial class WorldUniqueTests
     {
         World world = new();
 
-        world.UpdateUnique(static (ref ComponentA c) => c.A = 99);
+        ComponentAUpdate queryUnique = new() { A = 99 };
+
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
+
         ref ComponentA c = ref world.GetUnique<ComponentA>();
 
         const int targetA = 12;
+
         c.A = targetA;
 
         Assert.Equal(targetA, world.ReadUnique<ComponentA>().A);
@@ -53,57 +85,81 @@ public sealed partial class WorldUniqueTests
     {
         World world = new();
 
-        world.UpdateUnique(static (ref ComponentA c) => c.A = 42);
+        ComponentAUpdate queryUnique = new() { A = 42 };
+
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
 
         Assert.Equal(42, world.GetUnique<ComponentA>().A);
     }
 
     [Fact]
-    public void SetUnique_DefaultsToDefault_WhenNeverSet()
+    public void UpdateUnique_DefaultsToDefault_WhenNeverSet()
     {
         World world = new();
 
-        world.UpdateUnique(static (ref ComponentA c) => Assert.Equal(default, c));
+        ComponentAUpdate queryUnique = new() { };
+
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
+
+        Assert.Equal(default, queryUnique.ComponentA);
     }
 
     [Fact]
-    public void SetUnique_MutationAffectsStoredValue()
+    public void UpdateUnique_MutationAffectsStoredValue()
     {
         World world = new();
 
-        world.UpdateUnique(static (ref ComponentA c) => c.A = 99);
+        ComponentAUpdate queryUnique = new() { A = 99 };
+
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
     }
 
     [Fact]
-    public void SetUnique_ReadsCurrentValue()
+    public void UpdateUnique_ReadsCurrentValue()
     {
         World world = new();
 
-        world.UpdateUnique(static (ref ComponentA c) => c.A = 42);
+        ComponentAUpdate queryUnique1 = new() { A = 42 };
 
-        world.UpdateUnique((ref ComponentA c) => Assert.Equal(42, c.A));
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique1);
+
+        ComponentAUpdate queryUnique2 = new() { };
+
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique2);
+
+        Assert.Equal(42, queryUnique2.ComponentA.A);
     }
 
     [Fact]
-    public void SetUnique_OverwritesPreviousValue()
+    public void UpdateUnique_OverwritesPreviousValue()
     {
         World world = new();
 
-        world.ReadUnique<ComponentA>();
-        world.UpdateUnique(static (ref ComponentA c) => c.A = 99);
+        ref ComponentA a = ref world.GetUnique<ComponentA>();
+
+        a.A += 10;
+
+        ComponentAUpdate queryUnique = new() { A = 99 };
+
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
     }
 
     [Fact]
-    public void SetUnique_DoesNotAffectOtherTypes()
+    public void UpdateUnique_DoesNotAffectOtherTypes()
     {
         World world = new();
 
-        world.UpdateUnique(static (ref ComponentA c) => c.A = 99);
-        world.UpdateUnique(static (ref ComponentB c) => c.B = 2);
+        ComponentAUpdate queryUniqueA = new() { A = 99 };
+
+        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUniqueA);
+
+        ComponentBUpdate queryUniqueB = new() { B = 2 };
+
+        world.QueryUnique<ComponentBUpdate, ComponentB>(ref queryUniqueB);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
         Assert.Equal(2, world.ReadUnique<ComponentB>().B);

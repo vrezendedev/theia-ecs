@@ -8,14 +8,14 @@ namespace Theia.Tests.ECS.SourceGenerated;
 
 public sealed class SourceGeneratedTests
 {
-    private struct ForEachPositionVelocityCount : IForEach<Position, Velocity>
+    private ref struct ForEachPositionVelocityCount : IForEach<Position, Velocity>
     {
         public int CallCount;
 
         public void Execute(ref Position c1, ref Velocity c2) => CallCount++;
     }
 
-    private struct ForEachPositionVelocityReadSum : IForEach<Position, Velocity>
+    private ref struct ForEachPositionVelocityReadSum : IForEach<Position, Velocity>
     {
         public float SumX;
         public float SumY;
@@ -27,7 +27,7 @@ public sealed class SourceGeneratedTests
         }
     }
 
-    private struct ForEachPositionVelocityMutate : IForEach<Position, Velocity>
+    private ref struct ForEachPositionVelocityMutate : IForEach<Position, Velocity>
     {
         public int PositionX;
         public int VelocityX;
@@ -41,7 +41,7 @@ public sealed class SourceGeneratedTests
         }
     }
 
-    private struct ForEachEntityPositionVelocityCapture : IForEachEntity<Position, Velocity>
+    private ref struct ForEachEntityPositionVelocityCapture : IForEachEntity<Position, Velocity>
     {
         public Entity Entity;
         public float PositionX;
@@ -55,7 +55,7 @@ public sealed class SourceGeneratedTests
         }
     }
 
-    private struct ForEachT4Count : IForEach<Position, Velocity, Rotation, Health>
+    private ref struct ForEachT4Count : IForEach<Position, Velocity, Rotation, Health>
     {
         public int CallCount;
 
@@ -63,7 +63,8 @@ public sealed class SourceGeneratedTests
             CallCount++;
     }
 
-    private struct ForEachT4ReadPositionVelocity : IForEach<Position, Velocity, Rotation, Health>
+    private ref struct ForEachT4ReadPositionVelocity
+        : IForEach<Position, Velocity, Rotation, Health>
     {
         public float PositionX;
         public float VelocityX;
@@ -75,7 +76,7 @@ public sealed class SourceGeneratedTests
         }
     }
 
-    private struct ForEachEntityT4CaptureEntity
+    private ref struct ForEachEntityT4CaptureEntity
         : IForEachEntity<Position, Velocity, Rotation, Health>
     {
         public Entity Entity;
@@ -89,7 +90,7 @@ public sealed class SourceGeneratedTests
         ) => Entity = entity;
     }
 
-    private struct ForEachT8Count
+    private ref struct ForEachT8Count
         : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
     {
         public int CallCount;
@@ -106,7 +107,7 @@ public sealed class SourceGeneratedTests
         ) => CallCount++;
     }
 
-    private struct ForEachT8ReadSampled
+    private ref struct ForEachT8ReadSampled
         : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
     {
         public float PositionX;
@@ -132,7 +133,7 @@ public sealed class SourceGeneratedTests
         }
     }
 
-    private struct ForEachEntityT8CaptureEntity
+    private ref struct ForEachEntityT8CaptureEntity
         : IForEachEntity<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
     {
         public Entity Entity;
@@ -150,7 +151,7 @@ public sealed class SourceGeneratedTests
         ) => Entity = entity;
     }
 
-    private struct ForEachT16Count
+    private ref struct ForEachT16Count
         : IForEach<
             Position,
             Velocity,
@@ -192,7 +193,7 @@ public sealed class SourceGeneratedTests
         ) => CallCount++;
     }
 
-    private struct ForEachT16ReadFirstLast
+    private ref struct ForEachT16ReadFirstLast
         : IForEach<
             Position,
             Velocity,
@@ -239,7 +240,7 @@ public sealed class SourceGeneratedTests
         }
     }
 
-    private struct ForEachEntityT16CaptureEntity
+    private ref struct ForEachEntityT16CaptureEntity
         : IForEachEntity<
             Position,
             Velocity,
@@ -282,7 +283,7 @@ public sealed class SourceGeneratedTests
         ) => Entity = entity;
     }
 
-    private struct ForEachT16DeferredCreate
+    private ref struct ForEachT16DeferredCreate
         : IForEach<
             Position,
             Velocity,

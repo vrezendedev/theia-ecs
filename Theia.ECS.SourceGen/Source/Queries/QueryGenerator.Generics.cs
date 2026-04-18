@@ -162,7 +162,7 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
         : base(world, assemblage) { }
 
     public void ForEachEntity<T>(ref T forEachEntity)
-        where T : struct, IForEachEntity{{generics}}
+        where T : struct, IForEachEntity{{generics}}, allows ref struct
     {
         Archetype archetype = _archetype;
 
@@ -198,7 +198,7 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
     }
 
     public void ForEach<T>(ref T forEach)
-        where T : struct, IForEach{{generics}}
+        where T : struct, IForEach{{generics}}, allows ref struct
     {
         Archetype archetype = _archetype;
 
@@ -250,7 +250,7 @@ public sealed class NomadQuery{{generics}} : NomadQuery
         : base(world, componentIds) { }
 
     public void ForEachEntity<T>(ref T forEachEntity)
-        where T : struct, IForEachEntity{{generics}}
+        where T : struct, IForEachEntity{{generics}}, allows ref struct
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 
@@ -294,7 +294,7 @@ public sealed class NomadQuery{{generics}} : NomadQuery
     }
 
     public void ForEach<T>(ref T forEach)
-        where T : struct, IForEach{{generics}}
+        where T : struct, IForEach{{generics}}, allows ref struct
     {
         int matchedArchetypeCount = _matchedArchetypesCount;
 

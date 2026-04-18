@@ -15,7 +15,7 @@ public class TheiaCrossArchetypeQueryOnT1 : CrossArchetypeQueryOnT1
     private Assemblage<Component1, Component2>? _assemblageB;
     private NomadQuery<Component1>? _query;
 
-    private struct ForEachEntity : IForEachEntity<Component1>
+    private ref struct ForEachEntity : IForEachEntity<Component1>
     {
         public void Execute(Entity entity, ref Component1 c1)
         {
@@ -60,7 +60,7 @@ public class TheiaCrossArchetypeQueryOnT3 : CrossArchetypeQueryOnT3
     private Assemblage<Component1, Component2, Component3, Component4>? _assemblageB;
     private NomadQuery<Component1, Component2, Component3>? _query;
 
-    private struct ForEachEntity : IForEachEntity<Component1, Component2, Component3>
+    private ref struct ForEachEntity : IForEachEntity<Component1, Component2, Component3>
     {
         public void Execute(Entity entity, ref Component1 c1, ref Component2 c2, ref Component3 c3)
         {
@@ -123,7 +123,7 @@ public class TheiaCrossArchetypeQueryOnT5 : CrossArchetypeQueryOnT5
     >? _assemblageB;
     private NomadQuery<Component1, Component2, Component3, Component4, Component5>? _query;
 
-    private struct ForEachEntity
+    private ref struct ForEachEntity
         : IForEachEntity<Component1, Component2, Component3, Component4, Component5>
     {
         public void Execute(

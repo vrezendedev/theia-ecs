@@ -57,7 +57,7 @@ namespace Theia.ECS.Queries;
 public interface IForEachEntity{{generics}}
 {{constraints}}
 {
-    void Execute(Entity entity, {{arguments}});
+    public void Execute(Entity entity, {{arguments}});
 }
 
 """;
@@ -67,7 +67,7 @@ public interface IForEachEntity{{generics}}
 public interface IForEach{{generics}}
 {{constraints}}
 {
-    void Execute({{arguments}});
+    public void Execute({{arguments}});
 }
 
 """;

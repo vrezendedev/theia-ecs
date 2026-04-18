@@ -67,6 +67,7 @@ public sealed partial class World
     public void SetUnique<TComponent>(in TComponent component)
         where TComponent : struct => GetOrCreateUnique<TComponent>().Set(component);
 
-    public void UpdateUnique<TComponent>(UpdateUnique<TComponent> update)
-        where TComponent : struct => GetOrCreateUnique<TComponent>().Update(update);
+    public void QueryUnique<T, TComponent>(ref T query)
+        where T : struct, IUniqueQuery<TComponent>, allows ref struct
+        where TComponent : struct => GetOrCreateUnique<TComponent>().Query(ref query);
 }
