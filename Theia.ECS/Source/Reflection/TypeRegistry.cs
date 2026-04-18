@@ -85,15 +85,45 @@ internal sealed class TypeRegistry<T>
 
     private string GetTypeName(Type type)
     {
-        _stringBuilder.Append(type.FullName);
-        _stringBuilder.Append(", ");
-        _stringBuilder.Append(type.Assembly.GetName().Name);
-
-        string typeName = _stringBuilder.ToString();
-
         _stringBuilder.Clear();
 
-        return typeName;
+        AppendTypeName(type);
+
+        return _stringBuilder.ToString();
+    }
+
+    private void AppendTypeName(Type type)
+    {
+        if (type.IsGenericType)
+        {
+            _stringBuilder.Append(type.GetGenericTypeDefinition().FullName);
+
+            _stringBuilder.Append('[');
+
+            Type[] args = type.GetGenericArguments();
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (i > 0)
+                    _stringBuilder.Append(',');
+
+                _stringBuilder.Append('[');
+
+                AppendTypeName(args[i]);
+
+                _stringBuilder.Append(']');
+            }
+
+            _stringBuilder.Append(']');
+        }
+        else
+        {
+            _stringBuilder.Append(type.FullName);
+        }
+
+        _stringBuilder.Append(", ");
+
+        _stringBuilder.Append(type.Assembly.GetName().Name);
     }
 
     [DoesNotReturn]

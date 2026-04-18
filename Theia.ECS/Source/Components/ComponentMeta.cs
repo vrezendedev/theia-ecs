@@ -44,7 +44,13 @@ internal static class ComponentsMeta
 
             ComponentType componentType = (ComponentType)Activator.CreateInstance(genericType)!;
 
-            componentType.Initialize(type, Marshal.SizeOf(type));
+            int size = (int)
+                typeof(Unsafe)
+                    .GetMethod(nameof(Unsafe.SizeOf))!
+                    .MakeGenericMethod(type)
+                    .Invoke(null, null)!;
+
+            componentType.Initialize(type, size);
 
             s_componentRegistry.Set(componentId, componentType);
         }
