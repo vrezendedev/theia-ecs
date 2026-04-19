@@ -69,7 +69,7 @@ public sealed partial class WorldUniqueTests
 
         ComponentAUpdate queryUnique = new() { A = 99 };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUnique);
 
         ref ComponentA c = ref world.GetUnique<ComponentA>();
 
@@ -87,7 +87,7 @@ public sealed partial class WorldUniqueTests
 
         ComponentAUpdate queryUnique = new() { A = 42 };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUnique);
 
         Assert.Equal(42, world.GetUnique<ComponentA>().A);
     }
@@ -99,7 +99,7 @@ public sealed partial class WorldUniqueTests
 
         ComponentAUpdate queryUnique = new() { };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUnique);
 
         Assert.Equal(default, queryUnique.ComponentA);
     }
@@ -111,7 +111,7 @@ public sealed partial class WorldUniqueTests
 
         ComponentAUpdate queryUnique = new() { A = 99 };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUnique);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
     }
@@ -123,11 +123,11 @@ public sealed partial class WorldUniqueTests
 
         ComponentAUpdate queryUnique1 = new() { A = 42 };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique1);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUnique1);
 
         ComponentAUpdate queryUnique2 = new() { };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique2);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUnique2);
 
         Assert.Equal(42, queryUnique2.ComponentA.A);
     }
@@ -143,7 +143,7 @@ public sealed partial class WorldUniqueTests
 
         ComponentAUpdate queryUnique = new() { A = 99 };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUnique);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUnique);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
     }
@@ -155,11 +155,11 @@ public sealed partial class WorldUniqueTests
 
         ComponentAUpdate queryUniqueA = new() { A = 99 };
 
-        world.QueryUnique<ComponentAUpdate, ComponentA>(ref queryUniqueA);
+        world.QueryUnique<ComponentA, ComponentAUpdate>(ref queryUniqueA);
 
         ComponentBUpdate queryUniqueB = new() { B = 2 };
 
-        world.QueryUnique<ComponentBUpdate, ComponentB>(ref queryUniqueB);
+        world.QueryUnique<ComponentB, ComponentBUpdate>(ref queryUniqueB);
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
         Assert.Equal(2, world.ReadUnique<ComponentB>().B);
