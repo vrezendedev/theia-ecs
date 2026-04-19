@@ -947,9 +947,9 @@ public sealed class SourceGeneratedTests
 
         NomadQuery<Position, Velocity> query = world.CreateNomadQuery<Position, Velocity>();
 
-        Assemblage<Position, Velocity> base_ = world.CreateAssemblage<Position, Velocity>();
+        Assemblage<Position, Velocity> assemblage = world.CreateAssemblage<Position, Velocity>();
 
-        Entity entity = base_.Create(new Position() { X = 1 }, new Velocity() { X = 2 });
+        Entity entity = assemblage.Create(new Position() { X = 1 }, new Velocity() { X = 2 });
 
         world.TryAddComponent<Rotation>(entity);
 
