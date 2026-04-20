@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
@@ -13,6 +14,14 @@ public abstract class Query
     protected readonly World _world;
 
     internal Query(in World world) => _world = world;
+
+    public ref readonly World GetWorld() => ref _world;
+
+    [DoesNotReturn]
+    protected void ThrowInsideParallelSystems() =>
+        throw new InvalidOperationException(
+            "Parallel query execution is not allowed inside a ParallelSystems group."
+        );
 }
 
 public abstract class SettlerQuery : Query

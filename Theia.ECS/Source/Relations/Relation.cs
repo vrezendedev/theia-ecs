@@ -91,22 +91,17 @@ internal class Relation
 
         lock (_updateLock)
         {
-            try
-            {
-                int count = _relatedToCount;
+            int count = _relatedToCount;
 
-                if (count > 0)
-                {
-                    ReadOnlySpan<Entity> entities = To();
-
-                    for (int i = 0; i < count; i++)
-                        query.Execute(entities[i]);
-                }
-            }
-            finally
+            if (count > 0)
             {
-                DecrementUpdateCount();
+                ReadOnlySpan<Entity> entities = To();
+
+                for (int i = 0; i < count; i++)
+                    query.Execute(entities[i]);
             }
+
+            DecrementUpdateCount();
         }
     }
 

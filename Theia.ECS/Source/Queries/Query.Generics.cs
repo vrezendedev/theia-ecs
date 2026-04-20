@@ -3,6 +3,7 @@ using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Entities;
+using Theia.ECS.Systems;
 using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Queries;
@@ -49,6 +50,15 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
         _world.DecrementQueriesBeingExecuted();
     }
 
+    public void ForEachEntityParallel<T>(T forEachEntity)
+        where T : struct, IForEachEntity<ComponentT1>
+    {
+        if (ParallelSystems.IsExecutingParallel)
+            ThrowInsideParallelSystems();
+
+        //@TO-DO Parallel
+    }
+
     public void ForEach<T>(ref T forEach)
         where T : struct, IForEach<ComponentT1>, allows ref struct
     {
@@ -81,6 +91,15 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
         }
 
         _world.DecrementQueriesBeingExecuted();
+    }
+
+    public void ForEachParallel<T>(T forEach)
+        where T : struct, IForEach<ComponentT1>
+    {
+        if (ParallelSystems.IsExecutingParallel)
+            ThrowInsideParallelSystems();
+
+        //@TO-DO Parallel
     }
 }
 
@@ -137,6 +156,15 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
         _world.DecrementQueriesBeingExecuted();
     }
 
+    public void ForEachEntityParallel<T>(T forEachEntity)
+        where T : struct, IForEachEntity<ComponentT1>
+    {
+        if (ParallelSystems.IsExecutingParallel)
+            ThrowInsideParallelSystems();
+
+        //@TO-DO Parallel
+    }
+
     public void ForEach<T>(ref T forEach)
         where T : struct, IForEach<ComponentT1>, allows ref struct
     {
@@ -180,5 +208,14 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
         }
 
         _world.DecrementQueriesBeingExecuted();
+    }
+
+    public void ForEachParallel<T>(T forEach)
+        where T : struct, IForEach<ComponentT1>
+    {
+        if (ParallelSystems.IsExecutingParallel)
+            ThrowInsideParallelSystems();
+
+        //@TO-DO Parallel
     }
 }

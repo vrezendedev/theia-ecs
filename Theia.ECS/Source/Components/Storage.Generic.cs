@@ -41,32 +41,27 @@ internal sealed class Storage<TComponent> : Storage
     {
         TComponent[] combined = ArrayPool<TComponent>.Shared.Rent(accLength);
 
-        try
-        {
-            int offset = 0;
+        int offset = 0;
 
-            for (int i = 0; i < storages.Length; i++)
+        for (int i = 0; i < storages.Length; i++)
+        {
+            Storage<TComponent> storage = (Storage<TComponent>)storages[i];
+            int length = lengths[i];
+
+            if (length > 0)
             {
-                Storage<TComponent> storage = (Storage<TComponent>)storages[i];
-                int length = lengths[i];
-
-                if (length > 0)
-                {
-                    storage.GetValues(length).CopyTo(combined.AsSpan(offset));
-                    offset += length;
-                }
+                storage.GetValues(length).CopyTo(combined.AsSpan(offset));
+                offset += length;
             }
+        }
 
-            MessagePackSerializer.Serialize(
-                arrayBufferWriter,
-                combined.AsMemory(0, accLength),
-                serializerOptions
-            );
-        }
-        finally
-        {
-            ArrayPool<TComponent>.Shared.Return(combined);
-        }
+        MessagePackSerializer.Serialize(
+            arrayBufferWriter,
+            combined.AsMemory(0, accLength),
+            serializerOptions
+        );
+
+        ArrayPool<TComponent>.Shared.Return(combined);
     }
 
     internal override void CopyAllData(

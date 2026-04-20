@@ -34,23 +34,18 @@ internal sealed class EvaluatedRelation<TRelation> : Relation
 
         lock (_updateLock)
         {
-            try
-            {
-                int count = _relatedToCount;
+            int count = _relatedToCount;
 
-                if (count > 0)
-                {
-                    ReadOnlySpan<Entity> entities = To();
-                    Span<TRelation> relations = Get();
-
-                    for (int i = 0; i < count; i++)
-                        query.Execute(entities[i], ref relations[i]);
-                }
-            }
-            finally
+            if (count > 0)
             {
-                DecrementUpdateCount();
+                ReadOnlySpan<Entity> entities = To();
+                Span<TRelation> relations = Get();
+
+                for (int i = 0; i < count; i++)
+                    query.Execute(entities[i], ref relations[i]);
             }
+
+            DecrementUpdateCount();
         }
     }
 

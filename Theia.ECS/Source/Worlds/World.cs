@@ -11,7 +11,7 @@ using Theia.ECS.Relations;
 
 namespace Theia.ECS.Worlds;
 
-public sealed partial class World
+public sealed partial class World : IDisposable
 {
     /// <summary>
     /// The maximum allowed capacity. Any value beyond this would round up to a power of 2
@@ -74,5 +74,11 @@ public sealed partial class World
 
         EntitiesEvents = new();
         RelationsEvents = new();
+    }
+
+    public void Dispose()
+    {
+        EntitiesEvents.Reset();
+        RelationsEvents.Reset();
     }
 }
