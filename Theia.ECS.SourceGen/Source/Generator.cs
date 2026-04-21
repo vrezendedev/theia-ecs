@@ -29,6 +29,34 @@ internal static class Generator
     internal static string Params(int count, string paramScope, string paramPrefix) =>
         string.Join(", ", Enumerable.Range(1, count).Select(i => $"{paramScope} {paramPrefix}{i}"));
 
+    internal static string Params(
+        int count,
+        string paramScope,
+        string typePrefix,
+        string paramPrefix
+    ) =>
+        string.Join(
+            ", ",
+            Enumerable.Range(1, count).Select(i => $"{paramScope} {typePrefix}{i} {paramPrefix}{i}")
+        );
+
+    internal static string Fields(
+        int count,
+        string fieldScope,
+        string typePrefix,
+        string namePrefix,
+        string inlineInitPrefix,
+        string tabs
+    ) =>
+        string.Join(
+            "\n",
+            Enumerable
+                .Range(1, count)
+                .Select(i =>
+                    $"{tabs}{fieldScope} {typePrefix}{i} {namePrefix}{i} {(inlineInitPrefix.Length > 0 ? $"= {inlineInitPrefix}{i}" : "")};"
+                )
+        );
+
     internal static string VariablesDefinitionComponentsIds(
         int count,
         string variablePrefix,

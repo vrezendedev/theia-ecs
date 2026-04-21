@@ -27,7 +27,7 @@ public sealed partial class World
 
         for (
             int i = Constants.ComponentSetOverloadInitialIndex;
-            i <= Constants.ComponentSetOverloadMaxRange;
+            i <= Constants.OverloadMaxRange;
             i++
         )
         {

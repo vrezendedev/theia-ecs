@@ -20,7 +20,7 @@ public abstract class Query
     [DoesNotReturn]
     protected void ThrowInsideParallelSystems() =>
         throw new InvalidOperationException(
-            "Parallel query execution is not allowed inside a ParallelSystems group."
+            "Parallel Query execution is not allowed inside a ParallelSystems group."
         );
 }
 

@@ -22,7 +22,7 @@ namespace Theia.ECS.Contracts;
 
         for (
             int i = Constants.ComponentSetOverloadInitialIndex;
-            i <= Constants.ComponentSetOverloadMaxRange;
+            i <= Constants.OverloadMaxRange;
             i++
         )
         {

@@ -3,18 +3,18 @@ using Theia.ECS.Queries;
 
 namespace Theia.ECS.Systems;
 
-public abstract class System<QueryT1>(QueryT1 query) : BaseSystem
+public abstract class System<QueryT1>(in QueryT1 query) : BaseSystem
     where QueryT1 : Query
 {
     private readonly QueryT1 _query = query;
 
-    internal override void Run() => ExecuteQueryT1(_query);
+    internal override void Run() => ExecuteQueryT1(in _query);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public abstract void ExecuteQueryT1(QueryT1 query);
+    public abstract void ExecuteQueryT1(in QueryT1 query);
 }
 
-public abstract class System<TSharedData, QueryT1, QueryT2>(QueryT1 queryT1, QueryT2 queryT2)
+public abstract class System<TSharedData, QueryT1, QueryT2>(in QueryT1 queryT1, in QueryT2 queryT2)
     : BaseSystem
     where TSharedData : struct, allows ref struct
     where QueryT1 : Query
@@ -27,16 +27,16 @@ public abstract class System<TSharedData, QueryT1, QueryT2>(QueryT1 queryT1, Que
     {
         TSharedData sharedData = CreateData();
 
-        ExecuteQueryT1(ref sharedData, _queryT1);
-        ExecuteQueryT2(ref sharedData, _queryT2);
+        ExecuteQueryT1(ref sharedData, in _queryT1);
+        ExecuteQueryT2(ref sharedData, in _queryT2);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual TSharedData CreateData() => default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public abstract void ExecuteQueryT1(ref TSharedData sharedData, QueryT1 query);
+    public abstract void ExecuteQueryT1(ref TSharedData sharedData, in QueryT1 query);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public abstract void ExecuteQueryT2(ref TSharedData sharedData, QueryT2 query);
+    public abstract void ExecuteQueryT2(ref TSharedData sharedData, in QueryT2 query);
 }

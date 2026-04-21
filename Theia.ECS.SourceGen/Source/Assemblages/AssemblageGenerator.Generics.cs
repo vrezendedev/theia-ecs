@@ -27,7 +27,7 @@ namespace Theia.ECS.Assemblages;
 
         for (
             int i = Constants.ComponentSetOverloadInitialIndex;
-            i <= Constants.ComponentSetOverloadMaxRange;
+            i <= Constants.OverloadMaxRange;
             i++
         )
         {

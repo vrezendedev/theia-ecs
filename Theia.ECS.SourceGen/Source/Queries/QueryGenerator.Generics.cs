@@ -27,7 +27,7 @@ namespace Theia.ECS.Queries;
 
         for (
             int i = Constants.ComponentSetOverloadInitialIndex;
-            i <= Constants.ComponentSetOverloadMaxRange;
+            i <= Constants.OverloadMaxRange;
             i++
         )
         {
