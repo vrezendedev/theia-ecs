@@ -253,6 +253,9 @@ internal sealed class Archetype
         SetEdge(componentId, archetype, ref _removeEdges);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int GetInitializedCount() => _initializedCount;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<Indexer> GetIndexers() => _indexers.AsSpan(0, _initializedCount);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

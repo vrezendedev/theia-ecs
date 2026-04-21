@@ -1,6 +1,6 @@
 namespace Theia.ECS.Jobs;
 
-internal abstract class Job
+public abstract class Job
 {
-    internal abstract void Execute();
+    public abstract void Execute();
 }

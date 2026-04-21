@@ -1,35 +1,31 @@
 using System;
-using System.Runtime.CompilerServices;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Theia.ECS.Jobs;
 
-internal static class JobScheduler
+internal struct JobEntry
 {
-    private const int MinJobsPerWorker = 1;
-    internal const int MaxJobs = 4_096;
+    internal Job? Job;
+    internal CountdownEvent? Countdown;
+}
 
+public static class JobScheduler
+{
     private static readonly int s_workersCount;
     private static readonly Thread[] s_workers;
 
-    private static readonly Job?[] s_jobs;
+    private static readonly ConcurrentQueue<JobEntry> s_queue = new();
+    private static readonly SemaphoreSlim s_workAvailable = new(0);
 
-    private static readonly SemaphoreSlim s_workAvailable;
-    private static readonly ManualResetEventSlim s_batchComplete;
-
-    private static volatile int s_batchCount;
-    private static volatile int s_nextJob;
-    private static volatile int s_activeWorkers;
+    private static readonly Stack<CountdownEvent> s_countdownPool = new();
+    private static readonly Lock s_countdownPoolLock = new();
 
     static JobScheduler()
     {
         s_workersCount = Math.Max(0, Environment.ProcessorCount - 1);
         s_workers = new Thread[s_workersCount];
-
-        s_jobs = new Job[MaxJobs];
-
-        s_workAvailable = new(0);
-        s_batchComplete = new(true);
 
         for (int i = 0; i < s_workersCount; i++)
         {
@@ -46,51 +42,72 @@ internal static class JobScheduler
         }
     }
 
+    private static bool ShouldSkipScheduling(int jobCount) => s_workersCount == 0 || jobCount == 1;
+
     private static void WorkerLoop()
     {
         while (true)
         {
             s_workAvailable.Wait();
-
-            ClaimJob();
-
-            if (Interlocked.Decrement(ref s_activeWorkers) == 0)
-                s_batchComplete.Set();
+            DrainQueue();
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static void ClaimJob()
+    private static void DrainQueue()
     {
-        int claimed;
-
-        while ((claimed = Interlocked.Increment(ref s_nextJob) - 1) < s_batchCount)
-            s_jobs[claimed]!.Execute();
+        while (s_queue.TryDequeue(out JobEntry entry))
+        {
+            entry.Job!.Execute();
+            entry.Countdown!.Signal();
+        }
     }
 
-    internal static bool ShouldSkipScheduling(int jobCount) =>
-        s_workersCount == 0 || jobCount < (s_workersCount * MinJobsPerWorker);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void Schedule(int index, Job job) => s_jobs[index] = job;
-
-    internal static void Run(int jobCount)
+    public static void Run(ReadOnlySpan<Job> jobs)
     {
-        if (jobCount == 0)
+        int count = jobs.Length;
+
+        if (count == 0)
             return;
 
-        s_batchCount = jobCount;
-        s_nextJob = 0;
-        s_activeWorkers = s_workersCount + 1;
+        if (ShouldSkipScheduling(count))
+        {
+            for (int i = 0; i < count; i++)
+                jobs[i].Execute();
 
-        s_batchComplete.Reset();
-        s_workAvailable.Release(s_workersCount);
+            return;
+        }
 
-        ClaimJob();
+        CountdownEvent countdown = RentCountdown(count);
 
-        if (Interlocked.Decrement(ref s_activeWorkers) == 0)
-            s_batchComplete.Set();
+        for (int i = 0; i < count; i++)
+            s_queue.Enqueue(new JobEntry { Job = jobs[i], Countdown = countdown });
 
-        s_batchComplete.Wait();
+        s_workAvailable.Release(Math.Min(count, s_workersCount));
+
+        DrainQueue();
+
+        countdown.Wait();
+
+        ReturnCountdown(countdown);
+    }
+
+    private static CountdownEvent RentCountdown(int count)
+    {
+        lock (s_countdownPoolLock)
+        {
+            if (s_countdownPool.TryPop(out CountdownEvent? countdown))
+            {
+                countdown.Reset(count);
+                return countdown;
+            }
+        }
+
+        return new CountdownEvent(count);
+    }
+
+    private static void ReturnCountdown(CountdownEvent countdown)
+    {
+        lock (s_countdownPoolLock)
+            s_countdownPool.Push(countdown);
     }
 }
