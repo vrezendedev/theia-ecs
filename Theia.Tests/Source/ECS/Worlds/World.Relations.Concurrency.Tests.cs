@@ -11,6 +11,7 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Worlds;
 
+[Collection("MetaRequester")]
 public sealed class WorldRelationConcurrencyTests
 {
     private const int ThreadCount = 8;
@@ -33,84 +34,6 @@ public sealed class WorldRelationConcurrencyTests
             .ToArray();
 
         await Task.WhenAll(tasks).WaitAsync(TestTimeoutSpan);
-    }
-
-    private struct FriendQueryRelation : IQueryRelation
-    {
-        public static int Count;
-
-        public void Execute(Entity other)
-        {
-            Interlocked.Increment(ref Count);
-        }
-    }
-
-    private struct DamageQueryRelation : IQueryEvaluatedRelation<Damage>
-    {
-        public static int Count;
-
-        public void Execute(Entity other, ref Damage relation)
-        {
-            Interlocked.Increment(ref Count);
-        }
-    }
-
-    private struct BlockingFriendQueryRelation : IQueryRelation
-    {
-        private readonly ManualResetEventSlim _entered;
-        private readonly ManualResetEventSlim _release;
-        private readonly bool[] _finished;
-
-        public BlockingFriendQueryRelation(
-            ManualResetEventSlim entered,
-            ManualResetEventSlim release,
-            bool[] finished
-        )
-        {
-            _entered = entered;
-            _release = release;
-            _finished = finished;
-        }
-
-        public void Execute(Entity other)
-        {
-            _entered.Set();
-            _release.Wait();
-            _finished[0] = true;
-        }
-    }
-
-    private struct BlockingDamageQueryRelation : IQueryEvaluatedRelation<Damage>
-    {
-        private readonly ManualResetEventSlim _entered;
-        private readonly ManualResetEventSlim _release;
-        private readonly bool[] _finished;
-
-        public BlockingDamageQueryRelation(
-            ManualResetEventSlim entered,
-            ManualResetEventSlim release,
-            bool[] finished
-        )
-        {
-            _entered = entered;
-            _release = release;
-            _finished = finished;
-        }
-
-        public void Execute(Entity other, ref Damage relation)
-        {
-            _entered.Set();
-            _release.Wait();
-            _finished[0] = true;
-        }
-    }
-
-    private struct IncrementDamageQueryRelation : IQueryEvaluatedRelation<Damage>
-    {
-        public void Execute(Entity other, ref Damage relation)
-        {
-            relation.Value += 1f;
-        }
     }
 
     [Fact]
@@ -851,5 +774,83 @@ public sealed class WorldRelationConcurrencyTests
 
         foreach (Entity target in removeTargets)
             Assert.False(world.IsRelatedTo<Friend>(owner, target));
+    }
+}
+
+file struct FriendQueryRelation : IQueryRelation
+{
+    public static int Count;
+
+    public void Execute(Entity other)
+    {
+        Interlocked.Increment(ref Count);
+    }
+}
+
+file struct DamageQueryRelation : IQueryEvaluatedRelation<Damage>
+{
+    public static int Count;
+
+    public void Execute(Entity other, ref Damage relation)
+    {
+        Interlocked.Increment(ref Count);
+    }
+}
+
+file struct BlockingFriendQueryRelation : IQueryRelation
+{
+    private readonly ManualResetEventSlim _entered;
+    private readonly ManualResetEventSlim _release;
+    private readonly bool[] _finished;
+
+    public BlockingFriendQueryRelation(
+        ManualResetEventSlim entered,
+        ManualResetEventSlim release,
+        bool[] finished
+    )
+    {
+        _entered = entered;
+        _release = release;
+        _finished = finished;
+    }
+
+    public void Execute(Entity other)
+    {
+        _entered.Set();
+        _release.Wait();
+        _finished[0] = true;
+    }
+}
+
+file struct BlockingDamageQueryRelation : IQueryEvaluatedRelation<Damage>
+{
+    private readonly ManualResetEventSlim _entered;
+    private readonly ManualResetEventSlim _release;
+    private readonly bool[] _finished;
+
+    public BlockingDamageQueryRelation(
+        ManualResetEventSlim entered,
+        ManualResetEventSlim release,
+        bool[] finished
+    )
+    {
+        _entered = entered;
+        _release = release;
+        _finished = finished;
+    }
+
+    public void Execute(Entity other, ref Damage relation)
+    {
+        _entered.Set();
+        _release.Wait();
+        _finished[0] = true;
+    }
+}
+
+file struct IncrementDamageQueryRelation : IQueryEvaluatedRelation<Damage>
+{
+    public void Execute(Entity other, ref Damage relation)
+    {
+        relation.Value += 1f;
     }
 }

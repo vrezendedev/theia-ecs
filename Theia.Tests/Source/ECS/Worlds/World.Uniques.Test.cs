@@ -4,34 +4,9 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Worlds;
 
+[Collection("MetaRequester")]
 public sealed partial class WorldUniqueTests
 {
-    private ref struct ComponentAUpdate : IUniqueQuery<ComponentA>
-    {
-        public int A;
-        public ComponentA ComponentA;
-
-        public void Execute(ref ComponentA component)
-        {
-            if (A > 0)
-            {
-                component.A = A;
-            }
-
-            ComponentA = component;
-        }
-    }
-
-    private ref struct ComponentBUpdate : IUniqueQuery<ComponentB>
-    {
-        public int B;
-
-        public void Execute(ref ComponentB component)
-        {
-            component.B = B;
-        }
-    }
-
     [Fact]
     public void ReadUnique_DefaultsToDefault_WhenNeverSet()
     {
@@ -163,5 +138,31 @@ public sealed partial class WorldUniqueTests
 
         Assert.Equal(99, world.ReadUnique<ComponentA>().A);
         Assert.Equal(2, world.ReadUnique<ComponentB>().B);
+    }
+}
+
+file ref struct ComponentAUpdate : IUniqueQuery<ComponentA>
+{
+    public int A;
+    public ComponentA ComponentA;
+
+    public void Execute(ref ComponentA component)
+    {
+        if (A > 0)
+        {
+            component.A = A;
+        }
+
+        ComponentA = component;
+    }
+}
+
+file ref struct ComponentBUpdate : IUniqueQuery<ComponentB>
+{
+    public int B;
+
+    public void Execute(ref ComponentB component)
+    {
+        component.B = B;
     }
 }

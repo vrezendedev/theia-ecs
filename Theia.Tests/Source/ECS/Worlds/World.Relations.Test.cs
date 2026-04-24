@@ -8,49 +8,9 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Worlds;
 
+[Collection("MetaRequester")]
 public sealed class WorldRelationTests
 {
-    private struct FriendQueryRelation : IQueryRelation
-    {
-        public int Count;
-
-        public void Execute(Entity other)
-        {
-            Count++;
-        }
-    }
-
-    private struct FriendQueryRelationInvalidOperationException : IQueryRelation
-    {
-        public World World;
-        public Entity Owner;
-        public Entity EntityB;
-
-        public void Execute(Entity other)
-        {
-            World.TryAddTagRelation<Friend>(Owner, EntityB);
-        }
-    }
-
-    private struct DamageQueryRelation : IQueryEvaluatedRelation<Damage>
-    {
-        public float Set;
-        public float Total;
-
-        public void Execute(Entity other, ref Damage relation)
-        {
-            if (Set > 0)
-                relation.Value = Set;
-
-            Total += relation.Value;
-        }
-    }
-
-    private struct FriendQueryEvaluatedRelationException : IQueryEvaluatedRelation<Friend>
-    {
-        public void Execute(Entity other, ref Friend relation) { }
-    }
-
     [Fact]
     public void TryAddTagRelation_WithAliveEntities_ReturnsTrue()
     {
@@ -1188,4 +1148,45 @@ public sealed class WorldRelationTests
         Assert.Equal(1, world.CountRelations<Friend>(owner));
         Assert.True(world.IsRelatedTo<Friend>(owner, targetB));
     }
+}
+
+file struct FriendQueryRelation : IQueryRelation
+{
+    public int Count;
+
+    public void Execute(Entity other)
+    {
+        Count++;
+    }
+}
+
+file struct FriendQueryRelationInvalidOperationException : IQueryRelation
+{
+    public World World;
+    public Entity Owner;
+    public Entity EntityB;
+
+    public void Execute(Entity other)
+    {
+        World.TryAddTagRelation<Friend>(Owner, EntityB);
+    }
+}
+
+file struct DamageQueryRelation : IQueryEvaluatedRelation<Damage>
+{
+    public float Set;
+    public float Total;
+
+    public void Execute(Entity other, ref Damage relation)
+    {
+        if (Set > 0)
+            relation.Value = Set;
+
+        Total += relation.Value;
+    }
+}
+
+file struct FriendQueryEvaluatedRelationException : IQueryEvaluatedRelation<Friend>
+{
+    public void Execute(Entity other, ref Friend relation) { }
 }

@@ -7,127 +7,9 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Worlds;
 
+[Collection("MetaRequester")]
 public sealed class WorldQueriesTest
 {
-    private ref struct ForEachPosition : IForEach<Position>
-    {
-        public int CallCount;
-        public int X;
-        public int Y;
-
-        public void Execute(ref Position c1)
-        {
-            CallCount++;
-            c1.X = X;
-            c1.Y = Y;
-        }
-    }
-
-    private ref struct ForEachPositionMultiply : IForEach<Position>
-    {
-        public int XMultiplier;
-
-        public void Execute(ref Position c1)
-        {
-            c1.X *= XMultiplier;
-        }
-    }
-
-    private ref struct ForEachEntityPosition : IForEachEntity<Position>
-    {
-        public int CallCount;
-        public int X;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            CallCount++;
-            c1.X = X;
-        }
-    }
-
-    private ref struct AttemptAddForEachEntityPosition : IForEachEntity<Position>
-    {
-        public World World;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            World.TryAddComponent(entity, new Velocity());
-        }
-    }
-
-    private ref struct AttemptGhoulifyForEachEntityPosition : IForEachEntity<Position>
-    {
-        public World World;
-        public Entity Target;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            World.TryGhoulify(Target);
-        }
-    }
-
-    private ref struct CaptureEntityForEachEntityPosition : IForEachEntity<Position>
-    {
-        public Entity Entity;
-        public Position Position;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            Entity = entity;
-            Position = c1;
-        }
-    }
-
-    private ref struct DeferredCreateForEachEntityPosition : IForEachEntity<Position>
-    {
-        public Assemblage<Position> Assemblage;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            Assemblage.DeferredCreate(new Position { X = 1 });
-        }
-    }
-
-    private ref struct DeferredGhoulifyForEachEntityPosition : IForEachEntity<Position>
-    {
-        public World World;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            World.DeferredGhoulify(entity);
-        }
-    }
-
-    private ref struct DeferredAddVelocityForEachEntityPosition : IForEachEntity<Position>
-    {
-        public World World;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            World.DeferredAddComponent<Velocity>(entity);
-        }
-    }
-
-    private ref struct DeferredRemovePositionForEachEntityPosition : IForEachEntity<Position>
-    {
-        public World World;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            World.DeferredRemoveComponent<Position>(entity);
-        }
-    }
-
-    private ref struct DeferredRemoveVelocityForEachEntityPosition : IForEachEntity<Position>
-    {
-        public World World;
-
-        public void Execute(Entity entity, ref Position c1)
-        {
-            World.DeferredRemoveComponent<Velocity>(entity);
-        }
-    }
-
     [Fact]
     public void CreateSettlerQuery_ReturnsNonNullInstance()
     {
@@ -910,5 +792,124 @@ public sealed class WorldQueriesTest
         world.FlushDeferred();
 
         Assert.False(world.Has<Velocity>(entity));
+    }
+}
+
+file ref struct ForEachPosition : IForEach<Position>
+{
+    public int CallCount;
+    public int X;
+    public int Y;
+
+    public void Execute(ref Position c1)
+    {
+        CallCount++;
+        c1.X = X;
+        c1.Y = Y;
+    }
+}
+
+file ref struct ForEachPositionMultiply : IForEach<Position>
+{
+    public int XMultiplier;
+
+    public void Execute(ref Position c1)
+    {
+        c1.X *= XMultiplier;
+    }
+}
+
+file ref struct ForEachEntityPosition : IForEachEntity<Position>
+{
+    public int CallCount;
+    public int X;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        CallCount++;
+        c1.X = X;
+    }
+}
+
+file ref struct AttemptAddForEachEntityPosition : IForEachEntity<Position>
+{
+    public World World;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        World.TryAddComponent(entity, new Velocity());
+    }
+}
+
+file ref struct AttemptGhoulifyForEachEntityPosition : IForEachEntity<Position>
+{
+    public World World;
+    public Entity Target;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        World.TryGhoulify(Target);
+    }
+}
+
+file ref struct CaptureEntityForEachEntityPosition : IForEachEntity<Position>
+{
+    public Entity Entity;
+    public Position Position;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        Entity = entity;
+        Position = c1;
+    }
+}
+
+file ref struct DeferredCreateForEachEntityPosition : IForEachEntity<Position>
+{
+    public Assemblage<Position> Assemblage;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        Assemblage.DeferredCreate(new Position { X = 1 });
+    }
+}
+
+file ref struct DeferredGhoulifyForEachEntityPosition : IForEachEntity<Position>
+{
+    public World World;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        World.DeferredGhoulify(entity);
+    }
+}
+
+file ref struct DeferredAddVelocityForEachEntityPosition : IForEachEntity<Position>
+{
+    public World World;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        World.DeferredAddComponent<Velocity>(entity);
+    }
+}
+
+file ref struct DeferredRemovePositionForEachEntityPosition : IForEachEntity<Position>
+{
+    public World World;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        World.DeferredRemoveComponent<Position>(entity);
+    }
+}
+
+file ref struct DeferredRemoveVelocityForEachEntityPosition : IForEachEntity<Position>
+{
+    public World World;
+
+    public void Execute(Entity entity, ref Position c1)
+    {
+        World.DeferredRemoveComponent<Velocity>(entity);
     }
 }

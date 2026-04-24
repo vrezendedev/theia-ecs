@@ -4,6 +4,7 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Relations;
 
+[Collection("MetaRequester")]
 public sealed class RelationsMetaTests
 {
     [Fact]

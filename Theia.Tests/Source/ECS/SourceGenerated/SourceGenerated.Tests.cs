@@ -6,364 +6,9 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.SourceGenerated;
 
+[Collection("MetaRequester")]
 public sealed class SourceGeneratedTests
 {
-    private ref struct ForEachPositionVelocityCount : IForEach<Position, Velocity>
-    {
-        public int CallCount;
-
-        public void Execute(ref Position c1, ref Velocity c2) => CallCount++;
-    }
-
-    private ref struct ForEachPositionVelocityReadSum : IForEach<Position, Velocity>
-    {
-        public float SumX;
-        public float SumY;
-
-        public void Execute(ref Position c1, ref Velocity c2)
-        {
-            SumX = c1.X + c2.X;
-            SumY = c1.Y + c2.Y;
-        }
-    }
-
-    private ref struct ForEachPositionVelocityMutate : IForEach<Position, Velocity>
-    {
-        public int PositionX;
-        public int VelocityX;
-        public int VelocityY;
-
-        public void Execute(ref Position c1, ref Velocity c2)
-        {
-            c1.X = PositionX;
-            c2.X = VelocityX;
-            c2.Y = VelocityY;
-        }
-    }
-
-    private ref struct ForEachEntityPositionVelocityCapture : IForEachEntity<Position, Velocity>
-    {
-        public Entity Entity;
-        public float PositionX;
-        public float VelocityX;
-
-        public void Execute(Entity entity, ref Position c1, ref Velocity c2)
-        {
-            Entity = entity;
-            PositionX = c1.X;
-            VelocityX = c2.X;
-        }
-    }
-
-    private ref struct ForEachT4Count : IForEach<Position, Velocity, Rotation, Health>
-    {
-        public int CallCount;
-
-        public void Execute(ref Position c1, ref Velocity c2, ref Rotation c3, ref Health c4) =>
-            CallCount++;
-    }
-
-    private ref struct ForEachT4ReadPositionVelocity
-        : IForEach<Position, Velocity, Rotation, Health>
-    {
-        public float PositionX;
-        public float VelocityX;
-
-        public void Execute(ref Position c1, ref Velocity c2, ref Rotation c3, ref Health c4)
-        {
-            PositionX = c1.X;
-            VelocityX = c2.X;
-        }
-    }
-
-    private ref struct ForEachEntityT4CaptureEntity
-        : IForEachEntity<Position, Velocity, Rotation, Health>
-    {
-        public Entity Entity;
-
-        public void Execute(
-            Entity entity,
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4
-        ) => Entity = entity;
-    }
-
-    private ref struct ForEachT8Count
-        : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
-    {
-        public int CallCount;
-
-        public void Execute(
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4,
-            ref Mass c5,
-            ref Scale c6,
-            ref Age c7,
-            ref Tag c8
-        ) => CallCount++;
-    }
-
-    private ref struct ForEachT8ReadSampled
-        : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
-    {
-        public float PositionX;
-        public float Mass;
-        public int Age;
-        public int Tag;
-
-        public void Execute(
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4,
-            ref Mass c5,
-            ref Scale c6,
-            ref Age c7,
-            ref Tag c8
-        )
-        {
-            PositionX = c1.X;
-            Mass = c5.Value;
-            Age = c7.Value;
-            Tag = c8.Value;
-        }
-    }
-
-    private ref struct ForEachEntityT8CaptureEntity
-        : IForEachEntity<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
-    {
-        public Entity Entity;
-
-        public void Execute(
-            Entity entity,
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4,
-            ref Mass c5,
-            ref Scale c6,
-            ref Age c7,
-            ref Tag c8
-        ) => Entity = entity;
-    }
-
-    private ref struct ForEachT16Count
-        : IForEach<
-            Position,
-            Velocity,
-            Rotation,
-            Health,
-            Mass,
-            Scale,
-            Age,
-            Tag,
-            Color,
-            Force,
-            Momentum,
-            Gravity,
-            Friction,
-            Torque,
-            Impulse,
-            Damping
-        >
-    {
-        public int CallCount;
-
-        public void Execute(
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4,
-            ref Mass c5,
-            ref Scale c6,
-            ref Age c7,
-            ref Tag c8,
-            ref Color c9,
-            ref Force c10,
-            ref Momentum c11,
-            ref Gravity c12,
-            ref Friction c13,
-            ref Torque c14,
-            ref Impulse c15,
-            ref Damping c16
-        ) => CallCount++;
-    }
-
-    private ref struct ForEachT16ReadFirstLast
-        : IForEach<
-            Position,
-            Velocity,
-            Rotation,
-            Health,
-            Mass,
-            Scale,
-            Age,
-            Tag,
-            Color,
-            Force,
-            Momentum,
-            Gravity,
-            Friction,
-            Torque,
-            Impulse,
-            Damping
-        >
-    {
-        public float PositionX;
-        public float Damping;
-
-        public void Execute(
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4,
-            ref Mass c5,
-            ref Scale c6,
-            ref Age c7,
-            ref Tag c8,
-            ref Color c9,
-            ref Force c10,
-            ref Momentum c11,
-            ref Gravity c12,
-            ref Friction c13,
-            ref Torque c14,
-            ref Impulse c15,
-            ref Damping c16
-        )
-        {
-            PositionX = c1.X;
-            Damping = c16.Value;
-        }
-    }
-
-    private ref struct ForEachEntityT16CaptureEntity
-        : IForEachEntity<
-            Position,
-            Velocity,
-            Rotation,
-            Health,
-            Mass,
-            Scale,
-            Age,
-            Tag,
-            Color,
-            Force,
-            Momentum,
-            Gravity,
-            Friction,
-            Torque,
-            Impulse,
-            Damping
-        >
-    {
-        public Entity Entity;
-
-        public void Execute(
-            Entity entity,
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4,
-            ref Mass c5,
-            ref Scale c6,
-            ref Age c7,
-            ref Tag c8,
-            ref Color c9,
-            ref Force c10,
-            ref Momentum c11,
-            ref Gravity c12,
-            ref Friction c13,
-            ref Torque c14,
-            ref Impulse c15,
-            ref Damping c16
-        ) => Entity = entity;
-    }
-
-    private ref struct ForEachT16DeferredCreate
-        : IForEach<
-            Position,
-            Velocity,
-            Rotation,
-            Health,
-            Mass,
-            Scale,
-            Age,
-            Tag,
-            Color,
-            Force,
-            Momentum,
-            Gravity,
-            Friction,
-            Torque,
-            Impulse,
-            Damping
-        >
-    {
-        public Assemblage<
-            Position,
-            Velocity,
-            Rotation,
-            Health,
-            Mass,
-            Scale,
-            Age,
-            Tag,
-            Color,
-            Force,
-            Momentum,
-            Gravity,
-            Friction,
-            Torque,
-            Impulse,
-            Damping
-        > Assemblage;
-        public int Count;
-
-        public void Execute(
-            ref Position c1,
-            ref Velocity c2,
-            ref Rotation c3,
-            ref Health c4,
-            ref Mass c5,
-            ref Scale c6,
-            ref Age c7,
-            ref Tag c8,
-            ref Color c9,
-            ref Force c10,
-            ref Momentum c11,
-            ref Gravity c12,
-            ref Friction c13,
-            ref Torque c14,
-            ref Impulse c15,
-            ref Damping c16
-        )
-        {
-            for (int i = 0; i < Count; i++)
-                Assemblage.DeferredCreate(
-                    new Position(),
-                    new Velocity(),
-                    new Rotation(),
-                    new Health(),
-                    new Mass(),
-                    new Scale(),
-                    new Age(),
-                    new Tag(),
-                    new Color(),
-                    new Force(),
-                    new Momentum(),
-                    new Gravity(),
-                    new Friction(),
-                    new Torque(),
-                    new Impulse(),
-                    new Damping()
-                );
-        }
-    }
-
     [Fact]
     public void CreateAssemblage_T2_ReturnsNonNullInstance()
     {
@@ -1664,5 +1309,359 @@ public sealed class SourceGeneratedTests
         world.FlushDeferred();
 
         Assert.Equal(initial + (initial * initial), world.CountEntities());
+    }
+}
+
+file ref struct ForEachPositionVelocityCount : IForEach<Position, Velocity>
+{
+    public int CallCount;
+
+    public void Execute(ref Position c1, ref Velocity c2) => CallCount++;
+}
+
+file ref struct ForEachPositionVelocityReadSum : IForEach<Position, Velocity>
+{
+    public float SumX;
+    public float SumY;
+
+    public void Execute(ref Position c1, ref Velocity c2)
+    {
+        SumX = c1.X + c2.X;
+        SumY = c1.Y + c2.Y;
+    }
+}
+
+file ref struct ForEachPositionVelocityMutate : IForEach<Position, Velocity>
+{
+    public int PositionX;
+    public int VelocityX;
+    public int VelocityY;
+
+    public void Execute(ref Position c1, ref Velocity c2)
+    {
+        c1.X = PositionX;
+        c2.X = VelocityX;
+        c2.Y = VelocityY;
+    }
+}
+
+file ref struct ForEachEntityPositionVelocityCapture : IForEachEntity<Position, Velocity>
+{
+    public Entity Entity;
+    public float PositionX;
+    public float VelocityX;
+
+    public void Execute(Entity entity, ref Position c1, ref Velocity c2)
+    {
+        Entity = entity;
+        PositionX = c1.X;
+        VelocityX = c2.X;
+    }
+}
+
+file ref struct ForEachT4Count : IForEach<Position, Velocity, Rotation, Health>
+{
+    public int CallCount;
+
+    public void Execute(ref Position c1, ref Velocity c2, ref Rotation c3, ref Health c4) =>
+        CallCount++;
+}
+
+file ref struct ForEachT4ReadPositionVelocity : IForEach<Position, Velocity, Rotation, Health>
+{
+    public float PositionX;
+    public float VelocityX;
+
+    public void Execute(ref Position c1, ref Velocity c2, ref Rotation c3, ref Health c4)
+    {
+        PositionX = c1.X;
+        VelocityX = c2.X;
+    }
+}
+
+file ref struct ForEachEntityT4CaptureEntity : IForEachEntity<Position, Velocity, Rotation, Health>
+{
+    public Entity Entity;
+
+    public void Execute(
+        Entity entity,
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4
+    ) => Entity = entity;
+}
+
+file ref struct ForEachT8Count
+    : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
+{
+    public int CallCount;
+
+    public void Execute(
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4,
+        ref Mass c5,
+        ref Scale c6,
+        ref Age c7,
+        ref Tag c8
+    ) => CallCount++;
+}
+
+file ref struct ForEachT8ReadSampled
+    : IForEach<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
+{
+    public float PositionX;
+    public float Mass;
+    public int Age;
+    public int Tag;
+
+    public void Execute(
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4,
+        ref Mass c5,
+        ref Scale c6,
+        ref Age c7,
+        ref Tag c8
+    )
+    {
+        PositionX = c1.X;
+        Mass = c5.Value;
+        Age = c7.Value;
+        Tag = c8.Value;
+    }
+}
+
+file ref struct ForEachEntityT8CaptureEntity
+    : IForEachEntity<Position, Velocity, Rotation, Health, Mass, Scale, Age, Tag>
+{
+    public Entity Entity;
+
+    public void Execute(
+        Entity entity,
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4,
+        ref Mass c5,
+        ref Scale c6,
+        ref Age c7,
+        ref Tag c8
+    ) => Entity = entity;
+}
+
+file ref struct ForEachT16Count
+    : IForEach<
+        Position,
+        Velocity,
+        Rotation,
+        Health,
+        Mass,
+        Scale,
+        Age,
+        Tag,
+        Color,
+        Force,
+        Momentum,
+        Gravity,
+        Friction,
+        Torque,
+        Impulse,
+        Damping
+    >
+{
+    public int CallCount;
+
+    public void Execute(
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4,
+        ref Mass c5,
+        ref Scale c6,
+        ref Age c7,
+        ref Tag c8,
+        ref Color c9,
+        ref Force c10,
+        ref Momentum c11,
+        ref Gravity c12,
+        ref Friction c13,
+        ref Torque c14,
+        ref Impulse c15,
+        ref Damping c16
+    ) => CallCount++;
+}
+
+file ref struct ForEachT16ReadFirstLast
+    : IForEach<
+        Position,
+        Velocity,
+        Rotation,
+        Health,
+        Mass,
+        Scale,
+        Age,
+        Tag,
+        Color,
+        Force,
+        Momentum,
+        Gravity,
+        Friction,
+        Torque,
+        Impulse,
+        Damping
+    >
+{
+    public float PositionX;
+    public float Damping;
+
+    public void Execute(
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4,
+        ref Mass c5,
+        ref Scale c6,
+        ref Age c7,
+        ref Tag c8,
+        ref Color c9,
+        ref Force c10,
+        ref Momentum c11,
+        ref Gravity c12,
+        ref Friction c13,
+        ref Torque c14,
+        ref Impulse c15,
+        ref Damping c16
+    )
+    {
+        PositionX = c1.X;
+        Damping = c16.Value;
+    }
+}
+
+file ref struct ForEachEntityT16CaptureEntity
+    : IForEachEntity<
+        Position,
+        Velocity,
+        Rotation,
+        Health,
+        Mass,
+        Scale,
+        Age,
+        Tag,
+        Color,
+        Force,
+        Momentum,
+        Gravity,
+        Friction,
+        Torque,
+        Impulse,
+        Damping
+    >
+{
+    public Entity Entity;
+
+    public void Execute(
+        Entity entity,
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4,
+        ref Mass c5,
+        ref Scale c6,
+        ref Age c7,
+        ref Tag c8,
+        ref Color c9,
+        ref Force c10,
+        ref Momentum c11,
+        ref Gravity c12,
+        ref Friction c13,
+        ref Torque c14,
+        ref Impulse c15,
+        ref Damping c16
+    ) => Entity = entity;
+}
+
+file ref struct ForEachT16DeferredCreate
+    : IForEach<
+        Position,
+        Velocity,
+        Rotation,
+        Health,
+        Mass,
+        Scale,
+        Age,
+        Tag,
+        Color,
+        Force,
+        Momentum,
+        Gravity,
+        Friction,
+        Torque,
+        Impulse,
+        Damping
+    >
+{
+    public Assemblage<
+        Position,
+        Velocity,
+        Rotation,
+        Health,
+        Mass,
+        Scale,
+        Age,
+        Tag,
+        Color,
+        Force,
+        Momentum,
+        Gravity,
+        Friction,
+        Torque,
+        Impulse,
+        Damping
+    > Assemblage;
+    public int Count;
+
+    public void Execute(
+        ref Position c1,
+        ref Velocity c2,
+        ref Rotation c3,
+        ref Health c4,
+        ref Mass c5,
+        ref Scale c6,
+        ref Age c7,
+        ref Tag c8,
+        ref Color c9,
+        ref Force c10,
+        ref Momentum c11,
+        ref Gravity c12,
+        ref Friction c13,
+        ref Torque c14,
+        ref Impulse c15,
+        ref Damping c16
+    )
+    {
+        for (int i = 0; i < Count; i++)
+            Assemblage.DeferredCreate(
+                new Position(),
+                new Velocity(),
+                new Rotation(),
+                new Health(),
+                new Mass(),
+                new Scale(),
+                new Age(),
+                new Tag(),
+                new Color(),
+                new Force(),
+                new Momentum(),
+                new Gravity(),
+                new Friction(),
+                new Torque(),
+                new Impulse(),
+                new Damping()
+            );
     }
 }

@@ -5,6 +5,7 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Worlds;
 
+[Collection("MetaRequester")]
 public sealed class WorldConstructorTests
 {
     [Fact]

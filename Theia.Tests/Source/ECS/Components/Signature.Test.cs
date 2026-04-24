@@ -6,6 +6,7 @@ using Theia.Tests.Resources;
 namespace Theia.Tests.ECS.Components;
 
 #pragma warning disable CS0618
+[Collection("MetaRequester")]
 public sealed class SignatureTests
 {
     [Fact]

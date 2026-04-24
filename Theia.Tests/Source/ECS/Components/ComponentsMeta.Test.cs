@@ -5,6 +5,7 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Components;
 
+[Collection("MetaRequester")]
 public sealed class ComponentsMetaTests
 {
     [Fact]

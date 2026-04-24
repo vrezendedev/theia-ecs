@@ -4,14 +4,9 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Components;
 
+[Collection("MetaRequester")]
 public sealed class ComponentTypeTests
 {
-    [InlineArray(10)]
-    private struct ComponentWithFixedSizeBuffer()
-    {
-        public int Element0;
-    }
-
     [Fact]
     public void ComponentType_SizeOf_ReturnsCorrectSize() =>
         Assert.Equal(20, ComponentsMeta.GetComponentType(ComponentMeta<Transform>.s_id)._sizeOf);
@@ -35,4 +30,10 @@ public sealed class ComponentTypeTests
         Assert.IsType<Storage<Position>>(componentStorage);
         Assert.IsAssignableFrom<Storage>(componentStorage);
     }
+}
+
+[InlineArray(10)]
+file struct ComponentWithFixedSizeBuffer()
+{
+    public int Element0;
 }
