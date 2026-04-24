@@ -14,10 +14,12 @@ public class QueryGeneratorGenerics : IIncrementalGenerator
         sb.Append(
             @"
 using System;
+using System.Buffers;
 using Theia.ECS.Archetypes;
 using Theia.ECS.Assemblages;
 using Theia.ECS.Components;
 using Theia.ECS.Entities;
+using Theia.ECS.Jobs;
 using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Queries;
@@ -32,6 +34,7 @@ namespace Theia.ECS.Queries;
         )
         {
             string generics = Generator.Generics(i, Constants.GenericComponentPrefix);
+            string jobGenerics = generics.Replace("<", string.Empty).Replace(">", string.Empty);
             string constraints = Generator.Constraints(
                 i,
                 Constants.GenericComponentPrefix,
@@ -46,7 +49,9 @@ namespace Theia.ECS.Queries;
 
             sb.AppendLine(
                 SettlerQueryTemplate(
+                    i,
                     generics,
+                    jobGenerics,
                     constraints,
                     SettlerQueryStorages(i, Constants.QueryStoragesVariablePrefix),
                     QueriesStorageAccess(
@@ -62,7 +67,9 @@ namespace Theia.ECS.Queries;
 
             sb.AppendLine(
                 NomadQueryTemplate(
+                    i,
                     generics,
+                    jobGenerics,
                     constraints,
                     Generator.VariablesDefinitionComponentsIds(
                         i,
@@ -146,8 +153,26 @@ namespace Theia.ECS.Queries;
             Enumerable.Range(1, count).Select(i => $"{paramScope} {storagePrefix}{i}[j]")
         );
 
+    private static string JobStoragesInit(int count, string tabs) =>
+        string.Join(
+            "\n",
+            Enumerable
+                .Range(1, count)
+                .Select(i =>
+                    $"{tabs}job.StoragesComponentT{i} = (Storage<ComponentT{i}>)storagesT{i}[i];"
+                )
+        );
+
+    private static string JobStoragesNullify(int count) =>
+        string.Join(
+            "\n",
+            Enumerable.Range(1, count).Select(i => $"            job.StoragesComponentT{i} = null;")
+        );
+
     private static string SettlerQueryTemplate(
+        int count,
         string generics,
+        string jobGenerics,
         string constraints,
         string storagesVariables,
         string storageVariables,
@@ -197,6 +222,63 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
         _world.DecrementQueriesBeingExecuted();
     }
 
+    public void ForEachEntityParallel<T>(T forEachEntity)
+        where T : struct, IForEachEntity{{generics}}
+    {
+        Archetype archetype = _archetype;
+
+        Span<Indexer> indexers = archetype.GetIndexers();
+
+        int indexersCount = indexers.Length;
+
+        if (indexersCount == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
+
+{{storagesVariables}}
+
+        Job[] jobs = ArrayPool<Job>.Shared.Rent(indexersCount);
+
+        int jobCount = 0;
+
+        for (int i = 0; i < indexersCount; i++)
+        {
+            int count = indexers[i].Count();
+
+            if (count == 0)
+                continue;
+
+            ForEachEntityJob<T, {{jobGenerics}}> job = JobPool<ForEachEntityJob<T, {{jobGenerics}}>>.Rent();
+          
+            job.ForEach = forEachEntity;
+            job.Indexer = indexers[i];
+{{JobStoragesInit(count, "            ")}}
+            job.Count = count;
+
+            jobs[jobCount] = job;
+            jobCount++;
+        }
+
+        JobScheduler.Run(jobs.AsSpan(0, jobCount));
+
+        for (int i = 0; i < jobCount; i++)
+        {
+            ForEachEntityJob<T, {{jobGenerics}}> job = (ForEachEntityJob<T, {{jobGenerics}}>)jobs[i];
+           
+            job.Indexer = null;
+{{JobStoragesNullify(count)}}
+
+            JobPool<ForEachEntityJob<T, {{jobGenerics}}>>.Return(job);
+        }
+
+        ArrayPool<Job>.Shared.Return(jobs, clearArray: true);
+
+        _world.DecrementQueriesBeingExecuted();
+    }
+
     public void ForEach<T>(ref T forEach)
         where T : struct, IForEach{{generics}}, allows ref struct
     {
@@ -230,12 +312,69 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 
         _world.DecrementQueriesBeingExecuted();
     }
+
+    public void ForEachParallel<T>(T forEach)
+        where T : struct, IForEach{{generics}}
+    {
+        Archetype archetype = _archetype;
+
+        Span<Indexer> indexers = archetype.GetIndexers();
+
+        int indexersCount = indexers.Length;
+
+        if (indexersCount == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+        ReadOnlySpan<int> mapping = GetComponentStorageMapping();
+
+{{storagesVariables}}
+
+        Job[] jobs = ArrayPool<Job>.Shared.Rent(indexersCount);
+
+        int jobCount = 0;
+
+        for (int i = 0; i < indexersCount; i++)
+        {
+            int count = indexers[i].Count();
+
+            if (count == 0)
+                continue;
+
+            ForEachJob<T, {{jobGenerics}}> job = JobPool<ForEachJob<T, {{jobGenerics}}>>.Rent();
+            
+            job.ForEach = forEach;
+{{JobStoragesInit(count, "            ")}}
+            job.Count = count;
+
+            jobs[jobCount] = job;
+            jobCount++;
+        }
+
+        JobScheduler.Run(jobs.AsSpan(0, jobCount));
+
+        for (int i = 0; i < jobCount; i++)
+        {
+            ForEachJob<T, {{jobGenerics}}> job = (ForEachJob<T, {{jobGenerics}}>)jobs[i];
+
+{{JobStoragesNullify(count)}}
+
+            JobPool<ForEachJob<T, {{jobGenerics}}>>.Return(job);
+        }
+
+        ArrayPool<Job>.Shared.Return(jobs, clearArray: true);
+
+        _world.DecrementQueriesBeingExecuted();
+    }
 }
 
 """;
 
     private static string NomadQueryTemplate(
+        int count,
         string generics,
+        string jobGenerics,
         string constraints,
         string componentIds,
         string storages,
@@ -293,6 +432,82 @@ public sealed class NomadQuery{{generics}} : NomadQuery
         _world.DecrementQueriesBeingExecuted();
     }
 
+    public void ForEachEntityParallel<T>(T forEachEntity)
+        where T : struct, IForEachEntity{{generics}}
+    {
+        int matchedArchetypeCount = _matchedArchetypesCount;
+
+        if (matchedArchetypeCount == 0)
+            return;
+
+        ReadOnlySpan<Archetype> matchedArchetypes = GetMatchedArchetypes();
+
+        int totalIndexers = 0;
+
+        for (int i = 0; i < matchedArchetypes.Length; i++)
+        {
+            Archetype archetype = matchedArchetypes[i];
+            totalIndexers += archetype.GetInitializedCount();
+        }
+
+        if (totalIndexers == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+{{componentIds}}
+
+        Job[] jobs = ArrayPool<Job>.Shared.Rent(totalIndexers);
+
+        int jobCount = 0;
+
+        foreach (Archetype archetype in matchedArchetypes)
+        {
+            Span<Indexer> indexers = archetype.GetIndexers();
+
+            if (indexers.Length == 0)
+                continue;
+
+{{storages}}
+
+            for (int i = 0; i < indexers.Length; i++)
+            {
+                int count = indexers[i].Count();
+
+                if (count == 0)
+                    continue;
+
+                ForEachEntityJob<T, {{jobGenerics}}> job = JobPool<
+                    ForEachEntityJob<T, {{jobGenerics}}>
+                >.Rent();
+
+                job.ForEach = forEachEntity;
+                job.Indexer = indexers[i];
+{{JobStoragesInit(count, "                ")}}
+                job.Count = count;
+
+                jobs[jobCount] = job;
+                jobCount++;
+            }
+        }
+
+        JobScheduler.Run(jobs.AsSpan(0, jobCount));
+
+        for (int i = 0; i < jobCount; i++)
+        {
+            ForEachEntityJob<T, {{jobGenerics}}> job = (ForEachEntityJob<T, {{jobGenerics}}>)jobs[i];
+
+            job.Indexer = null;
+{{JobStoragesNullify(count)}}
+
+            JobPool<ForEachEntityJob<T, {{jobGenerics}}>>.Return(job);
+        }
+
+        ArrayPool<Job>.Shared.Return(jobs, clearArray: true);
+
+        _world.DecrementQueriesBeingExecuted();
+    }
+
     public void ForEach<T>(ref T forEach)
         where T : struct, IForEach{{generics}}, allows ref struct
     {
@@ -331,6 +546,78 @@ public sealed class NomadQuery{{generics}} : NomadQuery
                     forEach.Execute({{componentsArgs}});
             }
         }
+
+        _world.DecrementQueriesBeingExecuted();
+    }
+
+    public void ForEachParallel<T>(T forEach)
+        where T : struct, IForEach{{generics}}
+    {
+        int matchedArchetypeCount = _matchedArchetypesCount;
+
+        if (matchedArchetypeCount == 0)
+            return;
+
+        ReadOnlySpan<Archetype> matchedArchetypes = GetMatchedArchetypes();
+
+        int totalIndexers = 0;
+
+        for (int i = 0; i < matchedArchetypes.Length; i++)
+        {
+            Archetype archetype = matchedArchetypes[i];
+            totalIndexers += archetype.GetInitializedCount();
+        }
+
+        if (totalIndexers == 0)
+            return;
+
+        _world.IncrementQueriesBeingExecuted();
+
+{{componentIds}}
+
+        Job[] jobs = ArrayPool<Job>.Shared.Rent(totalIndexers);
+
+        int jobCount = 0;
+
+        foreach (Archetype archetype in matchedArchetypes)
+        {
+            Span<Indexer> indexers = archetype.GetIndexers();
+
+            if (indexers.Length == 0)
+                continue;
+
+{{storages}}
+
+            for (int i = 0; i < indexers.Length; i++)
+            {
+                int count = indexers[i].Count();
+
+                if (count == 0)
+                    continue;
+
+                ForEachJob<T, {{jobGenerics}}> job = JobPool<ForEachJob<T, {{jobGenerics}}>>.Rent();
+                
+                job.ForEach = forEach;
+{{JobStoragesInit(count, "                ")}}
+                job.Count = count;
+
+                jobs[jobCount] = job;
+                jobCount++;
+            }
+        }
+
+        JobScheduler.Run(jobs.AsSpan(0, jobCount));
+
+        for (int i = 0; i < jobCount; i++)
+        {
+            ForEachJob<T, {{jobGenerics}}> job = (ForEachJob<T, {{jobGenerics}}>)jobs[i];
+
+{{JobStoragesNullify(count)}}
+
+            JobPool<ForEachJob<T, {{jobGenerics}}>>.Return(job);
+        }
+
+        ArrayPool<Job>.Shared.Return(jobs, clearArray: true);
 
         _world.DecrementQueriesBeingExecuted();
     }

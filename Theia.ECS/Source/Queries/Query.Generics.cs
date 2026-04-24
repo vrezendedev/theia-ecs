@@ -81,6 +81,7 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
                 continue;
 
             ForEachEntityJob<T, ComponentT1> job = JobPool<ForEachEntityJob<T, ComponentT1>>.Rent();
+
             job.ForEach = forEachEntity;
             job.Indexer = indexers[i];
             job.StoragesComponentT1 = (Storage<ComponentT1>)storagesT1[i];
@@ -95,6 +96,7 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
         for (int i = 0; i < jobCount; i++)
         {
             ForEachEntityJob<T, ComponentT1> job = (ForEachEntityJob<T, ComponentT1>)jobs[i];
+
             job.Indexer = null;
             job.StoragesComponentT1 = null;
 
@@ -170,6 +172,7 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
                 continue;
 
             ForEachJob<T, ComponentT1> job = JobPool<ForEachJob<T, ComponentT1>>.Rent();
+
             job.ForEach = forEach;
             job.StoragesComponentT1 = (Storage<ComponentT1>)storagesT1[i];
             job.Count = count;
@@ -183,6 +186,7 @@ public sealed class SettlerQuery<ComponentT1> : SettlerQuery
         for (int i = 0; i < jobCount; i++)
         {
             ForEachJob<T, ComponentT1> job = (ForEachJob<T, ComponentT1>)jobs[i];
+
             job.StoragesComponentT1 = null;
 
             JobPool<ForEachJob<T, ComponentT1>>.Return(job);
@@ -296,6 +300,7 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
                 ForEachEntityJob<T, ComponentT1> job = JobPool<
                     ForEachEntityJob<T, ComponentT1>
                 >.Rent();
+
                 job.ForEach = forEachEntity;
                 job.Indexer = indexers[i];
                 job.StoragesComponentT1 = (Storage<ComponentT1>)storagesT1[i];
@@ -311,6 +316,7 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
         for (int i = 0; i < jobCount; i++)
         {
             ForEachEntityJob<T, ComponentT1> job = (ForEachEntityJob<T, ComponentT1>)jobs[i];
+
             job.Indexer = null;
             job.StoragesComponentT1 = null;
 
@@ -414,6 +420,7 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
                     continue;
 
                 ForEachJob<T, ComponentT1> job = JobPool<ForEachJob<T, ComponentT1>>.Rent();
+
                 job.ForEach = forEach;
                 job.StoragesComponentT1 = (Storage<ComponentT1>)storagesT1[i];
                 job.Count = count;
@@ -428,6 +435,7 @@ public sealed class NomadQuery<ComponentT1> : NomadQuery
         for (int i = 0; i < jobCount; i++)
         {
             ForEachJob<T, ComponentT1> job = (ForEachJob<T, ComponentT1>)jobs[i];
+
             job.StoragesComponentT1 = null;
 
             JobPool<ForEachJob<T, ComponentT1>>.Return(job);
