@@ -38,20 +38,20 @@ namespace Theia.ECS.Assemblages;
                 "struct",
                 "    "
             );
-            string arguments = Generator.Arguments(
+            string parameters = Generator.Parameters(
                 i,
                 "in",
                 Constants.GenericComponentPrefix,
                 Constants.GenericComponentLocalPrefix
             );
-            string parameters = Generator.Params(i, "in", Constants.GenericComponentLocalPrefix);
+            string arguments = Generator.Arguments(i, "in", Constants.GenericComponentLocalPrefix);
             string mapping = Mapping(i, "in", Constants.GenericComponentLocalPrefix);
             string entityCreateDeferredInit = EntityCreateDeferredInit(
                 i,
                 Constants.GenericComponentLocalPrefix,
                 Constants.GenericComponentLocalPrefix
             );
-            string deferredInParams = Generator.Params(
+            string deferredInArgs = Generator.Arguments(
                 i,
                 string.Empty,
                 $"deferredCreate._{Constants.GenericComponentLocalPrefix}"
@@ -61,11 +61,11 @@ namespace Theia.ECS.Assemblages;
                 AssemblageTemplate(
                     generics,
                     constraints,
-                    arguments,
                     parameters,
+                    arguments,
                     mapping,
                     entityCreateDeferredInit,
-                    deferredInParams
+                    deferredInArgs
                 )
             );
         }
@@ -98,11 +98,11 @@ namespace Theia.ECS.Assemblages;
     private static string AssemblageTemplate(
         string generics,
         string constraints,
-        string inArgs,
         string inParams,
+        string inArgs,
         string mapping,
         string entityCreateDeferredInit,
-        string deferredInParams
+        string deferredInArgs
     ) =>
         $$"""
 public class Assemblage{{generics}} : Assemblage
@@ -118,14 +118,14 @@ public class Assemblage{{generics}} : Assemblage
         : base(world, archetype, componentStorageMapping) =>
         _deferredCreate = new(World.DefaultDeferredCommandsCapacity);
 
-    public Entity Create({{inArgs}})
+    public Entity Create({{inParams}})
     {
         _world.ThrowIfQueriesExecuting();
     
-        return CreateAndSet({{inParams}})._entity;
+        return CreateAndSet({{inArgs}})._entity;
     }
 
-    internal EntityCreated CreateAndSet({{inArgs}})
+    internal EntityCreated CreateAndSet({{inParams}})
     {
         EntityCreated entityCreated = _world.CreateEntity(_archetype);
 
@@ -138,7 +138,7 @@ public class Assemblage{{generics}} : Assemblage
         return entityCreated;
     }
     
-    public void DeferredCreate({{inArgs}})
+    public void DeferredCreate({{inParams}})
     {
         _world.ThrowIfFlushingDeferred();
 
@@ -151,7 +151,7 @@ public class Assemblage{{generics}} : Assemblage
     }
 
     public void DeferredCreate<TRelation>(
-        {{inArgs}},
+        {{inParams}},
         DeferredRelationOnCreate<TRelation> deferredRelationOnCreate
     )
         where TRelation : struct
@@ -179,7 +179,7 @@ public class Assemblage{{generics}} : Assemblage
         {
             EntityCreateDeferred{{generics}} deferredCreate = _deferredCreate.Dequeue();
 
-            EntityCreated entityCreated = CreateAndSet({{deferredInParams}});
+            EntityCreated entityCreated = CreateAndSet({{deferredInArgs}});
 
             if (
                 deferredCreate._relationDeferred._relationId

@@ -7,7 +7,7 @@ internal static class Generator
     internal static string Generics(int count, string prefix) =>
         $"<{string.Join(", ", Enumerable.Range(1, count).Select(i => $"{prefix}{i}"))}>";
 
-    internal static string Arguments(
+    internal static string Parameters(
         int count,
         string argScope,
         string genericPrefix,
@@ -26,19 +26,8 @@ internal static class Generator
             Enumerable.Range(1, count).Select(i => $"{tabs}where {prefix}{i} : {constraint}")
         );
 
-    internal static string Params(int count, string paramScope, string paramPrefix) =>
+    internal static string Arguments(int count, string paramScope, string paramPrefix) =>
         string.Join(", ", Enumerable.Range(1, count).Select(i => $"{paramScope} {paramPrefix}{i}"));
-
-    internal static string Params(
-        int count,
-        string paramScope,
-        string typePrefix,
-        string paramPrefix
-    ) =>
-        string.Join(
-            ", ",
-            Enumerable.Range(1, count).Select(i => $"{paramScope} {typePrefix}{i} {paramPrefix}{i}")
-        );
 
     internal static string Fields(
         int count,

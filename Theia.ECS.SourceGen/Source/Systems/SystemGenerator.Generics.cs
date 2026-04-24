@@ -27,7 +27,7 @@ namespace Theia.ECS.Systems;
                 .Generics(i, Constants.GenericQueryPrefix)
                 .Replace("<", string.Empty)
                 .Replace(">", string.Empty);
-            string constructorParams = Generator.Params(
+            string constructorParams = Generator.Parameters(
                 i,
                 "in",
                 Constants.GenericQueryPrefix,

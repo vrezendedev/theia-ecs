@@ -38,7 +38,7 @@ namespace Theia.ECS.Queries;
                 "struct",
                 "    "
             );
-            string componentsParams = QueriesComponentParams(
+            string componentsArgs = QueriesComponentArguments(
                 i,
                 "ref",
                 Constants.QueryStorageVariablePrefix
@@ -56,7 +56,7 @@ namespace Theia.ECS.Queries;
                         Constants.QueryStoragesVariablePrefix,
                         "            "
                     ),
-                    componentsParams
+                    componentsArgs
                 )
             );
 
@@ -82,7 +82,7 @@ namespace Theia.ECS.Queries;
                         Constants.QueryStoragesVariablePrefix,
                         "                "
                     ),
-                    componentsParams
+                    componentsArgs
                 )
             );
         }
@@ -136,7 +136,7 @@ namespace Theia.ECS.Queries;
                 )
         );
 
-    private static string QueriesComponentParams(
+    private static string QueriesComponentArguments(
         int count,
         string paramScope,
         string storagePrefix
@@ -151,7 +151,7 @@ namespace Theia.ECS.Queries;
         string constraints,
         string storagesVariables,
         string storageVariables,
-        string componentsParams
+        string componentsArgs
     ) =>
         $$"""
 public sealed class SettlerQuery{{generics}} : SettlerQuery
@@ -191,7 +191,7 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 {{storageVariables}}
 
             for (int j = 0; j < count; j++)
-               forEachEntity.Execute(entities[j], {{componentsParams}});
+               forEachEntity.Execute(entities[j], {{componentsArgs}});
         }
 
         _world.DecrementQueriesBeingExecuted();
@@ -225,7 +225,7 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
 {{storageVariables}}
 
             for (int j = 0; j < count; j++)
-               forEach.Execute({{componentsParams}});
+               forEach.Execute({{componentsArgs}});
         }
 
         _world.DecrementQueriesBeingExecuted();
@@ -240,7 +240,7 @@ public sealed class SettlerQuery{{generics}} : SettlerQuery
         string componentIds,
         string storages,
         string storage,
-        string componentsParams
+        string componentsArgs
     ) =>
         $$"""
 public sealed class NomadQuery{{generics}} : NomadQuery
@@ -286,7 +286,7 @@ public sealed class NomadQuery{{generics}} : NomadQuery
 {{storage}}
 
                 for (int j = 0; j < count; j++)
-                    forEachEntity.Execute(entities[j], {{componentsParams}});
+                    forEachEntity.Execute(entities[j], {{componentsArgs}});
             }
         }
 
@@ -328,7 +328,7 @@ public sealed class NomadQuery{{generics}} : NomadQuery
 {{storage}}
 
                 for (int j = 0; j < count; j++)
-                    forEach.Execute({{componentsParams}});
+                    forEach.Execute({{componentsArgs}});
             }
         }
 

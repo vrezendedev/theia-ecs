@@ -26,21 +26,21 @@ namespace Theia.ECS.Queries;
         )
         {
             string generics = Generator.Generics(i, Constants.GenericComponentPrefix);
-            string arguments = Generator.Arguments(
-                i,
-                "ref",
-                Constants.GenericComponentPrefix,
-                Constants.GenericComponentLocalPrefix
-            );
             string constraints = Generator.Constraints(
                 i,
                 Constants.GenericComponentPrefix,
                 "struct",
                 "    "
             );
+            string parameters = Generator.Parameters(
+                i,
+                "ref",
+                Constants.GenericComponentPrefix,
+                Constants.GenericComponentLocalPrefix
+            );
 
-            sb.AppendLine(IForEachEntityTemplate(generics, constraints, arguments));
-            sb.AppendLine(IForEachTemplate(generics, constraints, arguments));
+            sb.AppendLine(IForEachEntityTemplate(generics, constraints, parameters));
+            sb.AppendLine(IForEachTemplate(generics, constraints, parameters));
         }
 
         context.RegisterPostInitializationOutput(ctx =>
@@ -51,23 +51,27 @@ namespace Theia.ECS.Queries;
     private static string IForEachEntityTemplate(
         string generics,
         string constraints,
-        string arguments
+        string parameters
     ) =>
         $$"""
 public interface IForEachEntity{{generics}}
 {{constraints}}
 {
-    public void Execute(Entity entity, {{arguments}});
+    public void Execute(Entity entity, {{parameters}});
 }
 
 """;
 
-    private static string IForEachTemplate(string generics, string constraints, string arguments) =>
+    private static string IForEachTemplate(
+        string generics,
+        string constraints,
+        string parameters
+    ) =>
         $$"""
 public interface IForEach{{generics}}
 {{constraints}}
 {
-    public void Execute({{arguments}});
+    public void Execute({{parameters}});
 }
 
 """;

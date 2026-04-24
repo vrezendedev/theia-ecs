@@ -13,5 +13,6 @@ internal static class Constants
     internal const string GenericQueryPrefix = "QueryT";
     internal const string GenericQueryLocalPrefix = "queryT";
     internal const string GenericQueryFieldPrefix = "_queryT";
+    internal const string GenericJobStorageComponentFieldPrefix = "StoragesComponentT";
     internal const int OverloadMaxRange = 16;
 }

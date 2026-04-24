@@ -21,10 +21,10 @@ internal sealed class ForEachEntityJob<TForEach, ComponentT1> : Job
         TForEach forEach = ForEach;
 
         Span<Entity> entities = Indexer!.GetValues();
-        Span<ComponentT1> storage = StoragesComponentT1!.GetValues(count);
+        Span<ComponentT1> storageT1 = StoragesComponentT1!.GetValues(count);
 
         for (int i = 0; i < count; i++)
-            forEach.Execute(entities[i], ref storage[i]);
+            forEach.Execute(entities[i], ref storageT1[i]);
     }
 }
 
@@ -41,9 +41,9 @@ internal sealed class ForEachJob<TForEach, ComponentT1> : Job
         int count = Count;
         TForEach forEach = ForEach;
 
-        Span<ComponentT1> storage = StoragesComponentT1!.GetValues(count);
+        Span<ComponentT1> storageT1 = StoragesComponentT1!.GetValues(count);
 
         for (int i = 0; i < count; i++)
-            forEach.Execute(ref storage[i]);
+            forEach.Execute(ref storageT1[i]);
     }
 }
