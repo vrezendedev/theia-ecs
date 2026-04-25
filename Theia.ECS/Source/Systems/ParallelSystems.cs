@@ -22,14 +22,7 @@ public abstract class ParallelSystems : BaseSystem
             _jobs[i] = new SystemJob(_systems[i]);
     }
 
-    internal override void Run()
-    {
-        Before();
-
-        JobScheduler.Run(_jobs.AsSpan());
-
-        After();
-    }
+    internal override void Run() => JobScheduler.Run(_jobs.AsSpan());
 
     [DoesNotReturn]
     private void ThrowRequiresAtLeastTwoSystems() =>
