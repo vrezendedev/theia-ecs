@@ -1,4 +1,6 @@
-﻿using BenchmarkDotNet.Configs;
+﻿using System.IO;
+using System.Linq;
+using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Exporters.Csv;
@@ -10,6 +12,11 @@ using Perfolizer.Horology;
 // using BenchmarkDotNet.Columns;
 // using Theia.Benchmarks.Source.Columns;
 
+new DirectoryInfo(DefaultConfig.Instance.ArtifactsPath)
+    .GetFiles()
+    .ToList()
+    .ForEach(file => file.Delete());
+
 ManualConfig config = DefaultConfig
     .Instance.WithOption(ConfigOptions.JoinSummary, true)
     .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.FastestToSlowest))
@@ -17,6 +24,9 @@ ManualConfig config = DefaultConfig
     .WithSummaryStyle(SummaryStyle.Default.WithTimeUnit(TimeUnit.Microsecond))
     .AddDiagnoser(MemoryDiagnoser.Default)
     // .AddColumn(new WarningColumn())
+    .AddExporter(new CategoryNamedExporter(CsvExporter.Default))
+    .AddExporter(new CategoryNamedExporter(HtmlExporter.Default))
+    .AddExporter(new CategoryNamedExporter(MarkdownExporter.GitHub))
     .HideColumns(
         "Method",
         "Error",
@@ -30,9 +40,6 @@ ManualConfig config = DefaultConfig
         "LaunchCount",
         "WarmupCount",
         "Alloc Ratio"
-    )
-    .AddExporter(new CategoryNamedExporter(CsvExporter.Default))
-    .AddExporter(new CategoryNamedExporter(HtmlExporter.Default))
-    .AddExporter(new CategoryNamedExporter(MarkdownExporter.GitHub));
+    );
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);
