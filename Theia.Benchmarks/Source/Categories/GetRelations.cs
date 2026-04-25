@@ -4,7 +4,7 @@ namespace Theia.Benchmarks.Source.Categories;
 
 public abstract class GetRelations
 {
-    [Params(1, 100)]
+    [Params(1, 16, 100)]
     public int Relations { get; set; }
 
     [IterationSetup]
