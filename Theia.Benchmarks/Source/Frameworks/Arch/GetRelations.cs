@@ -43,7 +43,7 @@ public class ArchGetTagRelationOnT1 : GetTagRelationOnT1
     }
 }
 
-public class ArchGetTagRelationsOnT1 : GetTagRelationsOnT1
+public class ArchGetAllTagRelationsOnT1 : GetAllTagRelationsOnT1
 {
     public Entity Owner { get; set; }
     private World? _world;
@@ -114,7 +114,7 @@ public class ArchGetEvaluatedRelationOnT1 : GetEvaluatedRelationOnT1
     }
 }
 
-public class ArchGetEvaluatedRelationsOnT1 : GetEvaluatedRelationsOnT1
+public class ArchGetAllEvaluatedRelationsOnT1 : GetAllEvaluatedRelationsOnT1
 {
     public Entity Owner { get; set; }
     private World? _world;

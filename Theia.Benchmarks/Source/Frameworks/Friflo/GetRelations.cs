@@ -52,7 +52,7 @@ public class FrifloGetTagRelationOnT1 : GetTagRelationOnT1
     }
 }
 
-public class FrifloGetTagRelationsOnT1 : GetTagRelationsOnT1
+public class FrifloGetAllTagRelationsOnT1 : GetAllTagRelationsOnT1
 {
     public Entity Owner { get; set; }
     private EntityStore? _entityStore;
@@ -123,7 +123,7 @@ public class FrifloGetEvaluatedRelationOnT1 : GetEvaluatedRelationOnT1
     }
 }
 
-public class FrifloGetEvaluatedRelationsOnT1 : GetEvaluatedRelationsOnT1
+public class FrifloGetAllEvaluatedRelationsOnT1 : GetAllEvaluatedRelationsOnT1
 {
     public Entity Owner { get; set; }
     private EntityStore? _entityStore;

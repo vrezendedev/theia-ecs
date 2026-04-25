@@ -46,7 +46,7 @@ public class TheiaGetTagRelationOnT1 : GetTagRelationOnT1
     }
 }
 
-public class TheiaGetTagRelationsOnT1 : GetTagRelationsOnT1
+public class TheiaGetAllTagRelationsOnT1 : GetAllTagRelationsOnT1
 {
     public Entity Owner { get; set; }
     private World? _world;
@@ -126,7 +126,7 @@ public class TheiaGetEvaluatedRelationOnT1 : GetEvaluatedRelationOnT1
     }
 }
 
-public class TheiaGetEvaluatedRelationsOnT1 : GetEvaluatedRelationsOnT1
+public class TheiaGetAllEvaluatedRelationsOnT1 : GetAllEvaluatedRelationsOnT1
 {
     public Entity Owner { get; set; }
     private World? _world;

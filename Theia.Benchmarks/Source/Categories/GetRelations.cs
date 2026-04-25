@@ -19,11 +19,11 @@ public abstract class GetRelations
 [BenchmarkCategory(nameof(GetTagRelationOnT1))]
 public abstract class GetTagRelationOnT1 : GetRelations;
 
-[BenchmarkCategory(nameof(GetTagRelationsOnT1))]
-public abstract class GetTagRelationsOnT1 : GetRelations;
+[BenchmarkCategory(nameof(GetAllTagRelationsOnT1))]
+public abstract class GetAllTagRelationsOnT1 : GetRelations;
 
 [BenchmarkCategory(nameof(GetEvaluatedRelationOnT1))]
 public abstract class GetEvaluatedRelationOnT1 : GetRelations;
 
-[BenchmarkCategory(nameof(GetEvaluatedRelationsOnT1))]
-public abstract class GetEvaluatedRelationsOnT1 : GetRelations;
+[BenchmarkCategory(nameof(GetAllEvaluatedRelationsOnT1))]
+public abstract class GetAllEvaluatedRelationsOnT1 : GetRelations;
