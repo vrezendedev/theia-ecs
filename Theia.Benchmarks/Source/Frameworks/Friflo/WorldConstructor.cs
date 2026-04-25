@@ -16,7 +16,7 @@ public class FrifloWorldConstructor : WorldConstructor
     [Benchmark]
     public override void Run()
     {
-        EntityStore entityStore = new EntityStore();
-        entityStore.EnsureCapacity(InitialSize);
+        _entityStore = new EntityStore();
+        _entityStore.EnsureCapacity(InitialSize);
     }
 }

@@ -7,6 +7,15 @@ public struct Component1
     public int Value;
 }
 
+[Relationship]
+public struct TagRelation1 { }
+
+[Relationship]
+public struct EvaluatedRelation1
+{
+    public int Value;
+}
+
 public struct FComponent1 : Friflo.Engine.ECS.IComponent
 {
     public int Value;

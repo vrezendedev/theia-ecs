@@ -171,14 +171,14 @@ public class TheiaCrossArchetypeQueryOnT5 : CrossArchetypeQueryOnT5
 
         for (int i = 0; i < EntityCount / 2; i++)
         {
-            _assemblageA!.Create(
+            _assemblageA.Create(
                 new Component1 { Value = i },
                 new Component2 { Value = i },
                 new Component3 { Value = i },
                 new Component4 { Value = i },
                 new Component5 { Value = i }
             );
-            _assemblageB!.Create(
+            _assemblageB.Create(
                 new Component1 { Value = i },
                 new Component2 { Value = i },
                 new Component3 { Value = i },

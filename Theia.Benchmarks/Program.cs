@@ -1,5 +1,7 @@
 ﻿using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnosers;
+using BenchmarkDotNet.Exporters;
+using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Order;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
@@ -28,6 +30,9 @@ ManualConfig config = DefaultConfig
         "LaunchCount",
         "WarmupCount",
         "Alloc Ratio"
-    );
+    )
+    .AddExporter(new CategoryNamedExporter(CsvExporter.Default))
+    .AddExporter(new CategoryNamedExporter(HtmlExporter.Default))
+    .AddExporter(new CategoryNamedExporter(MarkdownExporter.GitHub));
 
 BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);

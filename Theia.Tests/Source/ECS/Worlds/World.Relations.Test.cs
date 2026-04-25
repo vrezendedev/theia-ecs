@@ -143,6 +143,68 @@ public sealed class WorldRelationTests
     }
 
     [Fact]
+    public void TryAddTagRelation_HugeAmountOfTargets_AllAccountedCorrectly()
+    {
+        const int TargetCount = 500;
+
+        World world = new();
+
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        Entity owner = assemblage.Create(new Position());
+
+        Entity[] targets = new Entity[TargetCount];
+
+        for (int i = 0; i < TargetCount; i++)
+        {
+            targets[i] = assemblage.Create(new Position());
+            world.TryAddTagRelation<Friend>(owner, targets[i]);
+        }
+
+        Assert.Equal(TargetCount, world.CountRelations<Friend>(owner));
+
+        for (int i = 0; i < TargetCount; i++)
+        {
+            Assert.True(world.IsRelatedTo<Friend>(owner, targets[i]));
+            Assert.Equal(1, world.CountExternalLinks<Friend>(targets[i]));
+        }
+    }
+
+    [Fact]
+    public void TryAddTagRelation_HugeAmountOfOwnersAndTargets_AllExternalLinksAccountedCorrectly()
+    {
+        const int OwnerCount = 100;
+        const int TargetCount = 100;
+
+        World world = new();
+
+        Assemblage<Position> assemblage = world.CreateAssemblage<Position>();
+
+        Entity[] owners = new Entity[OwnerCount];
+        Entity[] targets = new Entity[TargetCount];
+
+        for (int i = 0; i < OwnerCount; i++)
+            owners[i] = assemblage.Create(new Position());
+
+        for (int i = 0; i < TargetCount; i++)
+            targets[i] = assemblage.Create(new Position());
+
+        for (int o = 0; o < OwnerCount; o++)
+        for (int t = 0; t < TargetCount; t++)
+            world.TryAddTagRelation<Friend>(owners[o], targets[t]);
+
+        for (int o = 0; o < OwnerCount; o++)
+            Assert.Equal(TargetCount, world.CountRelations<Friend>(owners[o]));
+
+        for (int t = 0; t < TargetCount; t++)
+            Assert.Equal(OwnerCount, world.CountExternalLinks<Friend>(targets[t]));
+
+        for (int o = 0; o < OwnerCount; o++)
+        for (int t = 0; t < TargetCount; t++)
+            Assert.True(world.IsRelatedTo<Friend>(owners[o], targets[t]));
+    }
+
+    [Fact]
     public void TryAddTagRelation_MultipleOwners_TargetCountsAllLinks()
     {
         World world = new();
