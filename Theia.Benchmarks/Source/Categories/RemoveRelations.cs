@@ -4,7 +4,7 @@ namespace Theia.Benchmarks.Source.Categories;
 
 public abstract class RemoveRelations
 {
-    [Params(1, 16, 100)]
+    [Params(1, 100)]
     public int Relations { get; set; }
 
     [IterationSetup]
