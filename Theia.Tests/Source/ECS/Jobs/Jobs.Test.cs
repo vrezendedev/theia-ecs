@@ -879,6 +879,7 @@ public sealed class JobsTests
             systems: [system, other]
         );
 
+        parallel.Before();
         parallel.Run();
 
         Assert.True(beforeTimestamp[0] > 0);
@@ -904,7 +905,9 @@ public sealed class JobsTests
             systems: [systemA, systemB]
         );
 
+        parallel.Before();
         parallel.Run();
+        parallel.After();
 
         Assert.Equal(1, afterCallCount);
         Assert.Equal(2, systemsCompletedBeforeAfter);
