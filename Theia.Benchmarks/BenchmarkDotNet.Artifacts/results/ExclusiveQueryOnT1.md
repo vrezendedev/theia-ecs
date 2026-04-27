@@ -6,13 +6,14 @@ AMD Ryzen 5 5600 3.50GHz, 1 CPU, 12 logical and 6 physical cores
   [Host]     : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
   Job-CNUJVU : .NET 10.0.5 (10.0.5, 10.0.526.15411), X64 RyuJIT x86-64-v3
 
-Method=Run  Job=Job-CNUJVU  InvocationCount=1  
-IterationCount=Default  LaunchCount=Default  UnrollFactor=1  
-WarmupCount=Default  
+Method=Run  Job=Job-CNUJVU  InvocationCount=1
+IterationCount=Default  LaunchCount=Default  UnrollFactor=1
+WarmupCount=Default
 
 ```
-| Namespace                                     | Type                       | EntityCount | Mean        | Allocated |
-|---------------------------------------------- |--------------------------- |------------ |------------:|----------:|
+
+| Namespace                                     | Type                       | EntityCount |        Mean | Allocated |
+| --------------------------------------------- | -------------------------- | ----------- | ----------: | --------: |
 | Theia.Benchmarks.Source.Frameworks.Theia      | TheiaExclusiveQueryOnT1    | 16          |   0.8612 μs |         - |
 | Theia.Benchmarks.Source.Frameworks.Frent      | FrentExclusiveQueryOnT1    | 16          |   1.8784 μs |         - |
 | Theia.Benchmarks.Source.Frameworks.EntitiesDb | EntityDbExclusiveQueryOnT1 | 16          |   2.1448 μs |         - |
@@ -36,10 +37,10 @@ WarmupCount=Default
 |                                               |                            |             |             |           |
 | Theia.Benchmarks.Source.Frameworks.Theia      | TheiaExclusiveQueryOnT1    | 1024        |   8.5237 μs |         - |
 | Theia.Benchmarks.Source.Frameworks.Friflo     | FrifloExclusiveQueryOnT1   | 1024        |  24.4706 μs |      56 B |
+| Theia.Benchmarks.Source.Frameworks.EntitiesDb | EntityDbExclusiveQueryOnT1 | 1024        |  25.2364 μs |         - |
 | Theia.Benchmarks.Source.Frameworks.Arch       | ArchExclusiveQueryOnT1     | 1024        |  26.5370 μs |     704 B |
 | Theia.Benchmarks.Source.Frameworks.Frent      | FrentExclusiveQueryOnT1    | 1024        |  33.2764 μs |         - |
 | Theia.Benchmarks.Source.Frameworks.Fennecs    | FennecsExclusiveQueryOnT1  | 1024        |  40.4867 μs |      72 B |
-| Theia.Benchmarks.Source.Frameworks.EntitiesDb | EntityDbExclusiveQueryOnT1 | 1024        |  83.0750 μs |         - |
 |                                               |                            |             |             |           |
 | Theia.Benchmarks.Source.Frameworks.Theia      | TheiaExclusiveQueryOnT1    | 4096        |  10.2977 μs |         - |
 | Theia.Benchmarks.Source.Frameworks.EntitiesDb | EntityDbExclusiveQueryOnT1 | 4096        |  27.8357 μs |         - |
