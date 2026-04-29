@@ -8,7 +8,6 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Queries;
 
-[Collection("MetaRequester")]
 public sealed class QueryTests
 {
     [Fact]

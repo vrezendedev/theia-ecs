@@ -8,7 +8,6 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Assemblages;
 
-[Collection("MetaRequester")]
 public sealed class AssemblageTests
 {
     [Fact]

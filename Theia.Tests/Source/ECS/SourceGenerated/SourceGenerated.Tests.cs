@@ -6,7 +6,6 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.SourceGenerated;
 
-[Collection("MetaRequester")]
 public sealed class SourceGeneratedTests
 {
     [Fact]

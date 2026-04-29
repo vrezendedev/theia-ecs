@@ -8,7 +8,6 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Archetypes;
 
-[Collection("MetaRequester")]
 public sealed class ArchetypeTests
 {
     private Signature _twoComponentSignature = new Signature(

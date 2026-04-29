@@ -1,10 +1,35 @@
-using System;
-
 namespace Theia.ECS.Entities;
 
-internal struct EntityMeta : IEquatable<EntityMeta>
+/// <summary>
+/// Internal bookkeeping record that tracks where an <see cref="Entity"/>'s data lives across the <see cref="Worlds.World">World's</see>
+/// storage structures, along with its current valid version.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Each <see cref="Entity"/> ID maps to exactly one <see cref="EntityMeta"/> slot.
+/// <br/>
+/// The meta holds the indices needed to locate the entity's <see cref="Archetypes.Archetype">Archetype</see>,
+/// its index within that archetype's storages, its components index, and its relations;
+/// <b>meaning O(1) lookups</b> is enough to reach any of the entity's associated data.
+/// </para>
+/// <para>
+/// When an entity is destroyed, <see cref="Reset"/> increments the version and invalidates
+/// the indices, leaving the slot ready to be recycled for a future entity.
+/// </para>
+/// </remarks>
+internal struct EntityMeta
 {
+    /// <summary>
+    /// The initial version assigned to a fresh meta slot.
+    /// <br/>
+    /// Versions start at <c>1</c> so that a default-constructed <see cref="Entity"/> (version <c>0</c>) is always recognizable as invalid.
+    /// </summary>
     internal const int DefaultEntityMetaVersion = 1;
+
+    /// <summary>
+    /// Sentinel value used for index fields when the meta does not yet point at any storage;
+    /// for example, immediately after <see cref="Reset"/>.
+    /// </summary>
     internal const int DefaultInvalidEntityMetaIndexes = -1;
 
     internal int _version;
@@ -28,7 +53,14 @@ internal struct EntityMeta : IEquatable<EntityMeta>
         _relationsIndexerIndex = relationsIndexerIndex;
     }
 
-    public void Reset()
+    /// <summary>
+    /// Recycles the slot by incrementing the version and clearing all index fields back to
+    /// <see cref="DefaultInvalidEntityMetaIndexes"/>.
+    /// <br/>
+    /// After this call, any previously issued <see cref="Entity"/> handle pointing to this
+    /// slot will be detectable as stale.
+    /// </summary>
+    internal void Reset()
     {
         _version++;
         _archetypeIndex = DefaultInvalidEntityMetaIndexes;
@@ -36,26 +68,4 @@ internal struct EntityMeta : IEquatable<EntityMeta>
         _componentIndex = DefaultInvalidEntityMetaIndexes;
         _relationsIndexerIndex = DefaultInvalidEntityMetaIndexes;
     }
-
-    public bool Equals(EntityMeta other) =>
-        _version == other._version
-        && _archetypeIndex == other._archetypeIndex
-        && _storageIndex == other._storageIndex
-        && _componentIndex == other._componentIndex
-        && _relationsIndexerIndex == other._relationsIndexerIndex;
-
-    public override bool Equals(object? obj) => obj is EntityMeta other && Equals(other);
-
-    public override int GetHashCode() =>
-        HashCode.Combine(
-            _version,
-            _archetypeIndex,
-            _storageIndex,
-            _componentIndex,
-            _relationsIndexerIndex
-        );
-
-    public static bool operator ==(EntityMeta left, EntityMeta right) => left.Equals(right);
-
-    public static bool operator !=(EntityMeta left, EntityMeta right) => !left.Equals(right);
 }

@@ -4,7 +4,6 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Worlds;
 
-[Collection("MetaRequester")]
 public sealed partial class WorldUniqueTests
 {
     [Fact]

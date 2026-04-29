@@ -6,7 +6,6 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Events;
 
-[Collection("MetaRequester")]
 public sealed class RelationsEventsTests
 {
     [Fact]

@@ -152,6 +152,12 @@ public sealed partial class BlittableMetaTests
         );
 
     [Fact]
+    public void IsStrictlyBlittable_StructWithStaticFields_Throws() =>
+        Assert.Throws<InvalidOperationException>(() =>
+            BlittableMeta.IsStrictlyBlittable(typeof(StructWithStaticFields))
+        );
+
+    [Fact]
     public void IsStrictlyBlittable_StructWithBlittableFields_ReturnsTrue() =>
         Assert.True(BlittableMeta.IsStrictlyBlittable(typeof(StructWithBlittableFields)));
 

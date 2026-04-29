@@ -5,7 +5,6 @@ using Theia.Tests.Resources;
 
 namespace Theia.Tests.ECS.Enums;
 
-[Collection("MetaRequester")]
 public sealed class StructEnumTests
 {
     [Fact]

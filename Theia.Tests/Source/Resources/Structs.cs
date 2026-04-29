@@ -134,6 +134,11 @@ public struct StructWithPrimitiveBlittableFields
     public byte Byte;
 }
 
+public struct StructWithStaticFields
+{
+    public static int Int;
+}
+
 public struct StructWithPrimitiveNonBlittableFields
 {
     public int? Int;
