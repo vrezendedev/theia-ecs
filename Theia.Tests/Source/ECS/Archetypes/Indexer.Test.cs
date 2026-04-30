@@ -9,7 +9,7 @@ public sealed class IndexerTests
     [Fact]
     public void Count_WithEmptyIndexer_ReturnsZero()
     {
-        Indexer indexer = new(0, 10);
+        Indexer indexer = new Indexer(10);
 
         Assert.Equal(0, indexer.Count());
     }
@@ -21,7 +21,7 @@ public sealed class IndexerTests
 
         int half = capacity / 2;
 
-        Indexer indexer = new(0, capacity);
+        Indexer indexer = new Indexer(capacity);
 
         for (int i = 0; i < half; i++)
             indexer.Add();
@@ -34,7 +34,7 @@ public sealed class IndexerTests
     {
         int capacity = 10;
 
-        Indexer indexer = new(0, capacity);
+        Indexer indexer = new Indexer(capacity);
 
         for (int i = 0; i < capacity; i++)
             indexer.Add();
@@ -47,7 +47,7 @@ public sealed class IndexerTests
     {
         int capacity = 10;
 
-        Indexer indexer = new(0, capacity);
+        Indexer indexer = new Indexer(capacity);
 
         Assert.False(indexer.IsFull());
     }
@@ -59,7 +59,7 @@ public sealed class IndexerTests
 
         int half = capacity / 2;
 
-        Indexer indexer = new(0, capacity);
+        Indexer indexer = new Indexer(capacity);
 
         for (int i = 0; i < half; i++)
             indexer.Add();
@@ -72,7 +72,7 @@ public sealed class IndexerTests
     {
         int length = 10;
 
-        Indexer indexer = new Indexer(0, length);
+        Indexer indexer = new Indexer(length);
 
         for (int i = 0; i < length; i++)
         {
@@ -90,7 +90,7 @@ public sealed class IndexerTests
     public void SetAndGet_WithValidIndex_ReturnsSetEntity()
     {
         int length = 1;
-        Indexer indexer = new Indexer(0, length);
+        Indexer indexer = new Indexer(length);
 
         int targetIndex = 0;
         int id = 10;
@@ -106,7 +106,7 @@ public sealed class IndexerTests
     {
         int length = 10;
 
-        Indexer indexer = new Indexer(0, length);
+        Indexer indexer = new Indexer(length);
 
         int nextValidIndex = indexer.Count();
 
@@ -121,7 +121,7 @@ public sealed class IndexerTests
     {
         int length = 10;
 
-        Indexer indexer = new Indexer(0, length);
+        Indexer indexer = new Indexer(length);
 
         for (int i = 0; i < length; i++)
         {
@@ -145,8 +145,8 @@ public sealed class IndexerTests
         int lengthB = 10;
         int lengthBHalf = lengthB / 2;
 
-        Indexer indexerA = new Indexer(0, lengthA);
-        Indexer indexerB = new Indexer(1, lengthB);
+        Indexer indexerA = new Indexer(lengthA);
+        Indexer indexerB = new Indexer(lengthB);
 
         for (int i = 0; i < lengthA; i++)
         {

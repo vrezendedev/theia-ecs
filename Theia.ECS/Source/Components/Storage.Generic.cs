@@ -5,6 +5,11 @@ using MessagePack;
 
 namespace Theia.ECS.Components;
 
+/// <summary>
+/// Generic concrete <see cref="Storage"/> for a single component type within one chunk. Holds
+/// the typed array that backs the chunk's slot for <typeparamref name="TComponent"/>, and
+/// implements the move/transfer/serialize hooks the archetype calls polymorphically.
+/// </summary>
 internal sealed class Storage<TComponent> : Storage
     where TComponent : struct
 {
@@ -12,6 +17,10 @@ internal sealed class Storage<TComponent> : Storage
 
     internal Storage(int capacity) => _values = new TComponent[capacity];
 
+    /// <summary>
+    /// Returns a span over the populated portion of the values array, sized to
+    /// <paramref name="length"/> as supplied by the chunk's <see cref="Archetypes.Indexer.Count">Indexer</see>.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Span<TComponent> GetValues(int length) => _values.AsSpan(0, length);
 
@@ -31,6 +40,12 @@ internal sealed class Storage<TComponent> : Storage
         target.Set(newIndex, _values[oldIndex]);
     }
 
+    /// <inheritdoc/>
+    /// <remarks>
+    /// Rents a temporary <typeparamref name="TComponent"/> array from <see cref="ArrayPool{T}"/>
+    /// sized to <paramref name="accLength"/>, copies each chunk's populated portion into it
+    /// contiguously, and serializes the result. The pooled array is returned before exit.
+    /// </remarks>
     internal override void WriteAllData(
         ReadOnlySpan<Storage> storages,
         int accLength,
