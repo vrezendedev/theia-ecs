@@ -79,7 +79,7 @@ public sealed partial class World
     {
         if (AreThereAnyQueriesBeingExecuted())
             throw new InvalidOperationException(
-                "Cannot perform structural changes or entity modifications while queries are executing. Use deferred commands to schedule modifications for after query execution completes."
+                "Cannot perform structural changes or entity modifications while queries are executing. For entity modifications, use deferred commands to schedule modifications for after query execution completes."
             );
     }
 }

@@ -4,7 +4,7 @@ public class NonBlittableClass() { }
 
 public record NonBlittableRecord();
 
-public class ManagedDataResource
+public sealed class TestResource
 {
-    public int Value { get; set; }
+    public int Value { get; init; }
 }

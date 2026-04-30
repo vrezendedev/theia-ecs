@@ -72,6 +72,8 @@ public sealed partial class World : IDisposable
             DefaultDeferredCommandsCapacity
         );
 
+        _resources = new();
+
         EntitiesEvents = new();
         RelationsEvents = new();
     }

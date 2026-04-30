@@ -52,22 +52,26 @@ public enum MixedAttributesEnum
     ComponentA,
 }
 
-public enum ManagedDataKey : int
+public enum SingleKey : int
 {
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    Unregistered = 99,
+    A = 0,
 }
 
-public enum ByteKeyEnum : byte
+public enum TwoKeys : int
 {
-    A,
+    A = 0,
+    B = 1,
+}
+
+public enum SparseKey : int
+{
+    A = 0,
+    B = 100,
+}
+
+public enum ByteKey : byte
+{
+    A = 0,
 }
 
 public enum MatchesRelationEnum

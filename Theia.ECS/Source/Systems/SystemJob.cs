@@ -2,6 +2,10 @@ using Theia.ECS.Jobs;
 
 namespace Theia.ECS.Systems;
 
+/// <summary>
+/// <see cref="Job"/> wrapper that runs a single <see cref="BaseSystem"/>'s full per-tick
+/// lifecycle inside a worker thread.
+/// </summary>
 internal sealed class SystemJob : Job
 {
     private readonly BaseSystem _system;
