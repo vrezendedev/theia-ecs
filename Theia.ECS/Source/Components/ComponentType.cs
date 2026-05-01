@@ -56,7 +56,7 @@ internal abstract class ComponentType : ITypeMeta
     internal abstract Storage CreateStorage(int capacity);
 
     /// <summary>
-    /// Creates a <see cref="Unique"/> singleton holder for this component type.
+    /// Creates a <see cref="Unique"/> holder for this component type.
     /// </summary>
     internal abstract Unique CreateUnique();
 }
