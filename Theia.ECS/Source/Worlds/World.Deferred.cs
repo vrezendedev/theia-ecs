@@ -11,6 +11,7 @@ namespace Theia.ECS.Worlds;
 
 public sealed partial class World
 {
+    /// <summary>Initial capacity for every deferred-command queue and value storage created on the world.</summary>
     internal const int DefaultDeferredCommandsCapacity = 256;
 
     private bool _isFlushingDeferred;
@@ -32,8 +33,18 @@ public sealed partial class World
     private Queue<RemoveRelationDeferred> _deferredRemoveRelation;
     private readonly Lock _deferredRemoveRelationLock = new();
 
+    /// <summary>
+    /// Returns <see langword="true"/> while <see cref="FlushDeferred"/> is draining the
+    /// deferred queues. Use this from <b>inside event handlers to detect whether a structural
+    /// change is being applied through the deferred path</b>.
+    /// </summary>
     public bool IsFlushingDeferred() => Volatile.Read(ref _isFlushingDeferred);
 
+    /// <summary>
+    /// Queues <paramref name="entity"/> for ghoulification at the next <see cref="FlushDeferred"/>.
+    /// Safe to call from inside query execution; the entity is not actually destroyed until the flush.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if called while a flush is already in progress.</exception>
     public void DeferredGhoulify(Entity entity)
     {
         ThrowIfFlushingDeferred();
@@ -92,6 +103,11 @@ public sealed partial class World
         return (RelationDeferredStorage<TRelation>)deferredStorage;
     }
 
+    /// <summary>
+    /// Queues "add <typeparamref name="TComponent"/> to <paramref name="entity"/>" for the next
+    /// flush.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if called while a flush is already in progress.</exception>
     public void DeferredAddComponent<TComponent>(Entity entity, in TComponent component = default)
         where TComponent : struct
     {
@@ -143,6 +159,11 @@ public sealed partial class World
             storage.DiscardNext();
     }
 
+    /// <summary>
+    /// Queues "remove <typeparamref name="TComponent"/> from <paramref name="entity"/>" for the
+    /// next flush.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if called while a flush is already in progress.</exception>
     public void DeferredRemoveComponent<TComponent>(Entity entity)
         where TComponent : struct
     {
@@ -166,6 +187,13 @@ public sealed partial class World
             entityComponentDeferred._componentId
         );
 
+    /// <summary>
+    /// Pre-resolves the metadata needed to add <typeparamref name="TRelation"/> to
+    /// <paramref name="owner"/> and stages the relation payload in
+    /// <see cref="RelationDeferredStorage{TRelation}"/> when applicable. Used by assemblages to
+    /// build a fully-resolved <see cref="AddRelationDeferred"/> at queue time, leaving only the
+    /// target field to be patched in once the new entity exists.
+    /// </summary>
     internal AddRelationDeferred GetAddRelationDeferred<TRelation>(
         Entity owner,
         TRelation relation = default
@@ -192,6 +220,10 @@ public sealed partial class World
         };
     }
 
+    /// <summary>
+    /// Variant of <see cref="GetAddRelationDeferred"/> that also captures
+    /// <paramref name="target"/> at queue time, for callers that already know both endpoints.
+    /// </summary>
     internal AddRelationDeferred GetAddRelationDeferredTargeted<TRelation>(
         int relationId,
         RelationType relationType,
@@ -233,6 +265,14 @@ public sealed partial class World
         return storage.AccountDeferred(relation);
     }
 
+    /// <summary>
+    /// Queues a <b>tag-relation</b> add: links <paramref name="owner"/> to <paramref name="target"/>
+    /// under <typeparamref name="TRelation"/>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if a flush is in progress, or if <typeparamref name="TRelation"/> carries data,
+    /// use <see cref="DeferredAddEvaluatedRelation"/>.
+    /// </exception>
     public void DeferredAddRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
@@ -251,6 +291,15 @@ public sealed partial class World
         }
     }
 
+    /// <summary>
+    /// Queues a <b>data-relation</b> add: links <paramref name="owner"/> to <paramref name="target"/>
+    /// under <typeparamref name="TRelation"/> with <paramref name="relation"/> as the per-link
+    /// payload.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if a flush is in progress, or if <typeparamref name="TRelation"/> is a tag
+    /// use <see cref="DeferredAddRelation"/>.
+    /// </exception>
     public void DeferredAddEvaluatedRelation<TRelation>(
         Entity owner,
         Entity target,
@@ -315,6 +364,11 @@ public sealed partial class World
         );
     }
 
+    /// <summary>
+    /// Queues "remove the <typeparamref name="TRelation"/> link from <paramref name="owner"/> to
+    /// <paramref name="target"/>" for the next flush.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if called while a flush is already in progress.</exception>
     public void DeferredRemoveRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
@@ -341,6 +395,33 @@ public sealed partial class World
         AttemptRemoveRelation(deferredRelation._relationId, owner, target);
     }
 
+    /// <summary>
+    /// Drains every deferred queue in a <b>fixed order</b>:
+    /// <list type="number">
+    /// <item><description>Ghoulifications;</description></item>
+    /// <item><description>Component Adds;</description></item>
+    /// <item><description>Component Removes;</description></item>
+    /// <item><description>Relation Adds;</description></item>
+    /// <item><description>Relation Removes;</description></item>
+    /// <item><description>Per-assemblage entity creations.</description></item>
+    /// </list>
+    /// While draining, <see cref="IsFlushingDeferred"/> returns <see langword="true"/> and any
+    /// further deferred-enqueue call throws.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The drain order is meaningful. Ghoulifications run first so subsequent commands see a
+    /// clean slot map and can <b>short-circuit work targeting destroyed entities</b>. Component changes
+    /// run before relation changes so structural transitions settle before the relations system
+    /// observes them. Assemblage creations run last so the entities they spawn enter a fully
+    /// settled world.
+    /// </para>
+    /// <para>
+    /// Commands that target an entity which no longer satisfies the operation's preconditions
+    /// (e.g., adding a component to an already-ghoulified entity) are <b>quietly dropped</b>.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if called while a query is currently iterating.</exception>
     public void FlushDeferred()
     {
         ThrowIfQueriesExecuting();

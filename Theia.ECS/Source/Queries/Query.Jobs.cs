@@ -6,6 +6,12 @@ using Theia.ECS.Jobs;
 
 namespace Theia.ECS.Queries;
 
+/// <summary>
+/// Pooled <see cref="Job"/> wrapper that runs an <see cref="IForEachEntity{ComponentT1}"/>
+/// callback over a single chunk's entities and component storage.
+/// <br/>
+/// <b>One job is enqueued per non-empty chunk</b> by parallel query iteration.
+/// </summary>
 internal sealed class ForEachEntityJob<TForEach, ComponentT1> : Job
     where TForEach : struct, IForEachEntity<ComponentT1>
     where ComponentT1 : struct
@@ -28,6 +34,12 @@ internal sealed class ForEachEntityJob<TForEach, ComponentT1> : Job
     }
 }
 
+/// <summary>
+/// Pooled <see cref="Job"/> wrapper that runs an <see cref="IForEach{ComponentT1}"/> callback
+/// over a single chunk's component storage, without loading entity handles.
+/// <br/>
+/// <b>One job is enqueued per non-empty chunk</b> by parallel query iteration.
+/// </summary>
 internal sealed class ForEachJob<TForEach, ComponentT1> : Job
     where TForEach : struct, IForEach<ComponentT1>
     where ComponentT1 : struct
