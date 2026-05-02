@@ -5,6 +5,21 @@ using Theia.ECS.Extensions;
 
 namespace Theia.ECS.Relations;
 
+/// <summary>
+/// Per-entity bookkeeping for the relations the entity participates in, on either side of the
+/// link. Owns two parallel sparse-set structures: one keyed by relation ID for relations the
+/// entity owns (<see cref="RelationKey"/>), and one keyed by relation ID for relations whose
+/// targets the entity participates in (<see cref="RelationLink"/>).
+/// </summary>
+/// <remarks>
+/// <para>
+/// This is the per-entity hub that ties the bilateral relation representation together: the
+/// owner-side <see cref="Relation"/> is reachable through <see cref="GetRelationKey"/> +
+/// <see cref="RelationStorage"/>, and the target-side <see cref="RelationLink"/> is reachable
+/// through <see cref="GetRelationLink"/>. Adding a link updates both sides; removing a link
+/// unwinds both sides.
+/// </para>
+/// </remarks>
 internal sealed class RelationsIndexer
 {
     private const int DefaultAddedCapacity = 4;
@@ -28,23 +43,33 @@ internal sealed class RelationsIndexer
         _links = Array.Empty<RelationLink>();
     }
 
+    /// <summary>Returns <see langword="true"/> if this entity owns at least one relation under <paramref name="relationId"/>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool HasKey(int relationId) =>
         relationId < _keys.Length && _keys[relationId].HasRelation();
 
+    /// <summary>Returns <see langword="true"/> if this entity is a target of at least one relation under <paramref name="relationId"/>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool HasLink(int relationId) =>
         relationId < _links.Length && _links[relationId] is not null;
 
+    /// <summary>Returns the number of distinct relation types this entity is a target of.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int GetAddedLinksCount() => _addedLinksCount;
 
+    /// <summary>Returns the relation ID at position <paramref name="index"/> in the dense added-links list.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int GetAddedLinksAt(int index) => _addedLinks[index];
 
+    /// <summary>Returns the <see cref="RelationLink"/> for <paramref name="relationId"/>; the caller must have already verified presence via <see cref="HasLink"/>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal RelationLink GetRelationLink(int relationId) => _links[relationId];
 
+    /// <summary>
+    /// Returns the existing <see cref="RelationLink"/> for <paramref name="relationId"/> if present,
+    /// otherwise rents a fresh one from the relation type's pool and registers it in the dense
+    /// added-links list. Grows the sparse <c>_links</c> array if needed.
+    /// </summary>
     internal RelationLink GetOrRentLink(int relationId)
     {
         if (HasLink(relationId))
@@ -69,6 +94,10 @@ internal sealed class RelationsIndexer
         return relationLink;
     }
 
+    /// <summary>
+    /// Returns the <see cref="RelationLink"/> for <paramref name="relationId"/> to the relation
+    /// type's pool and removes it from the dense added-links list in O(1) via swap-with-last.
+    /// </summary>
     internal void ReturnLink(int relationId)
     {
         RelationLink relationLink = _links[relationId];
@@ -91,15 +120,26 @@ internal sealed class RelationsIndexer
         RelationsMeta.GetRelationType(relationId).PoolRelationLink(relationLink);
     }
 
+    /// <summary>Returns the number of distinct relation types this entity owns.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int GetAddedRelationsCount() => _addedRelationsIdCount;
 
+    /// <summary>Returns the relation ID at position <paramref name="index"/> in the dense added-relations list.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int GetAddedRelationsAt(int index) => _addedRelationsId[index];
 
+    /// <summary>
+    /// Returns a reference to the <see cref="RelationKey"/> stored at <paramref name="relationId"/>.
+    /// Callers reading the primary key should pair this with <see cref="HasKey"/> first.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal ref RelationKey GetRelationKey(int relationId) => ref _keys[relationId];
 
+    /// <summary>
+    /// Records that this entity owns a relation under <paramref name="relationId"/> at the
+    /// <see cref="RelationStorage"/> slot identified by <paramref name="primaryKey"/>. Adds the
+    /// relation ID to the dense added-relations list.
+    /// </summary>
     internal void AddKey(int relationId, int primaryKey)
     {
         int addedIndex = _addedRelationsIdCount;
@@ -124,6 +164,11 @@ internal sealed class RelationsIndexer
         _keys[relationId] = relationKey;
     }
 
+    /// <summary>
+    /// Removes this entity's record of owning a relation under <paramref name="relationId"/>
+    /// from the dense added-relations list in O(1) via swap-with-last, and resets the keyed
+    /// entry to its empty state.
+    /// </summary>
     internal void RemoveRelationKey(int relationId)
     {
         ref RelationKey relationKey = ref _keys[relationId];

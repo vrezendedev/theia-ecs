@@ -22,6 +22,13 @@ public sealed partial class World
 
     private RelationStorage[] _relationStorages;
 
+    /// <summary>
+    /// Adds a <b>tag relation (fieldless)</b> linking <paramref name="owner"/> to <paramref name="target"/>
+    /// under <typeparamref name="TRelation"/>. Returns <see langword="true"/> if the relation was
+    /// established, <see langword="false"/> if it was rejected (either entity dead, owner equals
+    /// target, or the link already exists).
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if <typeparamref name="TRelation"/> is a data relation; use <see cref="TryAddEvaluatedRelation"/> instead.</exception>
     public bool TryAddTagRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
@@ -45,6 +52,17 @@ public sealed partial class World
         return relationLinked._linked;
     }
 
+    /// <summary>
+    /// Deserialization-only path that establishes a relation link without validating entity
+    /// liveness, tag/evaluated category, or firing <see cref="RelationsEvents"/>. Used to restore a
+    /// relation graph from a serialized world where the standard guards would either fire spurious
+    /// events on a not-yet-fully-loaded world or reject links pointing at entities being rehydrated.
+    /// </summary>
+    /// <remarks>
+    /// <b>Do not call from gameplay code.</b> The public <see cref="TryAddTagRelation"/> and
+    /// <see cref="TryAddEvaluatedRelation"/> paths exist for that purpose and enforce the
+    /// invariants this method skips.
+    /// </remarks>
     internal Relation UnrestrictedAddRelation(int relationId, Entity owner, Entity target)
     {
         RelationAccounted relationAccounted = AttemptAccountRelation(relationId, owner, target);
@@ -52,6 +70,13 @@ public sealed partial class World
         return relationAccounted._relation;
     }
 
+    /// <summary>
+    /// Adds a <b>data relation</b> linking <paramref name="owner"/> to <paramref name="target"/> under
+    /// <typeparamref name="TRelation"/> with <paramref name="value"/> as the per-link payload.
+    /// Returns <see langword="true"/> if the relation was established, <see langword="false"/>
+    /// otherwise.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if <typeparamref name="TRelation"/> is a tag relation; use <see cref="TryAddTagRelation"/> instead.</exception>
     public bool TryAddEvaluatedRelation<TRelation>(
         Entity owner,
         Entity target,
@@ -79,16 +104,33 @@ public sealed partial class World
         return linked;
     }
 
+    /// <summary>
+    /// Removes every <typeparamref name="TRelation"/> link <paramref name="owner"/> currently
+    /// owns. Each removed link fires <see cref="RelationsEvents.OnAnyRelationRemoved"/>.
+    /// Returns <see langword="false"/> if the entity is dead or has no relations of this type.
+    /// </summary>
     public bool TryRemoveRelation<TRelation>(Entity owner)
         where TRelation : struct => AttemptRemoveRelation(RelationMeta<TRelation>.s_id, owner);
 
+    /// <summary>
+    /// Removes the specific <typeparamref name="TRelation"/> link from <paramref name="owner"/>
+    /// to <paramref name="target"/>. Returns <see langword="false"/> if either entity is dead,
+    /// they are the same entity, or no such link exists.
+    /// </summary>
     public bool TryRemoveRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct =>
         AttemptRemoveRelation(RelationMeta<TRelation>.s_id, owner, target);
 
+    /// <summary>Returns <see langword="true"/> if <paramref name="owner"/> currently owns at least one <typeparamref name="TRelation"/> link.</summary>
     public bool HasRelation<TRelation>(Entity owner)
         where TRelation : struct => CountRelations<TRelation>(owner) > 0;
 
+    /// <summary>
+    /// Returns <see langword="true"/> if <paramref name="owner"/> currently has a
+    /// <typeparamref name="TRelation"/> link pointing at <paramref name="target"/>. Implements
+    /// the canonical "is A related to B?" check via the bilateral lookup: O(1) on the owner's
+    /// <see cref="RelationsIndexer"/> followed by O(1) on the target's <see cref="RelationLink"/>.
+    /// </summary>
     public bool IsRelatedTo<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
@@ -131,6 +173,11 @@ public sealed partial class World
         }
     }
 
+    /// <summary>
+    /// Returns the <b>number of <typeparamref name="TRelation"/> targets <paramref name="owner"/>
+    /// currently points at</b>. Returns <c>-1</c> if the entity is dead, <c>0</c> if alive but has
+    /// no relations of this type.
+    /// </summary>
     public int CountRelations<TRelation>(Entity owner)
         where TRelation : struct
     {
@@ -159,9 +206,15 @@ public sealed partial class World
         }
     }
 
+    /// <summary>Returns <see langword="true"/> if <paramref name="entity"/> is currently a target of at least one <typeparamref name="TRelation"/> link from any owner.</summary>
     public bool HasExternalLinks<TRelation>(Entity entity)
         where TRelation : struct => CountExternalLinks<TRelation>(entity) > 0;
 
+    /// <summary>
+    /// Returns the <b>number of owners currently pointing at <paramref name="entity"/> under
+    /// <typeparamref name="TRelation"/></b>. Returns <c>-1</c> if the entity is dead, <c>0</c> if
+    /// alive but not the target of any link of this type.
+    /// </summary>
     public int CountExternalLinks<TRelation>(Entity entity)
         where TRelation : struct
     {
@@ -192,11 +245,23 @@ public sealed partial class World
         }
     }
 
+    /// <summary>
+    /// Iterates every target of <paramref name="owner"/>'s <typeparamref name="TRelation"/>
+    /// links under <paramref name="query"/>, <b>holding the relation's update lock for the duration</b>.
+    /// <br/>
+    /// Use for tag relations or when the per-link payload isn't needed.
+    /// </summary>
     public void QueryRelation<TRelation, TQueryRelation>(Entity owner, ref TQueryRelation query)
         where TRelation : struct
         where TQueryRelation : struct, IQueryRelation, allows ref struct =>
         GetEntityRelation(RelationMeta<TRelation>.s_id, owner)._relation.Query(ref query);
 
+    /// <summary>
+    /// Iterates every (target, payload) pair of <paramref name="owner"/>'s
+    /// <typeparamref name="TRelation"/> links under <paramref name="update"/>, with the payload
+    /// supplied by reference for <b>in-place mutation</b>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if <typeparamref name="TRelation"/> is a tag relation; use <see cref="QueryRelation"/> instead.</exception>
     public void QueryEvaluatedRelation<TRelation, TQueryRelation>(
         Entity owner,
         ref TQueryRelation update
@@ -214,10 +279,42 @@ public sealed partial class World
         ).QueryEvaluated(ref update);
     }
 
+    /// <summary>
+    /// Returns a span over the target entities <paramref name="owner"/> currently points at under
+    /// <typeparamref name="TRelation"/>. The span aliases the underlying storage.
+    /// </summary>
+    /// <remarks>
+    /// <b>Not thread-safe:</b> concurrent structural changes to this relation while the span is in
+    /// use produce undefined behavior; the caller is responsible for ensuring no other thread adds
+    /// or removes <typeparamref name="TRelation"/> links from <paramref name="owner"/> for the
+    /// span's lifetime.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if <paramref name="owner"/> is dead or has no <typeparamref name="TRelation"/>
+    /// relations. The caller is responsible for ensuring the relation exists; check via
+    /// <see cref="HasRelation"/> first when the presence is not already known.
+    /// </exception>
     public ReadOnlySpan<Entity> GetRelations<TRelation>(Entity owner)
         where TRelation : struct =>
         GetEntityRelation(RelationMeta<TRelation>.s_id, owner)._relation.To();
 
+    /// <summary>
+    /// Returns a reference to the <typeparamref name="TRelation"/> payload on the link from
+    /// <paramref name="owner"/> to <paramref name="target"/>. <b>Mutations through the reference
+    /// persist in storage</b>.
+    /// </summary>
+    /// <remarks>
+    /// <b>Not thread-safe:</b> concurrent structural changes to this relation while the reference
+    /// is in use produce undefined behavior; the caller is responsible for ensuring no other thread
+    /// removes the link or modifies the surrounding relation for the reference's lifetime.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if <typeparamref name="TRelation"/> is a tag relation, if <paramref name="owner"/>
+    /// equals <paramref name="target"/>, if either entity is dead, or if no link from
+    /// <paramref name="owner"/> to <paramref name="target"/> exists. The caller is responsible for
+    /// ensuring the link exists; check via <see cref="IsRelatedTo"/> first when the presence is not
+    /// already known.
+    /// </exception>
     public ref TRelation GetEvaluatedRelation<TRelation>(Entity owner, Entity target)
         where TRelation : struct
     {
@@ -235,6 +332,24 @@ public sealed partial class World
         return ref ((EvaluatedRelation<TRelation>)relationKeyed._relation).Get(compositeKey);
     }
 
+    /// <summary>
+    /// Returns the targets and per-link payloads of <paramref name="owner"/>'s
+    /// <typeparamref name="TRelation"/> links as a parallel-span pair via
+    /// <see cref="EntityEvaluatedRelations{T}"/>. Use when iterating both sides together is more
+    /// convenient than the callback shape on <see cref="QueryEvaluatedRelation"/>.
+    /// </summary>
+    /// <remarks>
+    /// <b>Not thread-safe:</b> both spans alias the underlying storage; concurrent structural
+    /// changes to this relation while the spans are in use produce undefined behavior. The caller
+    /// is responsible for ensuring no other thread adds or removes <typeparamref name="TRelation"/>
+    /// links from <paramref name="owner"/> for the spans' lifetime.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if <typeparamref name="TRelation"/> is a tag relation, if <paramref name="owner"/>
+    /// is dead, or if <paramref name="owner"/> has no <typeparamref name="TRelation"/> relations.
+    /// The caller is responsible for ensuring the relation exists; check via
+    /// <see cref="HasRelation"/> first when the presence is not already known.
+    /// </exception>
     public EntityEvaluatedRelations<TRelation> GetEvaluatedRelations<TRelation>(Entity owner)
         where TRelation : struct
     {
@@ -251,6 +366,12 @@ public sealed partial class World
         );
     }
 
+    /// <summary>
+    /// Returns a <b>span over the inverse view</b>: every owner currently pointing at
+    /// <paramref name="entity"/> under <typeparamref name="TRelation"/>. Each
+    /// <see cref="ExternalLink"/> implicitly converts to the owning <see cref="Entity"/>.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the entity is dead or has no inverse links of this type.</exception>
     public ReadOnlySpan<ExternalLink> GetExternalLinks<TRelation>(Entity entity)
         where TRelation : struct
     {
@@ -608,6 +729,16 @@ public sealed partial class World
         }
     }
 
+    /// <summary>
+    /// Tears down every relation <paramref name="owner"/> participates in on either side, then
+    /// returns its <see cref="RelationsIndexer"/> to the pool. Called as part of entity
+    /// destruction so the bilateral graph stays consistent without orphaned links.
+    /// </summary>
+    /// <remarks>
+    /// Walks the inverse links first (every owner pointing at this entity removes its link),
+    /// then the forward links (this entity stops pointing at any target). Both walks fire
+    /// <see cref="Events.RelationsEvents.OnAnyRelationRemoved">OnAnyRelationRemoved</see> per removed link.
+    /// </remarks>
     private void ResetRelations(Entity owner)
     {
         ref EntityMeta ownerMeta = ref _entitiesMeta[owner._id];

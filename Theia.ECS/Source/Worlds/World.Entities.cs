@@ -47,6 +47,11 @@ public sealed partial class World
         );
     }
 
+    /// <summary>
+    /// Allocates a fresh entity slot (recycling a ghoulified slot when available) and places
+    /// the entity into <paramref name="archetype"/>. Returns the new entity handle paired with a
+    /// reference to its <see cref="EntityMeta"/> for downstream metadata patching.
+    /// </summary>
     internal EntityCreated CreateEntity(in Archetype archetype)
     {
         EntityCreated entityCreated = CreateEntity();
@@ -56,6 +61,11 @@ public sealed partial class World
         return entityCreated;
     }
 
+    /// <summary>
+    /// Returns <see langword="true"/> if <paramref name="entity"/>'s handle still matches its
+    /// slot in the world. <b>Stale handles</b> (referring to a slot that has been ghoulified and
+    /// possibly recycled) <b>return <see langword="false"/></b> via the version mismatch.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAlive(Entity entity) =>
         entity._id < _entitiesCount && entity._version == _entitiesMeta[entity._id]._version;
@@ -86,6 +96,20 @@ public sealed partial class World
         return true;
     }
 
+    /// <summary>
+    /// Destroys <paramref name="entity"/> immediately: tears down every relation it participates
+    /// in, removes it from its archetype, possibly fires <see cref="Events.RelationEvents.InvokeOnRelationRemoved">InvokeOnRelationRemoved</see>,
+    /// calls <see cref="InvokeOnGhoulified"/>, and
+    /// queues its slot for recycling. Returns <see langword="false"/> if the entity is already
+    /// dead.
+    /// </summary>
+    /// <remarks>
+    /// "Ghoulified" rather than "destroyed" because the slot is held in a recycling queue with
+    /// the version bumped, so a stale handle becomes a no-op rather than addressing a different
+    /// entity. The slot becomes available for reuse only when a future <c>CreateEntity</c>
+    /// dequeues it.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if a query is currently iterating; use <see cref="DeferredGhoulify"/> from inside system execution.</exception>
     public bool TryGhoulify(Entity entity)
     {
         ThrowIfQueriesExecuting();
@@ -130,6 +154,20 @@ public sealed partial class World
         return new EntityReferences(ref entityMeta, currentArchetype, newArchetype);
     }
 
+    /// <summary>
+    /// Adds <typeparamref name="TComponent"/> to <paramref name="entity"/> immediately,
+    /// transitioning it to the destination archetype and writing <paramref name="component"/>
+    /// into its row. Returns <see langword="false"/> if the entity is dead or already has this
+    /// component.
+    /// </summary>
+    /// <remarks>
+    /// On first transition between two given archetypes, the destination is found via
+    /// <see cref="FindOrCreateArchetype"/> and cached as an "add edge" on the source archetype;
+    /// subsequent additions of the same component to entities in the same source archetype
+    /// reuse the edge in O(1) without re-scanning. Calls <see cref="InvokeOnComponentAdded"/>
+    /// on success.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if a query is currently iterating; use <see cref="DeferredAddComponent"/> from inside system execution.</exception>
     public bool TryAddComponent<TComponent>(Entity entity, in TComponent component = default)
         where TComponent : struct
     {
@@ -218,6 +256,20 @@ public sealed partial class World
         return true;
     }
 
+    /// <summary>
+    /// Removes <typeparamref name="TComponent"/> from <paramref name="entity"/> immediately.
+    /// If <b>the component was the entity's last, the entity is ghoulified instead</b>. Returns
+    /// <see langword="false"/> if the entity is dead or does not have this component.
+    /// </summary>
+    /// <remarks>
+    /// On first transition between two given archetypes, the destination is found via
+    /// <see cref="FindOrCreateArchetype"/> and cached as a "remove edge" on the source
+    /// archetype; subsequent removals of the same component from entities in the same source
+    /// archetype reuse the edge in O(1). Calls <see cref="InvokeOnComponentRemoved"/>
+    /// on success or, when the removal would leave the entity with no components,
+    /// <see cref="InvokeOnGhoulified"/> via the implicit ghoulification.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if a query is currently iterating; use <see cref="DeferredRemoveComponent"/> from inside system execution.</exception>
     public bool TryRemoveComponent<TComponent>(Entity entity)
         where TComponent : struct
     {
@@ -226,6 +278,17 @@ public sealed partial class World
         return AttemptRemoveComponent(entity, ComponentMeta<TComponent>.s_id);
     }
 
+    /// <summary>
+    /// Returns a reference to <paramref name="entity"/>'s <typeparamref name="TComponent"/>
+    /// row in storage. <b>Mutations through the reference persist</b>.
+    /// </summary>
+    /// <remarks>
+    /// <b>Not thread-safe:</b> concurrent structural changes that transition the entity to a
+    /// different archetype while the reference is in use produce undefined behavior; the caller
+    /// is responsible for ensuring the entity stays in its current archetype for the
+    /// reference's lifetime.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if the entity is dead or does not have <typeparamref name="TComponent"/>.</exception>
     public ref TComponent Get<TComponent>(Entity entity)
         where TComponent : struct
     {
@@ -244,6 +307,12 @@ public sealed partial class World
         return ref archetype.Get<TComponent>(in entityMeta);
     }
 
+    /// <summary>
+    /// Overwrites <paramref name="entity"/>'s <typeparamref name="TComponent"/> row with
+    /// <paramref name="component"/>. Does not fire any events; this is a value update, not a
+    /// structural change.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if the entity is dead or does not have <typeparamref name="TComponent"/>.</exception>
     public void Set<TComponent>(Entity entity, in TComponent component)
         where TComponent : struct
     {
@@ -262,6 +331,11 @@ public sealed partial class World
         archetype.Set(in entityMeta, component);
     }
 
+    /// <summary>
+    /// Returns <see langword="true"/> if <paramref name="entity"/>'s current archetype is bound
+    /// to <paramref name="assemblage"/>: the entity's composition exactly matches that
+    /// assemblage's composition with no additions or removals having transitioned it elsewhere.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Is(Entity entity, Assemblage assemblage)
     {
@@ -275,6 +349,7 @@ public sealed partial class World
         return assemblage == archetype.GetMatchedAssemblage();
     }
 
+    /// <summary>Returns <see langword="true"/> if <paramref name="entity"/> currently has <typeparamref name="TComponent"/>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Has<TComponent>(Entity entity)
         where TComponent : struct

@@ -11,6 +11,25 @@ using Theia.ECS.Relations;
 
 namespace Theia.ECS.Worlds;
 
+/// <summary>
+/// <b>Root container for an ECS instance</b>: owns every archetype, assemblage, query, unique, resource,
+/// relation storage, deferred-command queue, and event hub. Entities live within a single world
+/// and cannot cross world boundaries; <b>multi-world setups must
+/// instantiate independent <see cref="World">Worlds</see></b>.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The world is the unit of state ownership in Theia. All structural changes, queries, and
+/// event subscriptions are scoped to a specific instance, and disposing it tears down the
+/// associated event wiring. Pooled resources held inside the world live as long as the world does.
+/// </para>
+/// <para>
+/// <see cref="World"/> is split across many partial files by responsibility: entities,
+/// components, relations, queries, uniques, resources, deferred commands, events. This file
+/// holds construction, disposal, and entity-count introspection; the per-feature partials
+/// carry the matching public surface.
+/// </para>
+/// </remarks>
 public sealed partial class World : IDisposable
 {
     /// <summary>
@@ -19,12 +38,21 @@ public sealed partial class World : IDisposable
     /// </summary>
     private const int MaxEntityCapacity = 1 << 30;
 
+    /// <summary>Returns the total number of entity slots ever allocated, including those currently in the ghoul queue.</summary>
     internal int CountTotalEntities() => _entitiesCount;
 
+    /// <summary>Returns the number of live (non-ghoulified) entities currently in the world.</summary>
     public int CountEntities() => _entitiesCount - _ghouls.Count;
 
+    /// <summary>Returns the number of ghoulified entities awaiting slot recycling.</summary>
     public int CountGhouls() => _ghouls.Count;
 
+    /// <summary>
+    /// Constructs a world with initial entity capacity rounded up to the next power of two.
+    /// Capacity affects only initial buffer sizes; the world grows past it on demand.
+    /// </summary>
+    /// <param name="capacity">Initial entity capacity. Rounded up to the next power of two; must be in <c>(0, 2^30]</c>.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="capacity"/> is non-positive or exceeds <c>2^30</c>.</exception>
     public World(int capacity = DefaultEntitiesMetaCapacity)
     {
         if (capacity <= 0)
@@ -78,6 +106,12 @@ public sealed partial class World : IDisposable
         RelationsEvents = new();
     }
 
+    /// <summary>
+    /// Tears down the world's event wiring by resetting <see cref="EntitiesEvents"/> and
+    /// <see cref="RelationsEvents"/>. Pooled state held by the world (archetypes, relation
+    /// storage, deferred queues) <b>becomes eligible for collection when the world itself</b> is no
+    /// longer reachable.
+    /// </summary>
     public void Dispose()
     {
         EntitiesEvents.Reset();

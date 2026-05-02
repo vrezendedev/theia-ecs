@@ -19,6 +19,22 @@ public sealed partial class World
         _assemblages[index] = assemblage;
     }
 
+    /// <summary>
+    /// Creates an <see cref="Assemblage{ComponentT1}"/> bound to the archetype whose composition
+    /// is exactly <typeparamref name="ComponentT1"/>, finding the archetype if it already exists
+    /// or creating it on first use. Each archetype admits at most one assemblage; attempting to
+    /// register <b>a second for the same composition throws</b>.
+    /// </summary>
+    /// <remarks>
+    /// The one-assemblage-per-archetype rule is what makes <see cref="Queries.SettlerQuery{ComponentT1}"/>
+    /// unambiguous: a settler bound to a specific assemblage, iterates exactly that
+    /// archetype, <b>with no possibility of two factories producing entities into the same archetype
+    /// under conflicting events or naming</b>.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if a query is currently iterating, a deferred flush is in progress, or an
+    /// assemblage has already been registered for this composition.
+    /// </exception>
     public Assemblage<ComponentT1> CreateAssemblage<ComponentT1>()
         where ComponentT1 : struct
     {

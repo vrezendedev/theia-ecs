@@ -11,6 +11,30 @@ using Theia.ECS.Worlds;
 
 namespace Theia.ECS.Serialization;
 
+/// <summary>
+/// Builds a <see cref="WorldDataTransferObject"/> from a live <see cref="World"/> by walking its
+/// archetypes, relation storages, and uniques in turn and packing each into the matching DTO
+/// shape. One instance per serialization call; not reusable across worlds.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The walk is fluent, each <c>Account</c> step returns <c>this</c>, so <see cref="Create"/>
+/// reads as a single statement listing the order of operations: max-id, components, relations,
+/// archetypes, relation storages, uniques. The order matters: component and relation type
+/// rosters must be populated before archetype and relation walks reference them by index.
+/// </para>
+/// <para>
+/// Component data is encoded one column at a time: every entity's value for component A is
+/// written, then every entity's value for component B, etc. This matches the runtime archetype
+/// layout and lets the deserializer stream values directly into destination storage without per-entity reshuffling.
+/// </para>
+/// <para>
+/// A single <see cref="ArrayBufferWriter{Byte}"/> is reused across every encode operation;
+/// callers extract <see cref="ArrayBufferWriter{T}.WrittenSpan"/> as a fresh array before the
+/// next reset. The temp <c>List&lt;Entity&gt;</c> and <c>List&lt;int&gt;</c> are reused across
+/// archetypes for the same reason.
+/// </para>
+/// </remarks>
 internal sealed class WorldSerializer
 {
     private readonly WorldDataTransferObject _dtoWorld;
@@ -45,6 +69,11 @@ internal sealed class WorldSerializer
         _relationsTypeName = Array.Empty<string>();
     }
 
+    /// <summary>
+    /// Walks <paramref name="world"/> and returns the populated <see cref="WorldDataTransferObject"/>.
+    /// The order of <c>Account</c> calls is load-bearing: type rosters must be ready before
+    /// archetype, relation, and unique payloads can resolve their type-name references.
+    /// </summary>
     internal WorldDataTransferObject Create(World world) =>
         AccountMaxEntityId(world)
             .AccountComponentsTypes()

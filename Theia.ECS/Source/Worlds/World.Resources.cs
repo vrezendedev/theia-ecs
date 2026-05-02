@@ -53,7 +53,7 @@ public sealed partial class World
         if (_resources.ContainsKey(resourcesIdentifier))
             ThrowResourceAlreadyCreated<TKey, TData>();
 
-        const int MaxStackSize = 512;
+        const int MaxStackSize = 256;
         Span<bool> seen =
             keys.Length <= MaxStackSize ? stackalloc bool[keys.Length] : new bool[keys.Length];
 

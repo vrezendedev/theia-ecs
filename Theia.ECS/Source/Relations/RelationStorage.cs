@@ -6,6 +6,17 @@ using Theia.ECS.Contracts;
 
 namespace Theia.ECS.Relations;
 
+/// <summary>
+/// Per-relation-type pool of <see cref="Relation"/> instances. Each entity that participates as
+/// an owner under this relation type holds one slot here; <see cref="RentRelation"/> hands out
+/// fresh slots on demand and <see cref="ReturnRelation"/> recycles them when the owner stops
+/// participating.
+/// </summary>
+/// <remarks>
+/// The slot index returned by <see cref="RentRelation"/> is the <see cref="RelationKey._primaryKey"/>
+/// stored in the owner's <see cref="RelationsIndexer"/>: <b>a single integer locates the owner's
+/// relation data among potentially hundreds of participating entities, in O(1)</b>.
+/// </remarks>
 internal sealed class RelationStorage
 {
     private const int DefaultRelationsCapacity = 8;
@@ -17,6 +28,7 @@ internal sealed class RelationStorage
     private Relation[] _relations;
     private Queue<int> _free;
 
+    /// <summary>Returns the number of slots currently held by entities (capacity minus free-list size).</summary>
     internal int CountStorageSlotsOccupied() => _relations.Length - _free.Count;
 
     internal RelationStorage(int relationId)
@@ -31,6 +43,7 @@ internal sealed class RelationStorage
             _free.Enqueue(i);
     }
 
+    /// <summary>Returns the <see cref="Relation"/> stored at <paramref name="primaryKey"/>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Relation GetRelation(int primaryKey)
     {
@@ -41,6 +54,11 @@ internal sealed class RelationStorage
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal Relation[] GetRelations() => _relations;
 
+    /// <summary>
+    /// Allocates the next free slot, populates it with a pooled <see cref="Relation"/>, and
+    /// returns the (relation, primary-key) pair. Grows the underlying array when the free list
+    /// is empty, seeding the new range into the free list.
+    /// </summary>
     internal RelationKeyed RentRelation()
     {
         int index;
@@ -64,6 +82,11 @@ internal sealed class RelationStorage
         return new RelationKeyed(_relations[index], index);
     }
 
+    /// <summary>
+    /// Returns the <see cref="Relation"/> at <paramref name="primaryKey"/> to the relation
+    /// type's pool and frees the slot. The caller must already have unwound the relation's
+    /// links via the inverse-side <see cref="RelationsIndexer"/>.
+    /// </summary>
     internal void ReturnRelation(int primaryKey)
     {
         Relation relation = _relations[primaryKey];
