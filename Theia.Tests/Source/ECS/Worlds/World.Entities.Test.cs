@@ -278,6 +278,60 @@ public sealed class WorldEntityLifecycleTests
     }
 
     [Fact]
+    public void Is_WithOriginalAssemblage_ReturnsTrue()
+    {
+        World world = new();
+
+        Assemblage<Velocity> assemblage = world.CreateAssemblage<Velocity>();
+
+        Entity entity = assemblage.Create(new Velocity());
+
+        Assert.True(world.Is(entity, assemblage));
+    }
+
+    [Fact]
+    public void Is_WithNonOriginalAssemblage_ReturnsFalse()
+    {
+        World world = new();
+
+        Assemblage<Velocity> assemblageVelocity = world.CreateAssemblage<Velocity>();
+        Assemblage<Position> assemblagePosition = world.CreateAssemblage<Position>();
+
+        Entity entity = assemblageVelocity.Create(new Velocity());
+
+        Assert.False(world.Is(entity, assemblagePosition));
+    }
+
+    [Fact]
+    public void Satisfies_WithOriginalAssemblage_ReturnsTrue()
+    {
+        World world = new();
+
+        Assemblage<Velocity> assemblage = world.CreateAssemblage<Velocity>();
+
+        Entity entity = assemblage.Create(new Velocity());
+
+        Assert.True(world.TryAddComponent(entity, new Position()));
+
+        Assert.True(world.Satisfies(entity, assemblage));
+    }
+
+    [Fact]
+    public void Satisfies_WithNonOriginalAssemblage_ReturnsTrue()
+    {
+        World world = new();
+
+        Assemblage<Velocity> assemblage = world.CreateAssemblage<Velocity>();
+        Assemblage<Position> assemblagePosition = world.CreateAssemblage<Position>();
+
+        Entity entity = assemblage.Create(new Velocity());
+
+        Assert.True(world.TryAddComponent(entity, new Position()));
+
+        Assert.True(world.Satisfies(entity, assemblagePosition));
+    }
+
+    [Fact]
     public void TryRemove_ComponentPresent_ReturnsTrue()
     {
         World world = new();

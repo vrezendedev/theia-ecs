@@ -349,6 +349,22 @@ public sealed partial class World
         return assemblage == archetype.GetMatchedAssemblage();
     }
 
+    /// <summary>
+    /// Returns <see langword="true"/> if <paramref name="entity"/>'s current archetype's signature satisfies
+    /// to <paramref name="assemblage"/>: the entity's composition satisfies that assemblage's composition.
+    /// </summary>
+    public bool Satisfies(Entity entity, Assemblage assemblage)
+    {
+        if (!IsAlive(entity))
+            return false;
+
+        ref EntityMeta entityMeta = ref _entitiesMeta[entity.ID];
+
+        Archetype archetype = GetArchetype(entityMeta._archetypeIndex);
+
+        return assemblage._signature.IsSatisfiedBy(archetype._signature);
+    }
+
     /// <summary>Returns <see langword="true"/> if <paramref name="entity"/> currently has <typeparamref name="TComponent"/>.</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Has<TComponent>(Entity entity)
