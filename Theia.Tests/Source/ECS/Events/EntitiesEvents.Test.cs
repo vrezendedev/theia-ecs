@@ -17,7 +17,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnCreated += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnCreated((_) => fired = true);
 
         assemblage.Create(new ComponentA { A = 1 });
 
@@ -33,7 +33,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        assemblage.EntityEvents.OnCreated += (_) => fired = true;
+        assemblage.EntityEvents.SubscribeOnCreated((_) => fired = true);
 
         assemblage.Create(new ComponentA { A = 1 });
 
@@ -49,7 +49,7 @@ public sealed class EntitiesEventsTests
 
         Entity createdEntity = default;
 
-        world.EntitiesEvents.OnCreated += (data) => createdEntity = data.Entity;
+        world.EntitiesEvents.SubscribeOnCreated((data) => createdEntity = data.Entity);
 
         Entity entity = assemblage.Create(new ComponentA { A = 1 });
 
@@ -65,7 +65,7 @@ public sealed class EntitiesEventsTests
 
         bool hasComponent = false;
 
-        world.EntitiesEvents.OnCreated += (data) => hasComponent = data.Has<ComponentA>();
+        world.EntitiesEvents.SubscribeOnCreated((data) => hasComponent = data.Has<ComponentA>());
 
         assemblage.Create(new ComponentA { A = 1 });
 
@@ -81,7 +81,7 @@ public sealed class EntitiesEventsTests
 
         bool isAssemblage = false;
 
-        world.EntitiesEvents.OnCreated += (data) => isAssemblage = data.Is(assemblage);
+        world.EntitiesEvents.SubscribeOnCreated((data) => isAssemblage = data.Is(assemblage));
 
         assemblage.Create(new ComponentA { A = 1 });
 
@@ -99,7 +99,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnGhoulified += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnGhoulified((_) => fired = true);
 
         world.TryGhoulify(entity);
 
@@ -117,7 +117,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        assemblage.EntityEvents.OnGhoulified += (_) => fired = true;
+        assemblage.EntityEvents.SubscribeOnGhoulified((_) => fired = true);
 
         world.TryGhoulify(entity);
 
@@ -135,7 +135,7 @@ public sealed class EntitiesEventsTests
 
         Entity ghoulifiedEntity = default;
 
-        world.EntitiesEvents.OnGhoulified += (data) => ghoulifiedEntity = data.Entity;
+        world.EntitiesEvents.SubscribeOnGhoulified((data) => ghoulifiedEntity = data.Entity);
 
         world.TryGhoulify(entity);
 
@@ -153,7 +153,7 @@ public sealed class EntitiesEventsTests
 
         bool hadComponent = false;
 
-        world.EntitiesEvents.OnGhoulified += (data) => hadComponent = data.Had<ComponentA>();
+        world.EntitiesEvents.SubscribeOnGhoulified((data) => hadComponent = data.Had<ComponentA>());
 
         world.TryGhoulify(entity);
 
@@ -173,7 +173,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnGhoulified += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnGhoulified((_) => fired = true);
 
         world.TryGhoulify(entity);
 
@@ -191,7 +191,7 @@ public sealed class EntitiesEventsTests
 
         bool wasAssemblage = false;
 
-        world.EntitiesEvents.OnGhoulified += (data) => wasAssemblage = data.Was(assemblage);
+        world.EntitiesEvents.SubscribeOnGhoulified((data) => wasAssemblage = data.Was(assemblage));
 
         world.TryGhoulify(entity);
 
@@ -209,7 +209,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((_) => fired = true);
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -227,7 +227,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        assemblage.EntityEvents.OnAnyComponentAdded += (_) => fired = true;
+        assemblage.EntityEvents.SubscribeOnAnyComponentAdded((_) => fired = true);
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -245,7 +245,7 @@ public sealed class EntitiesEventsTests
 
         Entity modifiedEntity = default;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => modifiedEntity = data.Entity;
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((data) => modifiedEntity = data.Entity);
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -263,7 +263,7 @@ public sealed class EntitiesEventsTests
 
         Type? type = null;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => type = data.Type;
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((data) => type = data.Type);
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -283,7 +283,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((_) => fired = true);
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -301,7 +301,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((_) => fired = true);
 
         world.TryAddComponent<ComponentA>(entity);
 
@@ -319,7 +319,7 @@ public sealed class EntitiesEventsTests
 
         bool has = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => has = data.Has<ComponentB>();
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((data) => has = data.Has<ComponentB>());
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -337,7 +337,7 @@ public sealed class EntitiesEventsTests
 
         bool had = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => had = data.Had<ComponentA>();
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((data) => had = data.Had<ComponentA>());
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -355,7 +355,7 @@ public sealed class EntitiesEventsTests
 
         bool had = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => had = data.Had<ComponentB>();
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((data) => had = data.Had<ComponentB>());
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -373,7 +373,7 @@ public sealed class EntitiesEventsTests
 
         bool is_ = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => is_ = data.Is(assemblage);
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((data) => is_ = data.Is(assemblage));
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -391,7 +391,7 @@ public sealed class EntitiesEventsTests
 
         bool was = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => was = data.Was(assemblage);
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((data) => was = data.Was(assemblage));
 
         world.TryAddComponent<ComponentB>(entity);
 
@@ -411,7 +411,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((_) => fired = true);
 
         world.TryRemoveComponent<ComponentB>(entity);
 
@@ -431,7 +431,7 @@ public sealed class EntitiesEventsTests
 
         Entity modifiedEntity = default;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (data) => modifiedEntity = data.Entity;
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((data) => modifiedEntity = data.Entity);
 
         world.TryRemoveComponent<ComponentB>(entity);
 
@@ -451,7 +451,7 @@ public sealed class EntitiesEventsTests
 
         Type? type = null;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (data) => type = data.Type;
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((data) => type = data.Type);
 
         world.TryRemoveComponent<ComponentB>(entity);
 
@@ -471,7 +471,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((_) => fired = true);
 
         world.TryRemoveComponent<ComponentA>(entity);
 
@@ -489,7 +489,7 @@ public sealed class EntitiesEventsTests
 
         bool fired = false;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (_) => fired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((_) => fired = true);
 
         world.TryRemoveComponent<ComponentB>(entity);
 
@@ -509,7 +509,7 @@ public sealed class EntitiesEventsTests
 
         bool had = false;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (data) => had = data.Had<ComponentB>();
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((data) => had = data.Had<ComponentB>());
 
         world.TryRemoveComponent<ComponentB>(entity);
 
@@ -529,7 +529,7 @@ public sealed class EntitiesEventsTests
 
         bool has = false;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (data) => has = data.Has<ComponentB>();
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((data) => has = data.Has<ComponentB>());
 
         world.TryRemoveComponent<ComponentB>(entity);
 
@@ -549,7 +549,7 @@ public sealed class EntitiesEventsTests
 
         bool has = false;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (data) => has = data.Has<ComponentA>();
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((data) => has = data.Has<ComponentA>());
 
         world.TryRemoveComponent<ComponentB>(entity);
 
@@ -567,7 +567,9 @@ public sealed class EntitiesEventsTests
 
         MatchesEnum result = default;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => result = data.As<MatchesEnum>();
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded(
+            (data) => result = data.As<MatchesEnum>()
+        );
 
         world.TryAddComponent<MatchesComponentA>(entity);
 
@@ -585,7 +587,9 @@ public sealed class EntitiesEventsTests
 
         IncludesEnum result = default;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => result = data.As<IncludesEnum>();
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded(
+            (data) => result = data.As<IncludesEnum>()
+        );
 
         world.TryAddComponent<IncludesComponentA>(entity);
 
@@ -603,7 +607,9 @@ public sealed class EntitiesEventsTests
 
         MatchesEnum result = default;
 
-        world.EntitiesEvents.OnAnyComponentAdded += (data) => result = data.As<MatchesEnum>();
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded(
+            (data) => result = data.As<MatchesEnum>()
+        );
 
         world.TryAddComponent<UnmappedComponent>(entity);
 
@@ -623,7 +629,9 @@ public sealed class EntitiesEventsTests
 
         MatchesEnum result = default;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += (data) => result = data.As<MatchesEnum>();
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved(
+            (data) => result = data.As<MatchesEnum>()
+        );
 
         world.TryRemoveComponent<MatchesComponentA>(entity);
 
@@ -639,10 +647,10 @@ public sealed class EntitiesEventsTests
 
         int firedCount = 0;
 
-        world.EntitiesEvents.OnCreated += (_) => firedCount++;
-        world.EntitiesEvents.OnGhoulified += (_) => firedCount++;
-        world.EntitiesEvents.OnAnyComponentAdded += (_) => firedCount++;
-        world.EntitiesEvents.OnAnyComponentRemoved += (_) => firedCount++;
+        world.EntitiesEvents.SubscribeOnCreated((_) => firedCount++);
+        world.EntitiesEvents.SubscribeOnGhoulified((_) => firedCount++);
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded((_) => firedCount++);
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved((_) => firedCount++);
 
         world.EntitiesEvents.Reset();
 
@@ -1105,7 +1113,7 @@ public sealed class EntitiesEventsTests
         bool broadFired = false;
         bool specificFired = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += _ => broadFired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded(_ => broadFired = true);
         world.EntitiesEvents.SubscribeOnComponentAdded<ComponentB>(_ => specificFired = true);
 
         world.TryAddComponent<ComponentB>(entity);
@@ -1128,7 +1136,7 @@ public sealed class EntitiesEventsTests
         bool broadFired = false;
         bool specificFired = false;
 
-        world.EntitiesEvents.OnAnyComponentRemoved += _ => broadFired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentRemoved(_ => broadFired = true);
         world.EntitiesEvents.SubscribeOnComponentRemoved<ComponentB>(_ => specificFired = true);
 
         world.TryRemoveComponent<ComponentB>(entity);
@@ -1149,7 +1157,7 @@ public sealed class EntitiesEventsTests
         bool broadFired = false;
         bool specificFired = false;
 
-        world.EntitiesEvents.OnAnyComponentAdded += _ => broadFired = true;
+        world.EntitiesEvents.SubscribeOnAnyComponentAdded(_ => broadFired = true);
         world.EntitiesEvents.SubscribeOnComponentAdded<ComponentB>(_ => specificFired = true);
 
         world.TryAddComponent<ComponentC>(entity);

@@ -114,6 +114,9 @@ public sealed partial class World : IDisposable
     /// </summary>
     public void Dispose()
     {
+        for (int i = 0; i < _assemblages.Length; i++)
+            _assemblages[i].EntityEvents.Reset();
+
         EntitiesEvents.Reset();
         RelationsEvents.Reset();
     }

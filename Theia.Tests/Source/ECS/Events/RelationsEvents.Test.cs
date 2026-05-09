@@ -20,7 +20,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationAdded += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((_) => fired = true);
 
         world.TryAddTagRelation<Friend>(owner, target);
 
@@ -39,7 +39,7 @@ public sealed class RelationsEventsTests
 
         Entity capturedOwner = default;
 
-        world.RelationsEvents.OnAnyRelationAdded += (data) => capturedOwner = data.Owner;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((data) => capturedOwner = data.Owner);
 
         world.TryAddTagRelation<Friend>(owner, target);
 
@@ -58,7 +58,7 @@ public sealed class RelationsEventsTests
 
         Entity capturedTarget = default;
 
-        world.RelationsEvents.OnAnyRelationAdded += (data) => capturedTarget = data.Target;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((data) => capturedTarget = data.Target);
 
         world.TryAddTagRelation<Friend>(owner, target);
 
@@ -77,7 +77,7 @@ public sealed class RelationsEventsTests
 
         Type? type = null;
 
-        world.RelationsEvents.OnAnyRelationAdded += (data) => type = data.Type;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((data) => type = data.Type);
 
         world.TryAddTagRelation<Friend>(owner, target);
 
@@ -98,7 +98,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationAdded += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((_) => fired = true);
 
         world.TryAddTagRelation<Friend>(owner, target);
 
@@ -119,7 +119,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationAdded += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((_) => fired = true);
 
         world.TryAddTagRelation<Friend>(owner, target);
 
@@ -140,7 +140,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationAdded += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((_) => fired = true);
 
         world.TryAddTagRelation<Friend>(owner, target);
 
@@ -159,7 +159,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationAdded += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded((_) => fired = true);
 
         world.TryAddEvaluatedRelation<Damage>(owner, target);
 
@@ -180,7 +180,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved((_) => fired = true);
 
         world.TryRemoveRelation<Friend>(owner, target);
 
@@ -201,7 +201,7 @@ public sealed class RelationsEventsTests
 
         Entity capturedOwner = default;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (data) => capturedOwner = data.Owner;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved((data) => capturedOwner = data.Owner);
 
         world.TryRemoveRelation<Friend>(owner, target);
 
@@ -222,7 +222,7 @@ public sealed class RelationsEventsTests
 
         Entity capturedTarget = default;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (data) => capturedTarget = data.Target;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved((data) => capturedTarget = data.Target);
 
         world.TryRemoveRelation<Friend>(owner, target);
 
@@ -243,7 +243,7 @@ public sealed class RelationsEventsTests
 
         Type? type = null;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (data) => type = data.Type;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved((data) => type = data.Type);
 
         world.TryRemoveRelation<Friend>(owner, target);
 
@@ -262,7 +262,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved((_) => fired = true);
 
         world.TryRemoveRelation<Friend>(owner, target);
 
@@ -285,7 +285,7 @@ public sealed class RelationsEventsTests
 
         bool fired = false;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (_) => fired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved((_) => fired = true);
 
         world.TryRemoveRelation<Friend>(owner, target);
 
@@ -310,7 +310,7 @@ public sealed class RelationsEventsTests
 
         int firedCount = 0;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (_) => firedCount++;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved((_) => firedCount++);
 
         world.TryRemoveRelation<Friend>(owner);
 
@@ -427,7 +427,7 @@ public sealed class RelationsEventsTests
         bool broadFired = false;
         bool specificFired = false;
 
-        world.RelationsEvents.OnAnyRelationAdded += _ => broadFired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded(_ => broadFired = true);
         world.RelationsEvents.SubscribeOnRelationAdded<Friend>(_ => specificFired = true);
 
         world.TryAddTagRelation<Friend>(owner, target);
@@ -449,7 +449,7 @@ public sealed class RelationsEventsTests
         bool broadFired = false;
         bool specificFired = false;
 
-        world.RelationsEvents.OnAnyRelationAdded += _ => broadFired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded(_ => broadFired = true);
         world.RelationsEvents.SubscribeOnRelationAdded<Damage>(_ => specificFired = true);
 
         world.TryAddTagRelation<Friend>(owner, target);
@@ -583,7 +583,7 @@ public sealed class RelationsEventsTests
         bool broadFired = false;
         bool specificFired = false;
 
-        world.RelationsEvents.OnAnyRelationRemoved += _ => broadFired = true;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved(_ => broadFired = true);
         world.RelationsEvents.SubscribeOnRelationRemoved<Friend>(_ => specificFired = true);
 
         world.TryRemoveRelation<Friend>(owner, target);
@@ -671,7 +671,7 @@ public sealed class RelationsEventsTests
 
         int firedCount = 0;
 
-        world.RelationsEvents.OnAnyRelationAdded += _ => firedCount++;
+        world.RelationsEvents.SubscribeOnAnyRelationAdded(_ => firedCount++);
 
         world.RelationsEvents.Reset();
 
@@ -694,7 +694,7 @@ public sealed class RelationsEventsTests
 
         int firedCount = 0;
 
-        world.RelationsEvents.OnAnyRelationRemoved += _ => firedCount++;
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved(_ => firedCount++);
 
         world.RelationsEvents.Reset();
 
@@ -715,8 +715,9 @@ public sealed class RelationsEventsTests
 
         MatchesRelationEnum result = default;
 
-        world.RelationsEvents.OnAnyRelationAdded += (data) =>
-            result = data.As<MatchesRelationEnum>();
+        world.RelationsEvents.SubscribeOnAnyRelationAdded(
+            (data) => result = data.As<MatchesRelationEnum>()
+        );
 
         world.TryAddTagRelation<Friend>(entity, target);
 
@@ -735,8 +736,9 @@ public sealed class RelationsEventsTests
 
         IncludesRelationOnlyEnum result = default;
 
-        world.RelationsEvents.OnAnyRelationAdded += (data) =>
-            result = data.As<IncludesRelationOnlyEnum>();
+        world.RelationsEvents.SubscribeOnAnyRelationAdded(
+            (data) => result = data.As<IncludesRelationOnlyEnum>()
+        );
 
         world.TryAddTagRelation<Friend>(entity, target);
 
@@ -755,8 +757,9 @@ public sealed class RelationsEventsTests
 
         MatchesRelationEnum result = default;
 
-        world.RelationsEvents.OnAnyRelationAdded += (data) =>
-            result = data.As<MatchesRelationEnum>();
+        world.RelationsEvents.SubscribeOnAnyRelationAdded(
+            (data) => result = data.As<MatchesRelationEnum>()
+        );
 
         world.TryAddEvaluatedRelation<Damage>(entity, target);
 
@@ -777,8 +780,9 @@ public sealed class RelationsEventsTests
 
         MatchesMultipleRelationEnum result = default;
 
-        world.RelationsEvents.OnAnyRelationRemoved += (data) =>
-            result = data.As<MatchesMultipleRelationEnum>();
+        world.RelationsEvents.SubscribeOnAnyRelationRemoved(
+            (data) => result = data.As<MatchesMultipleRelationEnum>()
+        );
 
         world.TryRemoveRelation<Damage>(entity);
 

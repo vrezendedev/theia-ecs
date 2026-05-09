@@ -27,28 +27,48 @@ namespace Theia.ECS.Events;
 /// </remarks>
 public sealed class EntitiesEvents
 {
-    /// <summary>Fires when an entity is <b>created via the <see cref="Assemblages.Assemblage">Assemblage</see> path</b>, with its initial component composition already in place.</summary>
-    public event Action<EntityAssembled>? OnCreated;
-
-    /// <summary>Fires when <b>any component is added to any entity</b>. <br/>Use the typed <see cref="SubscribeOnComponentAdded"/> for per-component-type filtering instead.</summary>
-    public event Action<EntityModified>? OnAnyComponentAdded;
-
-    /// <summary>
-    /// Fires when <b>any component is removed from any entity</b>, except when the removal would
-    /// leave the entity with no components: in that case the entity is ghoulified instead, and
-    /// <see cref="OnGhoulified"/> fires in this event's place.
-    /// <br/>
-    /// Use the typed <see cref="SubscribeOnComponentRemoved"/> for per-component-type filtering.
-    /// </summary>
-    public event Action<EntityModified>? OnAnyComponentRemoved;
-
-    /// <summary>
-    /// Fires when an entity has been destroyed and its slot is now eligible for reuse. <b>The
-    /// entity's components and relations have already been cleaned up</b>; this event marks the
-    /// transition into the recyclable state, not the start of teardown.
-    /// </summary>
-    public event Action<EntityGhoulified>? OnGhoulified;
+    private event Action<EntityAssembled>? OnCreated;
+    private event Action<EntityModified>? OnAnyComponentAdded;
+    private event Action<EntityModified>? OnAnyComponentRemoved;
+    private event Action<EntityGhoulified>? OnGhoulified;
     private ComponentEvents[] _componentEvents = Array.Empty<ComponentEvents>();
+
+    /// <summary>
+    /// Subscribes <paramref name="onCreated"/> to entity creation events fired through the
+    /// <see cref="Assemblages.Assemblage">Assemblage</see> path. The handler receives the entity
+    /// with <b>its initial composition already in place</b>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SubscribeOnCreated(Action<EntityAssembled> onCreated) => OnCreated += onCreated;
+
+    /// <summary>
+    /// Subscribes <paramref name="onAnyComponentAdded"/> to component additions on any entity.
+    /// <br/>
+    /// Use <see cref="SubscribeOnComponentAdded{TComponent}"/> for per-component-type filtering.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SubscribeOnAnyComponentAdded(Action<EntityModified> onAnyComponentAdded) =>
+        OnAnyComponentAdded += onAnyComponentAdded;
+
+    /// <summary>
+    /// Subscribes <paramref name="onAnyComponentRemoved"/> to component removals on any entity;
+    /// except when the removal would leave the entity with no components: in that case the entity
+    /// is ghoulified instead (see <see cref="SubscribeOnGhoulified">SubscribeOnGhoulified</see>).
+    /// <br/>
+    /// Use <see cref="SubscribeOnComponentRemoved{TComponent}"/> for per-component-type filtering.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SubscribeOnAnyComponentRemoved(Action<EntityModified> onAnyComponentRemoved) =>
+        OnAnyComponentRemoved += onAnyComponentRemoved;
+
+    /// <summary>
+    /// Subscribes <paramref name="onGhoulified"/> to entity destruction events. By the time the
+    /// handler runs, the entity's <b>components and relations have already been cleaned up</b>; the payload
+    /// exposes only the past-tense composition via <see cref="EntityGhoulified"/>.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SubscribeOnGhoulified(Action<EntityGhoulified> onGhoulified) =>
+        OnGhoulified += onGhoulified;
 
     /// <summary>
     /// Subscribes <paramref name="onComponentAdded"/> to additions of <typeparamref name="TComponent"/>

@@ -422,7 +422,9 @@ public sealed class WorldDeferredRelationsTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        assemblage.EntityEvents.OnCreated += _ => world.DeferredAddRelation<Friend>(owner, target);
+        assemblage.EntityEvents.SubscribeOnCreated(_ =>
+            world.DeferredAddRelation<Friend>(owner, target)
+        );
 
         assemblage.DeferredCreate(new Position());
 
@@ -441,8 +443,9 @@ public sealed class WorldDeferredRelationsTests
 
         world.TryAddTagRelation<Friend>(owner, target);
 
-        assemblage.EntityEvents.OnCreated += _ =>
-            world.DeferredRemoveRelation<Friend>(owner, target);
+        assemblage.EntityEvents.SubscribeOnCreated(_ =>
+            world.DeferredRemoveRelation<Friend>(owner, target)
+        );
 
         assemblage.DeferredCreate(new Position());
 
@@ -459,8 +462,9 @@ public sealed class WorldDeferredRelationsTests
         Entity owner = assemblage.Create(new Position());
         Entity target = assemblage.Create(new Position());
 
-        assemblage.EntityEvents.OnCreated += _ =>
-            world.DeferredAddEvaluatedRelation(owner, target, new Damage { Value = 1f });
+        assemblage.EntityEvents.SubscribeOnCreated(_ =>
+            world.DeferredAddEvaluatedRelation(owner, target, new Damage { Value = 1f })
+        );
 
         assemblage.DeferredCreate(new Position());
 
@@ -496,7 +500,7 @@ public sealed class WorldDeferredRelationsTests
 
         Entity createdEntity = default;
 
-        assemblage.EntityEvents.OnCreated += e => createdEntity = e.Entity;
+        assemblage.EntityEvents.SubscribeOnCreated(e => createdEntity = e.Entity);
 
         assemblage.DeferredCreate(
             new Position(),
@@ -546,7 +550,7 @@ public sealed class WorldDeferredRelationsTests
 
         int entitiesCreated = 0;
 
-        assemblage.EntityEvents.OnCreated += _ => entitiesCreated++;
+        assemblage.EntityEvents.SubscribeOnCreated(_ => entitiesCreated++);
 
         assemblage.DeferredCreate(
             new Position(),
@@ -569,7 +573,7 @@ public sealed class WorldDeferredRelationsTests
 
         int entitiesCreated = 0;
 
-        assemblage.EntityEvents.OnCreated += _ => entitiesCreated++;
+        assemblage.EntityEvents.SubscribeOnCreated(_ => entitiesCreated++);
 
         assemblage.DeferredCreate(new Position());
 
@@ -612,7 +616,7 @@ public sealed class WorldDeferredRelationsTests
 
         Entity createdEntity = default;
 
-        assemblage.EntityEvents.OnCreated += e => createdEntity = e.Entity;
+        assemblage.EntityEvents.SubscribeOnCreated(e => createdEntity = e.Entity);
 
         assemblage.DeferredCreate(
             new Position(),

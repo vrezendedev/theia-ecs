@@ -23,12 +23,29 @@ namespace Theia.ECS.Events;
 /// </remarks>
 public sealed class RelationsEvents
 {
-    /// <summary>Fires when any relation of any type is added between two entities. <br/> Use <see cref="SubscribeOnRelationAdded"/> for per-relation-type filtering.</summary>
-    public event Action<RelationModified>? OnAnyRelationAdded;
-
-    /// <summary>Fires when any relation of any type is removed between two entities. <br/> Use <see cref="SubscribeOnRelationRemoved"/> for per-relation-type filtering.</summary>
-    public event Action<RelationModified>? OnAnyRelationRemoved;
+    private event Action<RelationModified>? OnAnyRelationAdded;
+    private event Action<RelationModified>? OnAnyRelationRemoved;
     private RelationEvents[] _relationEvents = Array.Empty<RelationEvents>();
+
+    /// <summary>
+    /// Subscribes <paramref name="onAnyRelationAdded"/> to relation additions of any type between
+    /// any two entities.
+    /// <br/>
+    /// Use <see cref="SubscribeOnRelationAdded{TRelation}"/> for per-relation-type filtering.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SubscribeOnAnyRelationAdded(Action<RelationModified> onAnyRelationAdded) =>
+        OnAnyRelationAdded += onAnyRelationAdded;
+
+    /// <summary>
+    /// Subscribes <paramref name="onAnyRelationRemoved"/> to relation removals of any type between
+    /// any two entities.
+    /// <br/>
+    /// Use <see cref="SubscribeOnRelationRemoved{TRelation}"/> for per-relation-type filtering.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SubscribeOnAnyRelationRemoved(Action<RelationModified> onAnyRelationRemoved) =>
+        OnAnyRelationRemoved += onAnyRelationRemoved;
 
     /// <summary>
     /// Subscribes <paramref name="onRelationAdded"/> to additions of <typeparamref name="TRelation"/>

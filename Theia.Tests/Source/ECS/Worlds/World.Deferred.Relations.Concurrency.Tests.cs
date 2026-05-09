@@ -275,7 +275,7 @@ public sealed class WorldDeferredRelationsConcurrencyTests
         Entity owner = assemblage.Create(new Position());
 
         int createdCount = 0;
-        assemblage.EntityEvents.OnCreated += _ => Interlocked.Increment(ref createdCount);
+        assemblage.EntityEvents.SubscribeOnCreated(_ => Interlocked.Increment(ref createdCount));
 
         await RunConcurrent(
             ThreadCount,

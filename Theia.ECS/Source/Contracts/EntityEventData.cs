@@ -22,6 +22,10 @@ internal interface IEntitySet
     /// <summary>Returns <see langword="true"/> if the entity currently belongs to an archetype bound to <paramref name="assemblage"/>.</summary>
     public bool Is<TAssemblage>(TAssemblage assemblage)
         where TAssemblage : Assemblage;
+
+    /// <summary>Returns <see langword="true"/> if the entity component composition currently satisfies to <paramref name="assemblage"/>.</summary>
+    public bool Satisfies<TAssemblage>(TAssemblage assemblage)
+        where TAssemblage : Assemblage;
 }
 
 /// <summary>
@@ -83,6 +87,11 @@ public readonly ref struct EntityAssembled : IEntitySet
     /// <inheritdoc/>
     public bool Is<TAssemblage>(TAssemblage assemblage)
         where TAssemblage : Assemblage => assemblage == _belongsTo.GetMatchedAssemblage();
+
+    /// <inheritdoc/>
+    public bool Satisfies<TAssemblage>(TAssemblage assemblage)
+        where TAssemblage : Assemblage =>
+        assemblage._signature.IsSatisfiedBy(_belongsTo._signature);
 }
 
 /// <summary>
@@ -143,6 +152,11 @@ public readonly ref struct EntityModified : IComponentSetChanged, IEntitySet, IE
     /// <inheritdoc/>
     public bool Is<TAssemblage>(TAssemblage assemblage)
         where TAssemblage : Assemblage => assemblage == _belongsTo.GetMatchedAssemblage();
+
+    /// <inheritdoc/>
+    public bool Satisfies<TAssemblage>(TAssemblage assemblage)
+        where TAssemblage : Assemblage =>
+        assemblage._signature.IsSatisfiedBy(_belongsTo._signature);
 
     /// <inheritdoc/>
     public bool Was<TAssemblage>(TAssemblage assemblage)
