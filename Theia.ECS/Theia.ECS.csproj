@@ -5,6 +5,16 @@
         <Nullable>enable</Nullable>
         <LangVersion>14.0</LangVersion>
         <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+        <AssemblyName>Theia.ECS</AssemblyName>
+        <RootNamespace>Theia.ECS</RootNamespace>
+        <Authors>Vinicius Rezende</Authors>
+        <Company>Wise Shepherd Games</Company>
+        <Product>Theia ECS</Product>
+        <Description>A high-performance opinionated ECS framework for C# 14 / .NET 10.</Description>
+        <Copyright>Copyright © Vinicius Rezende</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/vrezendedev/Theia</RepositoryUrl>
+        <PackageReadmeFile>../README.md</PackageReadmeFile>
         <!-- <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
         <CompilerGeneratedFilesOutputPath>.\Generated</CompilerGeneratedFilesOutputPath> -->
     </PropertyGroup>
